@@ -10,13 +10,19 @@ Or inside Docker: make test
 """
 
 import pytest
-import pytest_asyncio
 import httpx
 import asyncio
 import os
 from typing import Dict, Any
 import sys
 from pathlib import Path
+
+# Handle pytest_asyncio import gracefully
+try:
+    import pytest_asyncio
+    HAS_PYTEST_ASYNCIO = hasattr(pytest_asyncio, 'fixture')
+except ImportError:
+    HAS_PYTEST_ASYNCIO = False
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
@@ -25,14 +31,34 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 # HELPER: Check if API is available
 # ============================================================
 
+def _get_api_url() -> str:
+    """Get API URL from env or default"""
+    return os.environ.get("ANALYTICA_API_URL", "http://localhost:8000")
+
+
 def _check_api_available(url: str) -> bool:
-    """Check if API server is reachable"""
+    """Check if Analytica API server is reachable and responding correctly"""
     try:
         with httpx.Client(timeout=2.0) as client:
+            # Check root endpoint returns Analytica-specific response
             response = client.get(f"{url}/")
-            return response.status_code in [200, 404]
-    except (httpx.ConnectError, httpx.TimeoutException):
+            if response.status_code == 200:
+                data = response.json()
+                # Verify it's actually Analytica API by checking for expected fields
+                return "status" in data and "domain" in data
+            return False
+    except (httpx.ConnectError, httpx.TimeoutException, httpx.ConnectTimeout, Exception):
         return False
+
+
+# Skip all tests in this module if API is not available
+_API_URL = _get_api_url()
+_API_AVAILABLE = _check_api_available(_API_URL)
+
+pytestmark = pytest.mark.skipif(
+    not _API_AVAILABLE,
+    reason=f"API not available at {_API_URL}. Set ANALYTICA_API_URL or run 'make up'"
+)
 
 
 # ============================================================
@@ -42,26 +68,18 @@ def _check_api_available(url: str) -> bool:
 @pytest.fixture(scope="module")
 def api_base_url():
     """Base URL for API tests - uses env var or defaults to repox port"""
-    return os.environ.get("ANALYTICA_API_URL", "http://localhost:8000")
-
-
-@pytest.fixture(scope="module")
-def api_available(api_base_url):
-    """Check if API is available, skip tests if not"""
-    if not _check_api_available(api_base_url):
-        pytest.skip(f"API not available at {api_base_url}. Set ANALYTICA_API_URL or run 'make up'")
-    return True
+    return _API_URL
 
 
 @pytest.fixture
-def api_client(api_base_url, api_available):
+def api_client(api_base_url):
     """HTTP client for API tests"""
     with httpx.Client(base_url=api_base_url, timeout=30.0) as client:
         yield client
 
 
-@pytest_asyncio.fixture
-async def async_api_client(api_base_url, api_available):
+@pytest.fixture
+async def async_api_client(api_base_url):
     """Async HTTP client for API tests"""
     async with httpx.AsyncClient(base_url=api_base_url, timeout=30.0) as client:
         yield client
@@ -376,35 +394,33 @@ class TestUtilityAPI:
 
 
 # ============================================================
-# ASYNC TESTS
+# CONCURRENT TESTS (using sync client with threads)
 # ============================================================
 
 @pytest.mark.integration
-@pytest.mark.asyncio
-class TestAsyncAPI:
-    """Async API tests"""
+class TestConcurrentAPI:
+    """Concurrent API tests"""
     
-    async def test_concurrent_pipeline_execution(self, async_api_client):
-        """Test concurrent pipeline execution"""
+    def test_concurrent_pipeline_execution(self, api_client, api_base_url):
+        """Test concurrent pipeline execution using threads"""
+        import concurrent.futures
+        
         pipelines = [
             {"dsl": 'data.from_input() | metrics.count()', "input_data": [1, 2, 3]},
             {"dsl": 'data.from_input() | metrics.sum("value")', "input_data": [{"value": 10}]},
             {"dsl": 'budget.create(name="Test")'},
         ]
         
-        async def execute_pipeline(pipeline_data):
-            response = await async_api_client.post(
-                "/api/v1/pipeline/execute",
-                json=pipeline_data
-            )
-            return response.json()
+        def execute_pipeline(pipeline_data):
+            with httpx.Client(base_url=api_base_url, timeout=30.0) as client:
+                response = client.post("/api/v1/pipeline/execute", json=pipeline_data)
+                return response.json()
         
-        results = await asyncio.gather(
-            *[execute_pipeline(p) for p in pipelines]
-        )
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+            results = list(executor.map(execute_pipeline, pipelines))
         
         assert len(results) == 3
-        assert all(r["status"] in ["success", "error"] for r in results)
+        assert all(r.get("status") in ["success", "error"] for r in results)
 
 
 # ============================================================

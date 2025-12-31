@@ -395,12 +395,25 @@ UI pozwala na:
 
 | Dokument | Opis |
 |----------|------|
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | **Architektura systemu** - przegląd, komponenty, przepływ danych |
+| [docs/POINTS.md](docs/POINTS.md) | **System punktów** - cennik, modele zakupu, API |
 | [docs/DSL.md](docs/DSL.md) | Pełna dokumentacja DSL, SDK Python/JS |
 | [docs/API.md](docs/API.md) | REST API reference, endpointy, przykłady |
 | [docs/MODULES.md](docs/MODULES.md) | Moduły: Budget, Investment, Forecast, Reports, Alerts, Voice |
 | [docs/COMPLIANCE.md](docs/COMPLIANCE.md) | Moduł zgodności: KSeF, CBAM, ESG, ViDA |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Plan rozwoju i refaktoryzacji architektury |
 | [examples/pipelines.dsl](examples/pipelines.dsl) | Przykłady pipeline'ów DSL |
+
+### Landing Pages (SaaS)
+
+| Produkt | URL | Specjalizacja |
+|---------|-----|---------------|
+| **Analytica** | `/landing/` | Strona główna ekosystemu |
+| **PlanBudzetu.pl** | `/landing/planbudzetu.html` | Planowanie budżetu |
+| **PlanInwestycji.pl** | `/landing/planinwestycji.html` | Analiza inwestycji |
+| **MultiPlan.pl** | `/landing/multiplan.html` | Planowanie scenariuszowe |
+| **Estymacja.pl** | `/landing/estymacja.html` | Prognozowanie AI |
+| **Logowanie** | `/landing/login.html` | Rejestracja i logowanie |
 
 ## 🧪 Testowanie
 

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logowanie - Analytica Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="components.css">
+  <style>
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--light) 0%, white 100%);
+      padding: 40px 20px;
+    }
+    
+    .auth-container {
+      width: 100%;
+      max-width: 420px;
+    }
+    
+    .auth-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 40px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+    }
+    
+    .auth-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    
+    .auth-logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .auth-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .auth-subtitle {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .form-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    .form-input {
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .form-input::placeholder {
+      color: var(--muted);
+    }
+    
+    .auth-error {
+      background: #fef2f2;
+      color: #dc2626;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      display: none;
+    }
+    
+    .auth-error.show {
+      display: block;
+    }
+    
+    .auth-success {
+      background: #f0fdf4;
+      color: #16a34a;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      display: none;
+    }
+    
+    .auth-success.show {
+      display: block;
+    }
+    
+    .auth-footer {
+      text-align: center;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--muted);
+    }
+    
+    .auth-footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+    
+    .auth-tabs {
+      display: flex;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .auth-tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    
+    .auth-tab:hover {
+      color: var(--dark);
+    }
+    
+    .auth-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .demo-info {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: #0369a1;
+      margin-bottom: 20px;
+    }
+    
+    .demo-info strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+    
+    .points-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <a href="index.html" class="auth-logo">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+            <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M8 20L14 14L18 18L24 12"/>
+          </svg>
+          Analytica
+        </a>
+      </div>
+      
+      <div class="auth-tabs">
+        <div class="auth-tab active" data-tab="login">Logowanie</div>
+        <div class="auth-tab" data-tab="register">Rejestracja</div>
+      </div>
+      
+      <div class="demo-info">
+        <strong>🧪 Demo Account</strong>
+        Email: demo@analytica.pl | Hasło: demo123
+      </div>
+      
+      <div id="auth-error" class="auth-error"></div>
+      <div id="auth-success" class="auth-success"></div>
+      
+      <!-- Login Form -->
+      <div id="login-tab" class="tab-content active">
+        <form id="login-form" class="auth-form">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-input" placeholder="twoj@email.pl" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Hasło</label>
+            <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+            Zaloguj się
+          </button>
+        </form>
+      </div>
+      
+      <!-- Register Form -->
+      <div id="register-tab" class="tab-content">
+        <form id="register-form" class="auth-form">
+          <div class="form-group">
+            <label class="form-label">Imię i nazwisko</label>
+            <input type="text" name="name" class="form-input" placeholder="Jan Kowalski" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-input" placeholder="twoj@email.pl" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Firma (opcjonalnie)</label>
+            <input type="text" name="company" class="form-input" placeholder="Nazwa firmy">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Hasło (min. 6 znaków)</label>
+            <input type="password" name="password" class="form-input" placeholder="••••••••" required minlength="6">
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+            Zarejestruj się
+          </button>
+          
+          <p style="font-size: 12px; color: var(--muted); text-align: center;">
+            Rejestrując się otrzymujesz <span class="points-badge">🎁 10 punktów GRATIS</span>
+          </p>
+        </form>
+      </div>
+      
+      <div class="auth-footer">
+        <a href="index.html">← Powrót do strony głównej</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = window.location.origin;
+
+// Tab switching
+document.querySelectorAll('.auth-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    
+    tab.classList.add('active');
+    document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+    
+    hideMessages();
+  });
+});
+
+function showError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.classList.add('show');
+  document.getElementById('auth-success').classList.remove('show');
+}
+
+function showSuccess(msg) {
+  const el = document.getElementById('auth-success');
+  el.textContent = msg;
+  el.classList.add('show');
+  document.getElementById('auth-error').classList.remove('show');
+}
+
+function hideMessages() {
+  document.getElementById('auth-error').classList.remove('show');
+  document.getElementById('auth-success').classList.remove('show');
+}
+
+// Login
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideMessages();
+  
+  const formData = new FormData(e.target);
+  const data = {
+    email: formData.get('email'),
+    password: formData.get('password')
+  };
+  
+  try {
+    const res = await fetch(`${API_URL}/api/v1/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    
+    const result = await res.json();
+    
+    if (!res.ok) {
+      showError(result.detail || 'Błąd logowania');
+      return;
+    }
+    
+    // Save token
+    localStorage.setItem('analytica_token', result.access_token);
+    localStorage.setItem('analytica_user', JSON.stringify(result.user));
+    
+    showSuccess(`Zalogowano! Punkty: ${result.user.points_balance}`);
+    
+    // Redirect to dashboard
+    setTimeout(() => {
+      window.location.href = '/ui/';
+    }, 1000);
+    
+  } catch (err) {
+    showError('Błąd połączenia z serwerem');
+  }
+});
+
+// Register
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideMessages();
+  
+  const formData = new FormData(e.target);
+  const data = {
+    name: formData.get('name'),
+    email: formData.get('email'),
+    company: formData.get('company') || null,
+    password: formData.get('password')
+  };
+  
+  try {
+    const res = await fetch(`${API_URL}/api/v1/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    
+    const result = await res.json();
+    
+    if (!res.ok) {
+      showError(result.detail || 'Błąd rejestracji');
+      return;
+    }
+    
+    // Save token
+    localStorage.setItem('analytica_token', result.access_token);
+    localStorage.setItem('analytica_user', JSON.stringify(result.user));
+    
+    showSuccess(`Zarejestrowano! Otrzymujesz ${result.user.points_balance} punktów na start!`);
+    
+    // Redirect to dashboard
+    setTimeout(() => {
+      window.location.href = '/ui/';
+    }, 1500);
+    
+  } catch (err) {
+    showError('Błąd połączenia z serwerem');
+  }
+});
+
+// Check if already logged in
+const token = localStorage.getItem('analytica_token');
+if (token) {
+  // Verify token
+  fetch(`${API_URL}/api/v1/auth/me`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  }).then(res => {
+    if (res.ok) {
+      window.location.href = '/ui/';
+    } else {
+      localStorage.removeItem('analytica_token');
+      localStorage.removeItem('analytica_user');
+    }
+  }).catch(() => {});
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlanInwestycji.pl - Analiza ROI, NPV i IRR dla inwestycji</title>
+  <meta name="description" content="Profesjonalna analiza inwestycji. Obliczenia ROI, NPV, IRR, payback period. Scenariusze i symulacje Monte Carlo.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="components.css">
+  <style>
+    :root {
+      --primary: #7c3aed;
+      --primary-dark: #6d28d9;
+      --primary-light: #8b5cf6;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="container">
+    <a href="/" class="nav-logo">
+      <svg class="nav-logo-icon" viewBox="0 0 32 32" fill="currentColor">
+        <path d="M4 28V16l8-8 6 6 10-10v8l-10 10-6-6-8 8z"/>
+        <circle cx="26" cy="6" r="4"/>
+      </svg>
+      PlanInwestycji.pl
+    </a>
+    <ul class="nav-links">
+      <li><a href="#funkcje">Funkcje</a></li>
+      <li><a href="#demo">Kalkulator</a></li>
+      <li><a href="#cennik">Cennik</a></li>
+      <li><a href="#kontakt">Kontakt</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="login.html" class="btn btn-ghost">Zaloguj się</a>
+      <a href="login.html" class="btn btn-primary">Analizuj inwestycję</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">
+        📈 Profesjonalna analiza inwestycji
+      </div>
+      <h1 class="hero-title">
+        Podejmuj decyzje<br>
+        <span>oparte na danych</span>
+      </h1>
+      <p class="hero-description">
+        Kompleksowa analiza ROI, NPV, IRR i payback period. 
+        Symulacje scenariuszy i analiza ryzyka dla Twoich projektów inwestycyjnych.
+      </p>
+      <div class="hero-actions">
+        <a href="#demo" class="btn btn-primary btn-lg">
+          Oblicz ROI teraz
+          <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+          </svg>
+        </a>
+        <a href="#funkcje" class="btn btn-secondary btn-lg">Zobacz więcej</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value">2.5B zł</div>
+          <div class="hero-stat-label">Przeanalizowanych inwestycji</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">15%</div>
+          <div class="hero-stat-label">Wyższe zwroty</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">200+</div>
+          <div class="hero-stat-label">Firm korzysta</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-demo">
+        <div class="dsl-editor">
+          <div class="dsl-editor-header">
+            <span class="dsl-editor-dot red"></span>
+            <span class="dsl-editor-dot yellow"></span>
+            <span class="dsl-editor-dot green"></span>
+            <span class="dsl-editor-title">investment_analysis.dsl</span>
+          </div>
+          <div class="dsl-code">
+<span class="comment"># Analiza projektu inwestycyjnego</span>
+<span class="keyword">@pipeline</span> <span class="function">roi_analysis</span>:
+    <span class="variable">$initial</span> = <span class="number">1000000</span>
+    <span class="variable">$flows</span> = [<span class="number">200000</span>, <span class="number">300000</span>, <span class="number">400000</span>, <span class="number">500000</span>]
+    
+    <span class="function">investment.analyze</span>(
+        initial_investment=<span class="variable">$initial</span>,
+        cash_flows=<span class="variable">$flows</span>,
+        discount_rate=<span class="number">0.12</span>
+    )
+    | <span class="function">investment.roi</span>()
+    | <span class="function">investment.npv</span>(rate=<span class="number">0.1</span>)
+    | <span class="function">investment.irr</span>()
+    | <span class="function">investment.payback</span>()
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="features" id="funkcje">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Funkcje</span>
+      <h2 class="section-title">Kompletna analiza inwestycyjna</h2>
+      <p class="section-description">
+        Wszystkie narzędzia potrzebne do oceny opłacalności projektów inwestycyjnych.
+      </p>
+    </div>
+    
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">ROI (Zwrot z inwestycji)</h3>
+        <p class="feature-description">
+          Oblicz procentowy zwrot z inwestycji. Porównaj różne projekty i wybierz najlepszy.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">NPV (Wartość bieżąca netto)</h3>
+        <p class="feature-description">
+          Zdyskontowana wartość przyszłych przepływów pieniężnych. Kluczowy wskaźnik decyzyjny.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">IRR (Wewnętrzna stopa zwrotu)</h3>
+        <p class="feature-description">
+          Stopa dyskontowa przy której NPV = 0. Porównaj z kosztem kapitału.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Payback Period</h3>
+        <p class="feature-description">
+          Czas zwrotu inwestycji. Dowiedz się kiedy odzyskasz zainwestowany kapitał.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Analiza scenariuszy</h3>
+        <p class="feature-description">
+          Porównaj scenariusze optymistyczny, realistyczny i pesymistyczny. Symulacje Monte Carlo.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Ocena ryzyka</h3>
+        <p class="feature-description">
+          Automatyczna ocena ryzyka inwestycji. Identyfikacja czynników ryzyka i ich wpływu.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DSL Demo Section -->
+<section class="dsl-demo" id="demo">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Kalkulator</span>
+      <h2 class="section-title">Analizuj inwestycję w DSL</h2>
+      <p class="section-description">
+        Wprowadź parametry inwestycji i otrzymaj pełną analizę finansową.
+      </p>
+    </div>
+    
+    <div class="dsl-container">
+      <div class="dsl-editor">
+        <div class="dsl-editor-header">
+          <span class="dsl-editor-dot red"></span>
+          <span class="dsl-editor-dot yellow"></span>
+          <span class="dsl-editor-dot green"></span>
+          <span class="dsl-editor-title">full_investment_analysis.dsl</span>
+        </div>
+        <div class="dsl-code">
+<span class="comment"># Pełna analiza inwestycji z raportowaniem</span>
+<span class="keyword">@pipeline</span> <span class="function">investment_full_analysis</span>:
+    <span class="variable">$project</span> = <span class="string">"Nowa fabryka"</span>
+    <span class="variable">$initial</span> = <span class="number">5000000</span>
+    <span class="variable">$rate</span> = <span class="number">0.15</span>
+    <span class="variable">$flows</span> = [
+        <span class="number">1000000</span>, <span class="number">1500000</span>, <span class="number">2000000</span>,
+        <span class="number">2500000</span>, <span class="number">3000000</span>
+    ]
+    
+    <span class="comment"># Analiza podstawowa</span>
+    <span class="function">investment.analyze</span>(
+        name=<span class="variable">$project</span>,
+        initial_investment=<span class="variable">$initial</span>,
+        discount_rate=<span class="variable">$rate</span>,
+        cash_flows=<span class="variable">$flows</span>
+    )
+    
+    <span class="comment"># Wskaźniki finansowe</span>
+    | <span class="function">investment.roi</span>()
+    | <span class="function">investment.npv</span>(rate=<span class="variable">$rate</span>)
+    | <span class="function">investment.irr</span>()
+    | <span class="function">investment.payback</span>()
+    
+    <span class="comment"># Scenariusze</span>
+    | <span class="function">investment.scenario</span>(
+        name=<span class="string">"optimistic"</span>, 
+        multiplier=<span class="number">1.2</span>
+    )
+    
+    <span class="comment"># Raport dla zarządu</span>
+    | <span class="function">report.generate</span>(
+        format=<span class="string">"pdf"</span>,
+        template=<span class="string">"investment_proposal"</span>
+    )
+    | <span class="function">report.send</span>(
+        to=[<span class="string">"board@company.pl"</span>]
+    )
+        </div>
+      </div>
+      
+      <div class="dsl-result">
+        <div class="dsl-result-title">Wynik analizy</div>
+        <div class="dsl-result-content">
+{
+  "status": "success",
+  "project": "Nowa fabryka",
+  "investment_summary": {
+    "initial_investment": 5000000,
+    "total_cash_flows": 10000000,
+    "net_profit": 5000000
+  },
+  "metrics": {
+    "roi": 100.0,
+    "roi_formatted": "100.00%",
+    "npv": 2847520.45,
+    "npv_positive": true,
+    "irr": 0.2845,
+    "irr_formatted": "28.45%",
+    "payback_years": 2.67,
+    "profitability_index": 1.57
+  },
+  "risk_assessment": {
+    "level": "low",
+    "score": 25,
+    "factors": ["positive_npv", "high_irr", "short_payback"]
+  },
+  "recommendation": "INVEST",
+  "report_url": "/reports/investment_proposal.pdf"
+}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing Section -->
+<section class="pricing" id="cennik">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Cennik</span>
+      <h2 class="section-title">Płać za analizy inwestycji</h2>
+      <p class="section-description">
+        1 punkt = pełna analiza ROI/NPV/IRR lub scenariusz. Używaj przez Frontend lub API.
+      </p>
+    </div>
+    
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-name">💳 Pakiet Punktów</div>
+        <p class="pricing-description">Jednorazowy zakup, bez zobowiązań</p>
+        <div class="pricing-price">1.50 zł<span>/punkt</span></div>
+        <ul class="pricing-features">
+          <li><strong>Kup od 50 do 5 000 punktów</strong></li>
+          <li>Ważność: 12 miesięcy od zakupu</li>
+          <li>1 pkt = analiza ROI + NPV + IRR</li>
+          <li>1 pkt = scenariusz inwestycyjny</li>
+          <li>Dostęp Frontend + API</li>
+          <li>Faktura VAT</li>
+        </ul>
+        <a href="login.html" class="btn btn-secondary">Kup punkty</a>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center;">
+          50 pkt = 75 zł | 200 pkt = 270 zł | 500 pkt = 600 zł
+        </p>
+      </div>
+      
+      <div class="pricing-card featured">
+        <span class="pricing-badge">Rekomendowany</span>
+        <div class="pricing-name">🔄 Subskrypcja</div>
+        <p class="pricing-description">Miesięczna pula punktów z rollover</p>
+        <div class="pricing-price">249 zł<span>/mies.</span></div>
+        <ul class="pricing-features">
+          <li><strong>200 punktów miesięcznie</strong></li>
+          <li>Niewykorzystane punkty przechodzą</li>
+          <li>Monte Carlo symulacje</li>
+          <li>DSL Pipeline Builder</li>
+          <li>Priority support</li>
+          <li>Anuluj w dowolnym momencie</li>
+          <li><strong>Rocznie: 2 490 zł</strong> (+400 pkt bonus)</li>
+        </ul>
+        <a href="login.html" class="btn btn-primary">Rozpocznij subskrypcję</a>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center;">
+          1.25 zł/pkt miesięcznie | 0.89 zł/pkt rocznie
+        </p>
+      </div>
+      
+      <div class="pricing-card">
+        <div class="pricing-name">🏢 Enterprise</div>
+        <p class="pricing-description">Dedykowane rozwiązanie dla funduszy</p>
+        <div class="pricing-price">Indywidualnie<span></span></div>
+        <ul class="pricing-features">
+          <li><strong>Zapytanie ofertowe</strong></li>
+          <li>Portfolio management</li>
+          <li>Integracja z Bloomberg/Reuters</li>
+          <li>Custom modele wyceny</li>
+          <li>White-label raporty</li>
+          <li>SLA 99.99% z gwarancją</li>
+          <li>Dedykowany analityk</li>
+        </ul>
+        <a href="mailto:enterprise@analytica.pl?subject=Zapytanie%20Enterprise%20-%20PlanInwestycji" class="btn btn-secondary">Wyślij zapytanie</a>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center;">
+          Odpowiadamy w ciągu 24h
+        </p>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 40px; color: var(--muted);">
+      <p><strong>Ile punktów potrzebuję?</strong> Analityk: 20-50/mies. | Dział inwestycji: 80-200/mies. | Fundusz: 300+/mies.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta">
+  <div class="container">
+    <h2 class="cta-title">Podejmuj lepsze decyzje inwestycyjne</h2>
+    <p class="cta-description">
+      Wykorzystaj profesjonalne narzędzia analityczne i zwiększ zwroty ze swoich inwestycji.
+    </p>
+    <a href="/ui/" class="btn btn-primary btn-lg">
+      Analizuj pierwszą inwestycję
+      <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+      </svg>
+    </a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer" id="kontakt">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">PlanInwestycji.pl</div>
+        <p class="footer-description">
+          Profesjonalna analiza inwestycji dla nowoczesnych firm i funduszy.
+          Część ekosystemu Analytica.
+        </p>
+      </div>
+      <div>
+        <div class="footer-title">Produkt</div>
+        <ul class="footer-links">
+          <li><a href="#funkcje">Funkcje</a></li>
+          <li><a href="#cennik">Cennik</a></li>
+          <li><a href="#demo">Kalkulator</a></li>
+          <li><a href="/ui/">Dashboard</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-title">Ekosystem</div>
+        <ul class="footer-links">
+          <li><a href="planbudzetu.html">PlanBudzetu.pl</a></li>
+          <li><a href="multiplan.html">MultiPlan.pl</a></li>
+          <li><a href="estymacja.html">Estymacja.pl</a></li>
+          <li><a href="/docs/API.md">API Docs</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-title">Kontakt</div>
+        <ul class="footer-links">
+          <li><a href="mailto:kontakt@planinwestycji.pl">kontakt@planinwestycji.pl</a></li>
+          <li><a href="tel:+48123456789">+48 123 456 789</a></li>
+          <li><a href="#">LinkedIn</a></li>
+          <li><a href="#">Twitter</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2025 PlanInwestycji.pl - Część Analytica Platform</div>
+      <div>
+        <a href="#">Polityka prywatności</a> · <a href="#">Regulamin</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

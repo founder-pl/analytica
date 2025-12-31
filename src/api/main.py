@@ -26,6 +26,7 @@ from dsl.core.parser import (
     execute as dsl_execute,
 )
 from dsl.atoms import implementations as _dsl_atoms
+from api.auth import auth_router, get_current_user, get_optional_user
 
 # Get domain from environment
 DOMAIN = os.getenv("ANALYTICA_DOMAIN", "repox.pl")
@@ -40,9 +41,14 @@ app = FastAPI(
 
 _src_dir = Path(__file__).resolve().parent.parent
 _frontend_dir = _src_dir / "frontend"
+_landing_dir = _frontend_dir / "landing"
 _sdk_js_dir = _src_dir / "sdk" / "js"
+
+# Mount static directories
 if _sdk_js_dir.exists():
     app.mount("/ui/sdk", StaticFiles(directory=str(_sdk_js_dir)), name="ui-sdk")
+if _landing_dir.exists():
+    app.mount("/landing", StaticFiles(directory=str(_landing_dir), html=True), name="landing")
 if _frontend_dir.exists():
     app.mount("/ui", StaticFiles(directory=str(_frontend_dir), html=True), name="ui")
 
@@ -54,6 +60,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include auth router
+app.include_router(auth_router)
 
 # ============ MODELS ============
 

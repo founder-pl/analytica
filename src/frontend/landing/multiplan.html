@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MultiPlan.pl - Planowanie wieloscenariuszowe dla biznesu</title>
+  <meta name="description" content="Planowanie scenariuszowe, rolling forecast, analiza what-if. Przygotuj się na każdą sytuację rynkową.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="components.css">
+  <style>
+    :root {
+      --primary: #0891b2;
+      --primary-dark: #0e7490;
+      --primary-light: #06b6d4;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="container">
+    <a href="/" class="nav-logo">
+      <svg class="nav-logo-icon" viewBox="0 0 32 32" fill="currentColor">
+        <path d="M4 8h24v4H4zM4 14h20v4H4zM4 20h16v4H4zM4 26h12v4H4z"/>
+      </svg>
+      MultiPlan.pl
+    </a>
+    <ul class="nav-links">
+      <li><a href="#funkcje">Funkcje</a></li>
+      <li><a href="#demo">Demo</a></li>
+      <li><a href="#cennik">Cennik</a></li>
+      <li><a href="#kontakt">Kontakt</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="login.html" class="btn btn-ghost">Zaloguj się</a>
+      <a href="login.html" class="btn btn-primary">Stwórz scenariusz</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">
+        🎯 Planowanie wieloscenariuszowe
+      </div>
+      <h1 class="hero-title">
+        Bądź przygotowany<br>
+        <span>na każdy scenariusz</span>
+      </h1>
+      <p class="hero-description">
+        Twórz plany na różne warianty przyszłości. Analiza what-if, rolling forecast 
+        i dynamiczne dostosowywanie się do zmian rynkowych.
+      </p>
+      <div class="hero-actions">
+        <a href="#demo" class="btn btn-primary btn-lg">
+          Rozpocznij planowanie
+          <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+          </svg>
+        </a>
+        <a href="#funkcje" class="btn btn-secondary btn-lg">Poznaj możliwości</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value">3x</div>
+          <div class="hero-stat-label">Szybsze planowanie</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">∞</div>
+          <div class="hero-stat-label">Scenariuszy</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">Real-time</div>
+          <div class="hero-stat-label">Aktualizacje</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-demo">
+        <div class="dsl-editor">
+          <div class="dsl-editor-header">
+            <span class="dsl-editor-dot red"></span>
+            <span class="dsl-editor-dot yellow"></span>
+            <span class="dsl-editor-dot green"></span>
+            <span class="dsl-editor-title">scenario_planning.dsl</span>
+          </div>
+          <div class="dsl-code">
+<span class="comment"># Planowanie scenariuszowe 2025</span>
+<span class="keyword">@pipeline</span> <span class="function">multi_scenario</span>:
+    <span class="variable">$base</span> = <span class="string">"budget_2025"</span>
+    
+    <span class="function">budget.load</span>(<span class="variable">$base</span>)
+    
+    <span class="comment"># Scenariusz optymistyczny +15%</span>
+    | <span class="function">investment.scenario</span>(
+        name=<span class="string">"optimistic"</span>,
+        multiplier=<span class="number">1.15</span>
+    )
+    
+    <span class="comment"># Prognoza krocząca</span>
+    | <span class="function">forecast.predict</span>(
+        periods=<span class="number">6</span>,
+        method=<span class="string">"linear"</span>
+    )
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="features" id="funkcje">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Funkcje</span>
+      <h2 class="section-title">Kompleksowe planowanie strategiczne</h2>
+      <p class="section-description">
+        Narzędzia do tworzenia elastycznych planów i szybkiego reagowania na zmiany.
+      </p>
+    </div>
+    
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Scenariusze what-if</h3>
+        <p class="feature-description">
+          Twórz nieograniczoną liczbę scenariuszy. Optymistyczny, pesymistyczny, bazowy i własne warianty.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Rolling Forecast</h3>
+        <p class="feature-description">
+          Prognoza krocząca automatycznie aktualizowana na podstawie nowych danych.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Porównanie scenariuszy</h3>
+        <p class="feature-description">
+          Wizualne porównanie wielu scenariuszy. Identyfikacja różnic i punktów decyzyjnych.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Analiza wrażliwości</h3>
+        <p class="feature-description">
+          Sprawdź jak zmiany kluczowych parametrów wpływają na wyniki finansowe.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Automatyczne triggery</h3>
+        <p class="feature-description">
+          Definiuj warunki aktywacji scenariuszy. System automatycznie przełącza plany.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Współpraca zespołowa</h3>
+        <p class="feature-description">
+          Pracuj nad scenariuszami z zespołem. Komentarze, wersjonowanie i zatwierdzanie.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DSL Demo Section -->
+<section class="dsl-demo" id="demo">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Demo</span>
+      <h2 class="section-title">Stwórz plan wieloscenariuszowy</h2>
+      <p class="section-description">
+        Zobacz jak łatwo tworzyć i porównywać różne warianty przyszłości.
+      </p>
+    </div>
+    
+    <div class="dsl-container">
+      <div class="dsl-editor">
+        <div class="dsl-editor-header">
+          <span class="dsl-editor-dot red"></span>
+          <span class="dsl-editor-dot yellow"></span>
+          <span class="dsl-editor-dot green"></span>
+          <span class="dsl-editor-title">multi_scenario_analysis.dsl</span>
+        </div>
+        <div class="dsl-code">
+<span class="comment"># Pełna analiza wieloscenariuszowa</span>
+<span class="keyword">@pipeline</span> <span class="function">scenario_comparison</span>:
+    <span class="variable">$base_budget</span> = <span class="string">"budget_2025"</span>
+    
+    <span class="comment"># Załaduj bazowy budżet</span>
+    <span class="function">budget.load</span>(<span class="variable">$base_budget</span>)
+    | <span class="function">budget.variance</span>()
+    
+    <span class="comment"># Scenariusz optymistyczny</span>
+    | <span class="function">investment.scenario</span>(
+        name=<span class="string">"optimistic"</span>,
+        multiplier=<span class="number">1.20</span>
+    )
+    
+    <span class="comment"># Rolling forecast 6 miesięcy</span>
+    | <span class="function">forecast.predict</span>(
+        periods=<span class="number">6</span>,
+        method=<span class="string">"linear"</span>
+    )
+    | <span class="function">forecast.confidence</span>(level=<span class="number">0.95</span>)
+    
+    <span class="comment"># Porównaj z planem</span>
+    | <span class="function">budget.compare</span>(scenario=<span class="string">"planned"</span>)
+    
+    <span class="comment"># Wygeneruj raport</span>
+    | <span class="function">report.generate</span>(
+        format=<span class="string">"xlsx"</span>,
+        template=<span class="string">"scenario_comparison"</span>
+    )
+        </div>
+      </div>
+      
+      <div class="dsl-result">
+        <div class="dsl-result-title">Porównanie scenariuszy</div>
+        <div class="dsl-result-content">
+{
+  "status": "success",
+  "scenarios": {
+    "base": {
+      "revenue": 10000000,
+      "costs": 7500000,
+      "profit": 2500000
+    },
+    "optimistic": {
+      "revenue": 12000000,
+      "costs": 7875000,
+      "profit": 4125000,
+      "change_vs_base": "+65%"
+    },
+    "pessimistic": {
+      "revenue": 8500000,
+      "costs": 7125000,
+      "profit": 1375000,
+      "change_vs_base": "-45%"
+    }
+  },
+  "forecast": {
+    "method": "linear",
+    "periods": 6,
+    "confidence": 0.95,
+    "trend": "up",
+    "predicted_revenue": 11200000
+  },
+  "recommendation": "Proceed with optimistic plan, monitor Q2 KPIs"
+}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing Section -->
+<section class="pricing" id="cennik">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Cennik</span>
+      <h2 class="section-title">Płać za scenariusze i prognozy</h2>
+      <p class="section-description">
+        1 punkt = 1 scenariusz what-if lub rolling forecast. Używaj przez Frontend lub API.
+      </p>
+    </div>
+    
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-name">💳 Pakiet Punktów</div>
+        <p class="pricing-description">Jednorazowy zakup, bez zobowiązań</p>
+        <div class="pricing-price">1 zł<span>/punkt</span></div>
+        <ul class="pricing-features">
+          <li><strong>Kup od 50 do 10 000 punktów</strong></li>
+          <li>Ważność: 12 miesięcy od zakupu</li>
+          <li>1 pkt = scenariusz what-if</li>
+          <li>1 pkt = rolling forecast</li>
+          <li>Dostęp Frontend + API</li>
+          <li>Faktura VAT</li>
+        </ul>
+        <a href="login.html" class="btn btn-secondary">Kup punkty</a>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center;">
+          50 pkt = 50 zł | 200 pkt = 180 zł | 500 pkt = 400 zł
+        </p>
+      </div>
+      
+      <div class="pricing-card featured">
+        <span class="pricing-badge">Rekomendowany</span>
+        <div class="pricing-name">🔄 Subskrypcja</div>
+        <p class="pricing-description">Miesięczna pula punktów z rollover</p>
+        <div class="pricing-price">199 zł<span>/mies.</span></div>
+        <ul class="pricing-features">
+          <li><strong>250 punktów miesięcznie</strong></li>
+          <li>Niewykorzystane punkty przechodzą</li>
+          <li>Analiza wrażliwości</li>
+          <li>DSL Pipeline Builder</li>
+          <li>Priority support</li>
+          <li>Anuluj w dowolnym momencie</li>
+          <li><strong>Rocznie: 1 990 zł</strong> (+500 pkt bonus)</li>
+        </ul>
+        <a href="login.html" class="btn btn-primary">Rozpocznij subskrypcję</a>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center;">
+          0.80 zł/pkt miesięcznie | 0.57 zł/pkt rocznie
+        </p>
+      </div>
+      
+      <div class="pricing-card">
+        <div class="pricing-name">🏢 Enterprise</div>
+        <p class="pricing-description">Dedykowane planowanie strategiczne</p>
+        <div class="pricing-price">Indywidualnie<span></span></div>
+        <ul class="pricing-features">
+          <li><strong>Zapytanie ofertowe</strong></li>
+          <li>Monte Carlo symulacje</li>
+          <li>Integracja z ERP/BI</li>
+          <li>Automatyczne triggery</li>
+          <li>Custom dashboardy</li>
+          <li>SLA 99.99% z gwarancją</li>
+          <li>Warsztaty strategiczne</li>
+        </ul>
+        <a href="mailto:enterprise@analytica.pl?subject=Zapytanie%20Enterprise%20-%20MultiPlan" class="btn btn-secondary">Wyślij zapytanie</a>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center;">
+          Odpowiadamy w ciągu 24h
+        </p>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 40px; color: var(--muted);">
+      <p><strong>Ile punktów potrzebuję?</strong> Mały zespół: 50-100/mies. | Średnia firma: 150-300/mies. | Korporacja: 500+/mies.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta">
+  <div class="container">
+    <h2 class="cta-title">Zaplanuj swoją przyszłość</h2>
+    <p class="cta-description">
+      Bądź przygotowany na każdy scenariusz. Reaguj szybciej niż konkurencja.
+    </p>
+    <a href="/ui/" class="btn btn-primary btn-lg">
+      Stwórz pierwszy scenariusz
+      <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+      </svg>
+    </a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer" id="kontakt">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">MultiPlan.pl</div>
+        <p class="footer-description">
+          Planowanie wieloscenariuszowe dla nowoczesnych organizacji.
+          Część ekosystemu Analytica.
+        </p>
+      </div>
+      <div>
+        <div class="footer-title">Produkt</div>
+        <ul class="footer-links">
+          <li><a href="#funkcje">Funkcje</a></li>
+          <li><a href="#cennik">Cennik</a></li>
+          <li><a href="#demo">Demo</a></li>
+          <li><a href="/ui/">Dashboard</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-title">Ekosystem</div>
+        <ul class="footer-links">
+          <li><a href="planbudzetu.html">PlanBudzetu.pl</a></li>
+          <li><a href="planinwestycji.html">PlanInwestycji.pl</a></li>
+          <li><a href="estymacja.html">Estymacja.pl</a></li>
+          <li><a href="/docs/API.md">API Docs</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-title">Kontakt</div>
+        <ul class="footer-links">
+          <li><a href="mailto:kontakt@multiplan.pl">kontakt@multiplan.pl</a></li>
+          <li><a href="tel:+48123456789">+48 123 456 789</a></li>
+          <li><a href="#">LinkedIn</a></li>
+          <li><a href="#">Twitter</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2025 MultiPlan.pl - Część Analytica Platform</div>
+      <div>
+        <a href="#">Polityka prywatności</a> · <a href="#">Regulamin</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

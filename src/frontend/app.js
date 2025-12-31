@@ -97,29 +97,117 @@ function defaultParamsFor(type, action) {
   // Minimal defaults for common atoms (editable as JSON)
   const key = `${type}.${action}`;
   const defaults = {
+    // Data atoms
     'data.load': { source: 'sales.csv' },
-    'data.query': { sql: 'SELECT 1' },
+    'data.query': { sql: 'SELECT * FROM table WHERE year = 2024' },
     'data.fetch': { url: 'https://api.example.com/data', method: 'GET' },
+    'data.from_input': {},
+    
+    // Transform atoms
     'transform.filter': { year: 2024 },
     'transform.sort': { by: 'amount', order: 'desc' },
     'transform.limit': { n: 10 },
+    'transform.group_by': { fields: ['category', 'month'] },
+    'transform.aggregate': { by: 'amount', func: 'sum' },
+    'transform.select': { fields: ['id', 'name', 'amount'] },
+    'transform.rename': { old_name: 'new_name' },
+    'transform.map': { func: 'uppercase', field: 'name' },
+    
+    // Metrics atoms
     'metrics.sum': { field: 'amount' },
     'metrics.avg': { field: 'amount' },
-    'metrics.calculate': { metrics: ['sum', 'avg'], field: 'amount' },
-    'report.generate': { format: 'pdf', template: 'monthly_report' },
-    'report.send': { to: ['team@company.pl'] },
-    'alert.threshold': { field: 'utilization', operator: 'gt', value: 0.9 },
-    'alert.send': { channel: 'slack', message: 'Alert triggered' },
+    'metrics.count': {},
+    'metrics.min': { field: 'amount' },
+    'metrics.max': { field: 'amount' },
+    'metrics.calculate': { metrics: ['sum', 'avg', 'count'], field: 'amount' },
+    'metrics.variance': { field: 'amount' },
+    'metrics.percentile': { field: 'amount', p: 95 },
+    
+    // Report atoms
+    'report.generate': { format: 'html', template: 'executive_summary', title: 'Report' },
+    'report.send': { to: ['team@company.pl'], method: 'email' },
+    'report.schedule': { frequency: 'weekly', recipients: ['team@company.pl'] },
+    
+    // Alert atoms
+    'alert.threshold': { metric: 'budget_usage', operator: 'gt', threshold: 100000 },
+    'alert.send': { channel: 'email', recipient: 'admin@company.pl', message: 'Alert triggered' },
+    'alert.when': { condition: 'value > threshold' },
+    'alert.anomaly': { std_multiplier: 2.0 },
+    'alert.create': { name: 'Budget Alert', metric: 'spending', operator: 'gt', threshold: 50000 },
+    
+    // Budget atoms
     'budget.load': { budget_id: 'budget_2024' },
-    'budget.create': { name: 'Budget 2025' },
-    'investment.analyze': { discount_rate: 0.12, initial_investment: 500000, cash_flows: [150000, 180000] },
-    'investment.npv': { rate: 0.1 },
-    'forecast.predict': { periods: 90, model: 'prophet' },
-    'export.to_json': {},
-    'export.to_csv': { path: 'out.csv' }
+    'budget.create': { name: 'Q1 2025 Budget', scenario: 'realistic' },
+    'budget.variance': { planned: 100000, actual: 95000 },
+    'budget.categorize': {},
+    'budget.compare': { scenario: 'actual' },
+    
+    // Investment atoms
+    'investment.analyze': { 
+      name: 'New Project',
+      initial_investment: 100000, 
+      discount_rate: 0.12, 
+      cash_flows: [30000, 40000, 50000, 60000] 
+    },
+    'investment.roi': { initial_investment: 100000, total_returns: 150000 },
+    'investment.npv': { initial_investment: 100000, discount_rate: 0.1, cash_flows: [30000, 40000, 50000] },
+    'investment.irr': { initial_investment: 100000, cash_flows: [30000, 40000, 50000, 60000] },
+    'investment.payback': { initial_investment: 100000, cash_flows: [30000, 40000, 50000] },
+    'investment.scenario': { name: 'optimistic', multiplier: 1.2 },
+    
+    // Forecast atoms
+    'forecast.predict': { periods: 12, method: 'linear' },
+    'forecast.trend': {},
+    'forecast.smooth': { method: 'exponential', alpha: 0.3 },
+    'forecast.seasonality': {},
+    'forecast.confidence': { level: 0.95 },
+    
+    // Voice atoms
+    'voice.transcribe': { audio_url: 'https://example.com/audio.wav', language: 'pl' },
+    'voice.parse': { text: 'oblicz sumę sprzedaży' },
+    'voice.to_dsl': { text: 'wygeneruj raport miesięczny' },
+    
+    // Export atoms
+    'export.to_json': { path: 'output.json' },
+    'export.to_csv': { path: 'output.csv' },
+    'export.to_excel': { path: 'output.xlsx' },
+    'export.to_api': { url: 'https://api.example.com/webhook', method: 'POST' }
   };
 
   return defaults[key] || {};
+}
+
+// Get description for atom
+function getAtomDescription(type, action) {
+  const descriptions = {
+    'data.load': 'Load data from file or database',
+    'data.query': 'Execute SQL query',
+    'data.fetch': 'Fetch data from URL',
+    'data.from_input': 'Use input data from request',
+    'transform.filter': 'Filter rows by condition',
+    'transform.sort': 'Sort by field',
+    'transform.limit': 'Limit number of rows',
+    'transform.group_by': 'Group by fields',
+    'metrics.sum': 'Calculate sum of field',
+    'metrics.avg': 'Calculate average of field',
+    'metrics.count': 'Count rows',
+    'metrics.calculate': 'Calculate multiple metrics',
+    'budget.create': 'Create new budget',
+    'budget.variance': 'Calculate budget variance',
+    'investment.analyze': 'Full investment analysis (ROI, NPV, IRR)',
+    'investment.roi': 'Calculate Return on Investment',
+    'investment.npv': 'Calculate Net Present Value',
+    'forecast.predict': 'Predict future values',
+    'forecast.trend': 'Analyze trend direction',
+    'alert.threshold': 'Check value against threshold',
+    'alert.anomaly': 'Detect anomalies in data',
+    'report.generate': 'Generate report in format',
+    'voice.parse': 'Parse voice command to intent',
+    'voice.to_dsl': 'Convert voice to DSL',
+    'export.to_json': 'Export to JSON file',
+    'export.to_csv': 'Export to CSV file',
+  };
+  return descriptions[`${type}.${action}`] || '';
 }
 
 function addStep(initial = null) {
@@ -283,6 +371,15 @@ function renderSteps() {
     top.appendChild(actionField);
     top.appendChild(stepActions);
 
+    // Description
+    const desc = getAtomDescription(s.type, s.action);
+    if (desc) {
+      const descEl = document.createElement('div');
+      descEl.className = 'step-desc';
+      descEl.textContent = desc;
+      wrapper.appendChild(descEl);
+    }
+
     const paramsField = document.createElement('label');
     paramsField.className = 'field';
     const paramsLabel = document.createElement('span');
@@ -290,9 +387,10 @@ function renderSteps() {
     paramsLabel.textContent = 'Params (JSON object)';
     const paramsTextarea = document.createElement('textarea');
     paramsTextarea.className = 'textarea';
-    paramsTextarea.rows = 6;
+    paramsTextarea.rows = 5;
     paramsTextarea.spellcheck = false;
     paramsTextarea.value = s.paramsJson;
+    paramsTextarea.placeholder = '{ "key": "value" }';
 
     paramsTextarea.addEventListener('input', () => {
       s.paramsJson = paramsTextarea.value;

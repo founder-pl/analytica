@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytica Platform - Ekosystem SaaS dla finansów i planowania</title>
+  <meta name="description" content="Kompleksowy ekosystem narzędzi SaaS: budżetowanie, inwestycje, planowanie scenariuszowe, prognozowanie AI. DSL-powered automation.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="components.css">
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="container">
+    <a href="/" class="nav-logo">
+      <svg class="nav-logo-icon" viewBox="0 0 32 32" fill="currentColor">
+        <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="2"/>
+        <path d="M8 20L14 14L18 18L24 12"/>
+        <circle cx="14" cy="14" r="2"/>
+        <circle cx="18" cy="18" r="2"/>
+        <circle cx="24" cy="12" r="2"/>
+      </svg>
+      Analytica
+    </a>
+    <ul class="nav-links">
+      <li><a href="#produkty">Produkty</a></li>
+      <li><a href="#dsl">DSL Platform</a></li>
+      <li><a href="#dla-kogo">Dla kogo</a></li>
+      <li><a href="/docs/API.md">API Docs</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="login.html" class="btn btn-ghost">Zaloguj się</a>
+      <a href="login.html" class="btn btn-primary">Rozpocznij</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content" style="max-width: 700px;">
+      <div class="hero-badge">
+        ✨ Ekosystem SaaS powered by DSL
+      </div>
+      <h1 class="hero-title">
+        Jeden ekosystem,<br>
+        <span>cztery specjalizacje</span>
+      </h1>
+      <p class="hero-description">
+        Analytica to platforma łącząca budżetowanie, analizę inwestycji, planowanie 
+        scenariuszowe i prognozowanie AI. Wszystko połączone wspólnym językiem DSL.
+      </p>
+      <div class="hero-actions">
+        <a href="#produkty" class="btn btn-primary btn-lg">
+          Poznaj produkty
+          <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </a>
+        <a href="/ui/" class="btn btn-secondary btn-lg">Otwórz Dashboard</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value">4</div>
+          <div class="hero-stat-label">Specjalizowane produkty</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">1</div>
+          <div class="hero-stat-label">Wspólne API</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">∞</div>
+          <div class="hero-stat-label">Możliwości DSL</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Products Section -->
+<section class="features" id="produkty">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Produkty</span>
+      <h2 class="section-title">Wybierz swoją specjalizację</h2>
+      <p class="section-description">
+        Każdy produkt jest zoptymalizowany pod konkretne potrzeby biznesowe, 
+        ale wszystkie działają na tej samej platformie DSL.
+      </p>
+    </div>
+    
+    <div class="features-grid" style="grid-template-columns: repeat(2, 1fr);">
+      <!-- PlanBudzetu -->
+      <a href="planbudzetu.html" class="feature-card" style="text-decoration: none; color: inherit;">
+        <div class="feature-icon" style="background: #059669;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">PlanBudzetu.pl</h3>
+        <p class="feature-description">
+          <strong>Planowanie budżetu</strong><br>
+          Analiza wariancji, kategoryzacja wydatków, prognozy finansowe, alerty budżetowe.
+          Automatyczne raporty PDF i Excel.
+        </p>
+        <div style="margin-top: 16px; color: #059669; font-weight: 600;">
+          Od 99 zł/mies. →
+        </div>
+      </a>
+      
+      <!-- PlanInwestycji -->
+      <a href="planinwestycji.html" class="feature-card" style="text-decoration: none; color: inherit;">
+        <div class="feature-icon" style="background: #7c3aed;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">PlanInwestycji.pl</h3>
+        <p class="feature-description">
+          <strong>Analiza inwestycji</strong><br>
+          ROI, NPV, IRR, payback period. Analiza scenariuszy, symulacje Monte Carlo, 
+          ocena ryzyka.
+        </p>
+        <div style="margin-top: 16px; color: #7c3aed; font-weight: 600;">
+          Od 149 zł/mies. →
+        </div>
+      </a>
+      
+      <!-- MultiPlan -->
+      <a href="multiplan.html" class="feature-card" style="text-decoration: none; color: inherit;">
+        <div class="feature-icon" style="background: #0891b2;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">MultiPlan.pl</h3>
+        <p class="feature-description">
+          <strong>Planowanie scenariuszowe</strong><br>
+          Scenariusze what-if, rolling forecast, analiza wrażliwości, 
+          automatyczne triggery.
+        </p>
+        <div style="margin-top: 16px; color: #0891b2; font-weight: 600;">
+          Od 199 zł/mies. →
+        </div>
+      </a>
+      
+      <!-- Estymacja -->
+      <a href="estymacja.html" class="feature-card" style="text-decoration: none; color: inherit;">
+        <div class="feature-icon" style="background: #ea580c;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Estymacja.pl</h3>
+        <p class="feature-description">
+          <strong>Prognozowanie AI</strong><br>
+          Machine learning, predykcja trendów, detekcja sezonowości, 
+          przedziały ufności, anomalie.
+        </p>
+        <div style="margin-top: 16px; color: #ea580c; font-weight: 600;">
+          Od 129 zł/mies. →
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- DSL Section -->
+<section class="dsl-demo" id="dsl">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">DSL Platform</span>
+      <h2 class="section-title">Jeden język, nieskończone możliwości</h2>
+      <p class="section-description">
+        Analytica DSL to prosty język do tworzenia pipeline'ów analitycznych.
+        Łącz moduły z różnych produktów w jeden workflow.
+      </p>
+    </div>
+    
+    <div class="dsl-container">
+      <div class="dsl-editor">
+        <div class="dsl-editor-header">
+          <span class="dsl-editor-dot red"></span>
+          <span class="dsl-editor-dot yellow"></span>
+          <span class="dsl-editor-dot green"></span>
+          <span class="dsl-editor-title">cross_product_pipeline.dsl</span>
+        </div>
+        <div class="dsl-code">
+<span class="comment"># Pipeline łączący wszystkie produkty</span>
+<span class="keyword">@pipeline</span> <span class="function">full_financial_analysis</span>:
+    <span class="variable">$year</span> = <span class="number">2025</span>
+    
+    <span class="comment"># 📊 Budget: Załaduj i przeanalizuj budżet</span>
+    <span class="function">budget.load</span>(<span class="string">"budget_2025"</span>)
+    | <span class="function">budget.variance</span>()
+    
+    <span class="comment"># 📈 Investment: Oblicz ROI projektów</span>
+    | <span class="function">investment.roi</span>()
+    | <span class="function">investment.npv</span>(rate=<span class="number">0.12</span>)
+    
+    <span class="comment"># 🎯 MultiPlan: Porównaj scenariusze</span>
+    | <span class="function">investment.scenario</span>(
+        name=<span class="string">"optimistic"</span>,
+        multiplier=<span class="number">1.15</span>
+    )
+    
+    <span class="comment"># 🤖 Forecast: Prognoza AI</span>
+    | <span class="function">forecast.predict</span>(
+        periods=<span class="number">12</span>,
+        method=<span class="string">"linear"</span>
+    )
+    | <span class="function">forecast.confidence</span>(level=<span class="number">0.95</span>)
+    
+    <span class="comment"># 🚨 Alerty</span>
+    | <span class="function">alert.threshold</span>(
+        metric=<span class="string">"variance"</span>,
+        operator=<span class="string">"gt"</span>,
+        threshold=<span class="number">0.1</span>
+    )
+    
+    <span class="comment"># 📄 Raport dla zarządu</span>
+    | <span class="function">report.generate</span>(
+        format=<span class="string">"pdf"</span>,
+        template=<span class="string">"executive_summary"</span>
+    )
+        </div>
+      </div>
+      
+      <div class="dsl-result">
+        <div class="dsl-result-title">Możliwości DSL</div>
+        <div style="padding: 20px; color: var(--dark);">
+          <h4 style="margin-bottom: 16px;">✅ Kluczowe funkcje:</h4>
+          <ul style="list-style: none; line-height: 2;">
+            <li>📊 <strong>budget.*</strong> - planowanie budżetu</li>
+            <li>📈 <strong>investment.*</strong> - analiza inwestycji</li>
+            <li>🔮 <strong>forecast.*</strong> - prognozowanie AI</li>
+            <li>🚨 <strong>alert.*</strong> - alerty i powiadomienia</li>
+            <li>📄 <strong>report.*</strong> - generowanie raportów</li>
+            <li>🔄 <strong>transform.*</strong> - transformacje danych</li>
+            <li>📊 <strong>metrics.*</strong> - obliczanie metryk</li>
+            <li>🎤 <strong>voice.*</strong> - komendy głosowe</li>
+          </ul>
+          
+          <h4 style="margin: 24px 0 16px;">🔧 Integracje:</h4>
+          <ul style="list-style: none; line-height: 2;">
+            <li>• REST API</li>
+            <li>• JavaScript SDK</li>
+            <li>• Python SDK</li>
+            <li>• Webhook exports</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- For Who Section -->
+<section class="features" id="dla-kogo">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Dla kogo</span>
+      <h2 class="section-title">Kto korzysta z Analytica?</h2>
+      <p class="section-description">
+        Nasze narzędzia wspierają różne działy i role w organizacjach.
+      </p>
+    </div>
+    
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Dział Finansów</h3>
+        <p class="feature-description">
+          Kontrolerzy finansowi, analitycy budżetowi, CFO. Automatyzacja raportowania 
+          i planowania finansowego.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Dział Inwestycji</h3>
+        <p class="feature-description">
+          Analitycy inwestycyjni, zarządzający portfelem. Profesjonalna analiza 
+          opłacalności i ryzyka projektów.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Zarząd / CEO</h3>
+        <p class="feature-description">
+          Strategiczne dashboardy, scenariusze biznesowe, executive reports. 
+          Szybki dostęp do kluczowych metryk.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing Section -->
+<section class="pricing" id="cennik">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Cennik</span>
+      <h2 class="section-title">Płać za to, czego używasz</h2>
+      <p class="section-description">
+        Uniwersalne punkty do wykorzystania w Frontend i przez API. Wybierz model dopasowany do Twoich potrzeb.
+      </p>
+    </div>
+    
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-name">💳 Pakiet Punktów</div>
+        <p class="pricing-description">Jednorazowy zakup, bez zobowiązań</p>
+        <div class="pricing-price">od 1 zł<span>/punkt</span></div>
+        <ul class="pricing-features">
+          <li><strong>Kup od 50 do 10 000 punktów</strong></li>
+          <li>Ważność: 12 miesięcy od zakupu</li>
+          <li>Dostęp do Frontend UI</li>
+          <li>Dostęp do REST API</li>
+          <li>1 pkt = 1 raport / analiza / prognoza</li>
+          <li>Płatność jednorazowa</li>
+          <li>Faktura VAT</li>
+        </ul>
+        <a href="login.html" class="btn btn-secondary">Kup punkty</a>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center;">
+          50 pkt = 50 zł | 200 pkt = 180 zł | 500 pkt = 400 zł
+        </p>
+      </div>
+      
+      <div class="pricing-card featured">
+        <span class="pricing-badge">Rekomendowany</span>
+        <div class="pricing-name">🔄 Subskrypcja</div>
+        <p class="pricing-description">Miesięczna pula punktów z rollover</p>
+        <div class="pricing-price">199 zł<span>/mies.</span></div>
+        <ul class="pricing-features">
+          <li><strong>250 punktów miesięcznie</strong></li>
+          <li>Niewykorzystane punkty przechodzą</li>
+          <li>Pełny dostęp Frontend + API</li>
+          <li>DSL Pipeline Builder</li>
+          <li>Priority support</li>
+          <li>Anuluj w dowolnym momencie</li>
+          <li><strong>Roczna: 1 990 zł</strong> (+500 pkt bonus)</li>
+        </ul>
+        <a href="login.html" class="btn btn-primary">Rozpocznij subskrypcję</a>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center;">
+          0.80 zł/pkt miesięcznie | 0.57 zł/pkt rocznie
+        </p>
+      </div>
+      
+      <div class="pricing-card">
+        <div class="pricing-name">🏢 Enterprise</div>
+        <p class="pricing-description">Dedykowana integracja dla Twojej firmy</p>
+        <div class="pricing-price">Indywidualnie<span></span></div>
+        <ul class="pricing-features">
+          <li><strong>Zapytanie ofertowe</strong></li>
+          <li>Integracja on-premise lub cloud</li>
+          <li>Dedykowane API endpoints</li>
+          <li>Custom moduły DSL</li>
+          <li>Integracja z ERP/CRM</li>
+          <li>SLA 99.99% z gwarancją</li>
+          <li>Dedykowany opiekun + szkolenia</li>
+        </ul>
+        <a href="mailto:enterprise@analytica.pl?subject=Zapytanie%20Enterprise" class="btn btn-secondary">Wyślij zapytanie</a>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center;">
+          Odpowiadamy w ciągu 24h
+        </p>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 40px; padding: 24px; background: white; border-radius: 12px; border: 1px solid var(--border);">
+      <h4 style="margin-bottom: 16px;">💡 Jak działają punkty?</h4>
+      <p style="color: var(--muted); margin-bottom: 20px;">1 punkt = 1 operacja. Używaj w dowolnym produkcie przez Frontend lub API.</p>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; text-align: center;">
+        <div>
+          <div style="font-size: 24px; margin-bottom: 8px;">📊</div>
+          <strong>Budget</strong><br>
+          <span style="color: var(--muted);">1 pkt = raport</span>
+        </div>
+        <div>
+          <div style="font-size: 24px; margin-bottom: 8px;">📈</div>
+          <strong>Investment</strong><br>
+          <span style="color: var(--muted);">1 pkt = analiza ROI</span>
+        </div>
+        <div>
+          <div style="font-size: 24px; margin-bottom: 8px;">🎯</div>
+          <strong>MultiPlan</strong><br>
+          <span style="color: var(--muted);">1 pkt = scenariusz</span>
+        </div>
+        <div>
+          <div style="font-size: 24px; margin-bottom: 8px;">🤖</div>
+          <strong>Forecast</strong><br>
+          <span style="color: var(--muted);">1 pkt = prognoza AI</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta">
+  <div class="container">
+    <h2 class="cta-title">Gotowy na transformację?</h2>
+    <p class="cta-description">
+      Wybierz produkt dopasowany do Twoich potrzeb lub skorzystaj z pełnej platformy.
+    </p>
+    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+      <a href="planbudzetu.html" class="btn btn-primary btn-lg" style="background: #059669;">
+        PlanBudzetu.pl
+      </a>
+      <a href="planinwestycji.html" class="btn btn-primary btn-lg" style="background: #7c3aed;">
+        PlanInwestycji.pl
+      </a>
+      <a href="multiplan.html" class="btn btn-primary btn-lg" style="background: #0891b2;">
+        MultiPlan.pl
+      </a>
+      <a href="estymacja.html" class="btn btn-primary btn-lg" style="background: #ea580c;">
+        Estymacja.pl
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">Analytica Platform</div>
+        <p class="footer-description">
+          Kompleksowy ekosystem narzędzi SaaS dla finansów i planowania.
+          Powered by DSL.
+        </p>
+      </div>
+      <div>
+        <div class="footer-title">Produkty</div>
+        <ul class="footer-links">
+          <li><a href="planbudzetu.html">PlanBudzetu.pl</a></li>
+          <li><a href="planinwestycji.html">PlanInwestycji.pl</a></li>
+          <li><a href="multiplan.html">MultiPlan.pl</a></li>
+          <li><a href="estymacja.html">Estymacja.pl</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-title">Dla deweloperów</div>
+        <ul class="footer-links">
+          <li><a href="/docs/API.md">API Documentation</a></li>
+          <li><a href="/docs/DSL.md">DSL Reference</a></li>
+          <li><a href="/docs/MODULES.md">Modules</a></li>
+          <li><a href="/ui/">Pipeline Builder</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-title">Kontakt</div>
+        <ul class="footer-links">
+          <li><a href="mailto:kontakt@analytica.pl">kontakt@analytica.pl</a></li>
+          <li><a href="tel:+48123456789">+48 123 456 789</a></li>
+          <li><a href="#">LinkedIn</a></li>
+          <li><a href="#">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2025 Analytica Platform - All rights reserved</div>
+      <div>
+        <a href="#">Polityka prywatności</a> · <a href="#">Regulamin</a> · <a href="#">RODO</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

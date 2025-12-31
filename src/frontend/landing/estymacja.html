@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estymacja.pl - Prognozowanie AI dla biznesu</title>
+  <meta name="description" content="Prognozowanie oparte na AI. Trendy, sezonowość, predykcje sprzedaży i przychodów. Machine learning dla Twojego biznesu.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="components.css">
+  <style>
+    :root {
+      --primary: #ea580c;
+      --primary-dark: #c2410c;
+      --primary-light: #f97316;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="container">
+    <a href="/" class="nav-logo">
+      <svg class="nav-logo-icon" viewBox="0 0 32 32" fill="currentColor">
+        <path d="M4 24L10 18L16 22L22 14L28 8M28 8V16M28 8H20"/>
+        <circle cx="10" cy="18" r="2"/>
+        <circle cx="16" cy="22" r="2"/>
+        <circle cx="22" cy="14" r="2"/>
+        <circle cx="28" cy="8" r="2"/>
+      </svg>
+      Estymacja.pl
+    </a>
+    <ul class="nav-links">
+      <li><a href="#funkcje">Funkcje</a></li>
+      <li><a href="#demo">Demo AI</a></li>
+      <li><a href="#cennik">Cennik</a></li>
+      <li><a href="#kontakt">Kontakt</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="login.html" class="btn btn-ghost">Zaloguj się</a>
+      <a href="login.html" class="btn btn-primary">Prognozuj teraz</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">
+        🤖 AI-powered forecasting
+      </div>
+      <h1 class="hero-title">
+        Przewiduj przyszłość<br>
+        <span>z AI</span>
+      </h1>
+      <p class="hero-description">
+        Wykorzystaj machine learning do prognozowania sprzedaży, przychodów i trendów. 
+        Automatyczna detekcja sezonowości i anomalii.
+      </p>
+      <div class="hero-actions">
+        <a href="#demo" class="btn btn-primary btn-lg">
+          Wypróbuj prognozowanie
+          <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+          </svg>
+        </a>
+        <a href="#funkcje" class="btn btn-secondary btn-lg">Zobacz możliwości</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value">95%</div>
+          <div class="hero-stat-label">Dokładność prognoz</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">< 1s</div>
+          <div class="hero-stat-label">Czas predykcji</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">24/7</div>
+          <div class="hero-stat-label">Monitorowanie</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-demo">
+        <div class="dsl-editor">
+          <div class="dsl-editor-header">
+            <span class="dsl-editor-dot red"></span>
+            <span class="dsl-editor-dot yellow"></span>
+            <span class="dsl-editor-dot green"></span>
+            <span class="dsl-editor-title">sales_forecast.dsl</span>
+          </div>
+          <div class="dsl-code">
+<span class="comment"># Prognoza sprzedaży na 90 dni</span>
+<span class="keyword">@pipeline</span> <span class="function">sales_forecast</span>:
+    <span class="function">data.load</span>(<span class="string">"historical_sales"</span>)
+    
+    <span class="comment"># AI prediction</span>
+    | <span class="function">forecast.predict</span>(
+        periods=<span class="number">90</span>,
+        method=<span class="string">"prophet"</span>
+    )
+    | <span class="function">forecast.trend</span>()
+    | <span class="function">forecast.seasonality</span>()
+    | <span class="function">forecast.confidence</span>(
+        level=<span class="number">0.95</span>
+    )
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="features" id="funkcje">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Funkcje AI</span>
+      <h2 class="section-title">Inteligentne prognozowanie</h2>
+      <p class="section-description">
+        Algorytmy machine learning dostosowane do Twoich danych biznesowych.
+      </p>
+    </div>
+    
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Predykcja trendów</h3>
+        <p class="feature-description">
+          Automatyczna identyfikacja trendów wzrostowych, spadkowych i stabilnych w Twoich danych.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Wykrywanie sezonowości</h3>
+        <p class="feature-description">
+          AI automatycznie wykrywa wzorce sezonowe: dzienne, tygodniowe, miesięczne i roczne.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Wygładzanie danych</h3>
+        <p class="feature-description">
+          Exponential smoothing, moving average i inne metody redukcji szumu w danych.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Detekcja anomalii</h3>
+        <p class="feature-description">
+          Automatyczne wykrywanie nietypowych wartości i alertowanie o odchyleniach.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Przedziały ufności</h3>
+        <p class="feature-description">
+          Każda prognoza z przedziałem ufności 90%, 95% lub 99%. Mierz niepewność.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Auto-tuning modeli</h3>
+        <p class="feature-description">
+          Automatyczna optymalizacja hiperparametrów. Model dopasowuje się do Twoich danych.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DSL Demo Section -->
+<section class="dsl-demo" id="demo">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Demo AI</span>
+      <h2 class="section-title">Prognozuj z jedną linią kodu</h2>
+      <p class="section-description">
+        Prosty DSL ukrywa złożoność machine learning. Ty skupiasz się na biznesie.
+      </p>
+    </div>
+    
+    <div class="dsl-container">
+      <div class="dsl-editor">
+        <div class="dsl-editor-header">
+          <span class="dsl-editor-dot red"></span>
+          <span class="dsl-editor-dot yellow"></span>
+          <span class="dsl-editor-dot green"></span>
+          <span class="dsl-editor-title">revenue_forecast.dsl</span>
+        </div>
+        <div class="dsl-code">
+<span class="comment"># Kompleksowa prognoza przychodów</span>
+<span class="keyword">@pipeline</span> <span class="function">revenue_projection</span>:
+    <span class="variable">$periods</span> = <span class="number">12</span>
+    <span class="variable">$confidence</span> = <span class="number">0.95</span>
+    
+    <span class="comment"># Załaduj dane historyczne</span>
+    <span class="function">data.load</span>(<span class="string">"revenue_history"</span>)
+    | <span class="function">transform.filter</span>(year=<span class="number">2024</span>)
+    
+    <span class="comment"># Wygładź dane</span>
+    | <span class="function">forecast.smooth</span>(
+        method=<span class="string">"exponential"</span>,
+        alpha=<span class="number">0.3</span>
+    )
+    
+    <span class="comment"># Analiza trendu</span>
+    | <span class="function">forecast.trend</span>()
+    
+    <span class="comment"># Główna prognoza</span>
+    | <span class="function">forecast.predict</span>(
+        periods=<span class="variable">$periods</span>,
+        method=<span class="string">"linear"</span>
+    )
+    | <span class="function">forecast.confidence</span>(
+        level=<span class="variable">$confidence</span>
+    )
+    
+    <span class="comment"># Metryki i raport</span>
+    | <span class="function">metrics.calculate</span>(
+        [<span class="string">"sum"</span>, <span class="string">"avg"</span>, <span class="string">"growth_rate"</span>]
+    )
+    | <span class="function">report.generate</span>(
+        format=<span class="string">"html"</span>,
+        template=<span class="string">"forecast_dashboard"</span>
+    )
+        </div>
+      </div>
+      
+      <div class="dsl-result">
+        <div class="dsl-result-title">Wynik prognozy</div>
+        <div class="dsl-result-content">
+{
+  "status": "success",
+  "model": "linear",
+  "data_points": 365,
+  "forecast": {
+    "periods": 12,
+    "method": "linear",
+    "values": [
+      {"month": "2025-01", "value": 850000},
+      {"month": "2025-02", "value": 875000},
+      {"month": "2025-03", "value": 920000},
+      {"month": "2025-04", "value": 945000},
+      "..."
+    ],
+    "total_projected": 11200000
+  },
+  "trend": {
+    "direction": "up",
+    "slope": 0.045,
+    "r_squared": 0.89
+  },
+  "confidence_interval": {
+    "level": 0.95,
+    "lower_bound": 10640000,
+    "upper_bound": 11760000
+  },
+  "seasonality": {
+    "detected": true,
+    "period": "monthly",
+    "strength": 0.23
+  },
+  "accuracy_metrics": {
+    "mae": 12500,
+    "mape": 2.1,
+    "rmse": 18200
+  }
+}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing Section -->
+<section class="pricing" id="cennik">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Cennik</span>
+      <h2 class="section-title">Płać za prognozy AI</h2>
+      <p class="section-description">
+        1 punkt = 1 prognoza lub analiza trendu. Używaj przez Frontend lub API.
+      </p>
+    </div>
+    
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-name">💳 Pakiet Punktów</div>
+        <p class="pricing-description">Jednorazowy zakup, bez zobowiązań</p>
+        <div class="pricing-price">1 zł<span>/punkt</span></div>
+        <ul class="pricing-features">
+          <li><strong>Kup od 50 do 10 000 punktów</strong></li>
+          <li>Ważność: 12 miesięcy od zakupu</li>
+          <li>1 pkt = prognoza AI (do 365 dni)</li>
+          <li>1 pkt = analiza trendu</li>
+          <li>Dostęp Frontend + API</li>
+          <li>Faktura VAT</li>
+        </ul>
+        <a href="login.html" class="btn btn-secondary">Kup punkty</a>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center;">
+          50 pkt = 50 zł | 200 pkt = 180 zł | 500 pkt = 400 zł
+        </p>
+      </div>
+      
+      <div class="pricing-card featured">
+        <span class="pricing-badge">Rekomendowany</span>
+        <div class="pricing-name">🔄 Subskrypcja</div>
+        <p class="pricing-description">Miesięczna pula punktów z rollover</p>
+        <div class="pricing-price">199 zł<span>/mies.</span></div>
+        <ul class="pricing-features">
+          <li><strong>250 punktów miesięcznie</strong></li>
+          <li>Niewykorzystane punkty przechodzą</li>
+          <li>Wszystkie metody ML</li>
+          <li>DSL Pipeline Builder</li>
+          <li>Priority support</li>
+          <li>Anuluj w dowolnym momencie</li>
+          <li><strong>Rocznie: 1 990 zł</strong> (+500 pkt bonus)</li>
+        </ul>
+        <a href="login.html" class="btn btn-primary">Rozpocznij subskrypcję</a>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center;">
+          0.80 zł/pkt miesięcznie | 0.57 zł/pkt rocznie
+        </p>
+      </div>
+      
+      <div class="pricing-card">
+        <div class="pricing-name">🏢 Enterprise</div>
+        <p class="pricing-description">Dedykowane rozwiązanie ML</p>
+        <div class="pricing-price">Indywidualnie<span></span></div>
+        <ul class="pricing-features">
+          <li><strong>Zapytanie ofertowe</strong></li>
+          <li>Custom modele ML</li>
+          <li>Real-time streaming</li>
+          <li>Integracja z data warehouse</li>
+          <li>GPU acceleration</li>
+          <li>SLA 99.99% z gwarancją</li>
+          <li>Dedykowany data scientist</li>
+        </ul>
+        <a href="mailto:enterprise@analytica.pl?subject=Zapytanie%20Enterprise%20-%20Estymacja" class="btn btn-secondary">Wyślij zapytanie</a>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center;">
+          Odpowiadamy w ciągu 24h
+        </p>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 40px; color: var(--muted);">
+      <p><strong>Ile punktów potrzebuję?</strong> Mały projekt: 30-80/mies. | Średnia firma: 150-300/mies. | Data-driven: 500+/mies.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta">
+  <div class="container">
+    <h2 class="cta-title">Zacznij prognozować z AI</h2>
+    <p class="cta-description">
+      Podejmuj decyzje oparte na danych. Wyprzedź konkurencję dzięki dokładnym prognozom.
+    </p>
+    <a href="/ui/" class="btn btn-primary btn-lg">
+      Prognozuj pierwszą metrykę
+      <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+      </svg>
+    </a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer" id="kontakt">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">Estymacja.pl</div>
+        <p class="footer-description">
+          Prognozowanie oparte na AI dla nowoczesnego biznesu.
+          Część ekosystemu Analytica.
+        </p>
+      </div>
+      <div>
+        <div class="footer-title">Produkt</div>
+        <ul class="footer-links">
+          <li><a href="#funkcje">Funkcje AI</a></li>
+          <li><a href="#cennik">Cennik</a></li>
+          <li><a href="#demo">Demo</a></li>
+          <li><a href="/ui/">Dashboard</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-title">Ekosystem</div>
+        <ul class="footer-links">
+          <li><a href="planbudzetu.html">PlanBudzetu.pl</a></li>
+          <li><a href="planinwestycji.html">PlanInwestycji.pl</a></li>
+          <li><a href="multiplan.html">MultiPlan.pl</a></li>
+          <li><a href="/docs/API.md">API Docs</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-title">Kontakt</div>
+        <ul class="footer-links">
+          <li><a href="mailto:kontakt@estymacja.pl">kontakt@estymacja.pl</a></li>
+          <li><a href="tel:+48123456789">+48 123 456 789</a></li>
+          <li><a href="#">LinkedIn</a></li>
+          <li><a href="#">Twitter</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2025 Estymacja.pl - Część Analytica Platform</div>
+      <div>
+        <a href="#">Polityka prywatności</a> · <a href="#">Regulamin</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

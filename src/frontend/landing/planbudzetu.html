@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlanBudzetu.pl - Inteligentne planowanie budżetu dla firm</title>
+  <meta name="description" content="Automatyzuj planowanie budżetu z AI. Analiza wariancji, kategoryzacja wydatków, prognozy finansowe.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="components.css">
+  <style>
+    :root {
+      --primary: #059669;
+      --primary-dark: #047857;
+      --primary-light: #10b981;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="container">
+    <a href="/" class="nav-logo">
+      <svg class="nav-logo-icon" viewBox="0 0 32 32" fill="currentColor">
+        <rect x="4" y="18" width="6" height="10" rx="1"/>
+        <rect x="13" y="12" width="6" height="16" rx="1"/>
+        <rect x="22" y="6" width="6" height="22" rx="1"/>
+      </svg>
+      PlanBudzetu.pl
+    </a>
+    <ul class="nav-links">
+      <li><a href="#funkcje">Funkcje</a></li>
+      <li><a href="#demo">Demo DSL</a></li>
+      <li><a href="#cennik">Cennik</a></li>
+      <li><a href="#kontakt">Kontakt</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="login.html" class="btn btn-ghost">Zaloguj się</a>
+      <a href="login.html" class="btn btn-primary">Wypróbuj za darmo</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">
+        🚀 Nowa wersja 2.0 z AI
+      </div>
+      <h1 class="hero-title">
+        Planowanie budżetu<br>
+        <span>zautomatyzowane</span>
+      </h1>
+      <p class="hero-description">
+        Wykorzystaj moc DSL i sztucznej inteligencji do automatycznego planowania, 
+        śledzenia i analizy budżetu Twojej firmy. Oszczędź 80% czasu na raportowaniu.
+      </p>
+      <div class="hero-actions">
+        <a href="#demo" class="btn btn-primary btn-lg">
+          Rozpocznij za darmo
+          <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+          </svg>
+        </a>
+        <a href="#funkcje" class="btn btn-secondary btn-lg">Zobacz funkcje</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value">500+</div>
+          <div class="hero-stat-label">Firm korzysta</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">80%</div>
+          <div class="hero-stat-label">Oszczędność czasu</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">99.9%</div>
+          <div class="hero-stat-label">Uptime SLA</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-demo">
+        <div class="dsl-editor">
+          <div class="dsl-editor-header">
+            <span class="dsl-editor-dot red"></span>
+            <span class="dsl-editor-dot yellow"></span>
+            <span class="dsl-editor-dot green"></span>
+            <span class="dsl-editor-title">pipeline.dsl</span>
+          </div>
+          <div class="dsl-code">
+<span class="comment"># Analiza budżetu Q1 2025</span>
+<span class="keyword">@pipeline</span> <span class="function">budget_analysis</span>:
+    <span class="variable">$month</span> = <span class="string">"2025-01"</span>
+    
+    <span class="function">budget.load</span>(<span class="string">"budget_2025"</span>)
+    | <span class="function">transform.filter</span>(month=<span class="variable">$month</span>)
+    | <span class="function">budget.variance</span>()
+    | <span class="function">report.generate</span>(
+        format=<span class="string">"pdf"</span>,
+        template=<span class="string">"monthly_budget"</span>
+    )
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="features" id="funkcje">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Funkcje</span>
+      <h2 class="section-title">Wszystko czego potrzebujesz do zarządzania budżetem</h2>
+      <p class="section-description">
+        Kompleksowe narzędzia do planowania, monitorowania i optymalizacji budżetu firmy.
+      </p>
+    </div>
+    
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Analiza wariancji</h3>
+        <p class="feature-description">
+          Automatyczne porównanie planu vs wykonania. Identyfikacja odchyleń i ich przyczyn.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Kategoryzacja wydatków</h3>
+        <p class="feature-description">
+          AI automatycznie kategoryzuje wydatki i przypisuje je do odpowiednich pozycji budżetowych.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Prognozy wydatków</h3>
+        <p class="feature-description">
+          Prognozowanie przyszłych wydatków na podstawie danych historycznych i trendów.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Alerty budżetowe</h3>
+        <p class="feature-description">
+          Powiadomienia o przekroczeniach budżetu, anomaliach i ważnych zmianach.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">Raporty automatyczne</h3>
+        <p class="feature-description">
+          Generowanie raportów PDF, Excel i dashboardów jednym kliknięciem lub harmonogramem.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <h3 class="feature-title">DSL Pipeline</h3>
+        <p class="feature-description">
+          Twórz własne pipeline'y analityczne w prostym języku DSL. Pełna automatyzacja.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DSL Demo Section -->
+<section class="dsl-demo" id="demo">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Demo</span>
+      <h2 class="section-title">Zobacz DSL w akcji</h2>
+      <p class="section-description">
+        Napisz pipeline w DSL i zobacz wynik w czasie rzeczywistym.
+      </p>
+    </div>
+    
+    <div class="dsl-container">
+      <div class="dsl-editor">
+        <div class="dsl-editor-header">
+          <span class="dsl-editor-dot red"></span>
+          <span class="dsl-editor-dot yellow"></span>
+          <span class="dsl-editor-dot green"></span>
+          <span class="dsl-editor-title">budget_variance.dsl</span>
+        </div>
+        <div class="dsl-code">
+<span class="comment"># Kompleksowa analiza budżetu</span>
+<span class="keyword">@pipeline</span> <span class="function">budget_variance_report</span>:
+    <span class="variable">$budget_id</span> = <span class="string">"bdgt_2025_q1"</span>
+    <span class="variable">$threshold</span> = <span class="number">0.1</span>
+    
+    <span class="comment"># Załaduj budżet i oblicz wariancję</span>
+    <span class="function">budget.load</span>(<span class="variable">$budget_id</span>)
+    | <span class="function">budget.variance</span>()
+    | <span class="function">budget.categorize</span>()
+    
+    <span class="comment"># Sprawdź przekroczenia</span>
+    | <span class="function">alert.threshold</span>(
+        metric=<span class="string">"variance_percent"</span>,
+        operator=<span class="string">"gt"</span>,
+        threshold=<span class="variable">$threshold</span>
+    )
+    
+    <span class="comment"># Wygeneruj raport</span>
+    | <span class="function">report.generate</span>(
+        format=<span class="string">"pdf"</span>,
+        template=<span class="string">"budget_variance"</span>
+    )
+    | <span class="function">report.send</span>(
+        to=[<span class="string">"finance@company.pl"</span>]
+    )
+        </div>
+      </div>
+      
+      <div class="dsl-result">
+        <div class="dsl-result-title">Wynik wykonania</div>
+        <div class="dsl-result-content">
+{
+  "status": "success",
+  "execution_id": "exec_abc123",
+  "results": {
+    "budget": {
+      "total_planned": 500000,
+      "total_actual": 485000,
+      "variance": -15000,
+      "variance_percent": -3.0
+    },
+    "categories": [
+      {"name": "Marketing", "variance": -5000},
+      {"name": "IT", "variance": -8000},
+      {"name": "HR", "variance": -2000}
+    ],
+    "alerts": [],
+    "report": {
+      "format": "pdf",
+      "url": "/reports/budget_q1.pdf"
+    }
+  }
+}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing Section -->
+<section class="pricing" id="cennik">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Cennik</span>
+      <h2 class="section-title">Płać za raporty budżetowe</h2>
+      <p class="section-description">
+        1 punkt = 1 raport lub analiza wariancji. Używaj przez Frontend lub API.
+      </p>
+    </div>
+    
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-name">💳 Pakiet Punktów</div>
+        <p class="pricing-description">Jednorazowy zakup, bez zobowiązań</p>
+        <div class="pricing-price">1 zł<span>/punkt</span></div>
+        <ul class="pricing-features">
+          <li><strong>Kup od 50 do 10 000 punktów</strong></li>
+          <li>Ważność: 12 miesięcy od zakupu</li>
+          <li>1 pkt = raport budżetowy PDF/Excel</li>
+          <li>1 pkt = analiza wariancji</li>
+          <li>Dostęp Frontend + API</li>
+          <li>Faktura VAT</li>
+        </ul>
+        <a href="login.html" class="btn btn-secondary">Kup punkty</a>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center;">
+          50 pkt = 50 zł | 200 pkt = 180 zł | 500 pkt = 400 zł
+        </p>
+      </div>
+      
+      <div class="pricing-card featured">
+        <span class="pricing-badge">Rekomendowany</span>
+        <div class="pricing-name">🔄 Subskrypcja</div>
+        <p class="pricing-description">Miesięczna pula punktów z rollover</p>
+        <div class="pricing-price">199 zł<span>/mies.</span></div>
+        <ul class="pricing-features">
+          <li><strong>250 punktów miesięcznie</strong></li>
+          <li>Niewykorzystane punkty przechodzą</li>
+          <li>DSL Pipeline Builder</li>
+          <li>Automatyczne raporty (scheduler)</li>
+          <li>Priority support</li>
+          <li>Anuluj w dowolnym momencie</li>
+          <li><strong>Rocznie: 1 990 zł</strong> (+500 pkt bonus)</li>
+        </ul>
+        <a href="login.html" class="btn btn-primary">Rozpocznij subskrypcję</a>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center;">
+          0.80 zł/pkt miesięcznie | 0.57 zł/pkt rocznie
+        </p>
+      </div>
+      
+      <div class="pricing-card">
+        <div class="pricing-name">🏢 Enterprise</div>
+        <p class="pricing-description">Dedykowana integracja budżetowa</p>
+        <div class="pricing-price">Indywidualnie<span></span></div>
+        <ul class="pricing-features">
+          <li><strong>Zapytanie ofertowe</strong></li>
+          <li>Integracja z systemem księgowym</li>
+          <li>Import danych z ERP</li>
+          <li>Custom szablony raportów</li>
+          <li>Wdrożenie on-premise</li>
+          <li>SLA 99.99% z gwarancją</li>
+          <li>Szkolenia dla zespołu</li>
+        </ul>
+        <a href="mailto:enterprise@analytica.pl?subject=Zapytanie%20Enterprise%20-%20PlanBudzetu" class="btn btn-secondary">Wyślij zapytanie</a>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center;">
+          Odpowiadamy w ciągu 24h
+        </p>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 40px; color: var(--muted);">
+      <p><strong>Ile punktów potrzebuję?</strong> Mała firma: 30-50/mies. | Średnia: 100-200/mies. | Duża: 300-500/mies.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta">
+  <div class="container">
+    <h2 class="cta-title">Gotowy na automatyzację budżetu?</h2>
+    <p class="cta-description">
+      Dołącz do 500+ firm, które już oszczędzają czas i pieniądze dzięki PlanBudzetu.pl
+    </p>
+    <a href="/ui/" class="btn btn-primary btn-lg">
+      Rozpocznij 14-dniowy trial
+      <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+      </svg>
+    </a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer" id="kontakt">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">PlanBudzetu.pl</div>
+        <p class="footer-description">
+          Inteligentne planowanie budżetu dla nowoczesnych firm. 
+          Część ekosystemu Analytica.
+        </p>
+      </div>
+      <div>
+        <div class="footer-title">Produkt</div>
+        <ul class="footer-links">
+          <li><a href="#funkcje">Funkcje</a></li>
+          <li><a href="#cennik">Cennik</a></li>
+          <li><a href="#demo">Demo</a></li>
+          <li><a href="/ui/">Dashboard</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-title">Ekosystem</div>
+        <ul class="footer-links">
+          <li><a href="planinwestycji.html">PlanInwestycji.pl</a></li>
+          <li><a href="multiplan.html">MultiPlan.pl</a></li>
+          <li><a href="estymacja.html">Estymacja.pl</a></li>
+          <li><a href="/docs/API.md">API Docs</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-title">Kontakt</div>
+        <ul class="footer-links">
+          <li><a href="mailto:kontakt@planbudzetu.pl">kontakt@planbudzetu.pl</a></li>
+          <li><a href="tel:+48123456789">+48 123 456 789</a></li>
+          <li><a href="#">LinkedIn</a></li>
+          <li><a href="#">Twitter</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2025 PlanBudzetu.pl - Część Analytica Platform</div>
+      <div>
+        <a href="#">Polityka prywatności</a> · <a href="#">Regulamin</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
