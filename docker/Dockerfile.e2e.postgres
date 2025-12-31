@@ -1,0 +1,4 @@
+# ANALYTICA Framework - E2E Postgres Image (for Docker-in-Docker)
+FROM postgres:16-alpine
+
+COPY docker/init-db.sql /docker-entrypoint-initdb.d/init.sql

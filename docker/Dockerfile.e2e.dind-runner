@@ -1,0 +1,19 @@
+# ANALYTICA Framework - Docker-in-Docker runner
+# Runs the inner E2E stack inside a docker:dind daemon.
+
+FROM docker:27-cli
+
+RUN apk add --no-cache \
+    bash \
+    curl \
+    coreutils \
+    docker-cli-compose
+
+WORKDIR /workspace
+COPY . /workspace
+
+RUN chmod +x /workspace/scripts/run-e2e-dind-inner.sh
+
+ENV DOCKER_TLS_CERTDIR=""
+
+CMD ["/workspace/scripts/run-e2e-dind-inner.sh"]

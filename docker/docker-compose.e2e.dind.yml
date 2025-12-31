@@ -1,0 +1,36 @@
+# ANALYTICA Framework - E2E Docker-in-Docker Compose
+# This compose starts:
+# - docker:dind daemon (inner Docker host)
+# - runner container that builds and runs the inner E2E stack via DOCKER_HOST
+
+services:
+  dind:
+    image: docker:27-dind
+    privileged: true
+    ports:
+      - "127.0.0.1:23750:2375"
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    command:
+      - "--host=tcp://0.0.0.0:2375"
+      - "--host=unix:///var/run/docker.sock"
+    healthcheck:
+      test: ["CMD", "docker", "info"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  runner:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.e2e.dind-runner
+    environment:
+      DOCKER_HOST: tcp://dind:2375
+      DOCKER_TLS_CERTDIR: ""
+      KEEP_DIND: "${KEEP_DIND:-false}"
+    depends_on:
+      dind:
+        condition: service_healthy
+    volumes:
+      - ../test-results:/results
+    command: /workspace/scripts/run-e2e-dind-inner.sh

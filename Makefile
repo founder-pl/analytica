@@ -233,6 +233,22 @@ test-e2e-keep: ## Run E2E tests and keep containers running
 	@echo "$(CYAN)Running E2E tests (keep containers)...$(NC)"
 	./scripts/run-e2e-tests.sh --keep
 
+test-e2e-dind: ## Run E2E tests in Docker-in-Docker
+	@echo "$(CYAN)Running E2E tests (Docker-in-Docker)...$(NC)"
+	./scripts/run-e2e-dind.sh
+
+test-e2e-dind-build: ## Run E2E tests in Docker-in-Docker (with rebuild)
+	@echo "$(CYAN)Running E2E tests (Docker-in-Docker, with rebuild)...$(NC)"
+	./scripts/run-e2e-dind.sh --build
+
+test-e2e-dind-keep: ## Run E2E tests in Docker-in-Docker and keep inner stack running
+	@echo "$(CYAN)Running E2E tests (Docker-in-Docker, keep)...$(NC)"
+	./scripts/run-e2e-dind.sh --keep
+
+logs-e2e-dind: ## Show logs for Docker-in-Docker runner
+	@echo "$(CYAN)Logs: E2E Docker-in-Docker runner...$(NC)"
+	cd docker && docker-compose -f docker-compose.e2e.dind.yml logs -f
+
 test-financial: ## Test financial domains health
 	@echo "$(CYAN)Testing financial domains...$(NC)"
 	curl -s http://localhost:8010/health | jq .

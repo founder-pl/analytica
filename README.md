@@ -145,6 +145,13 @@ make dev                   # Start z hot reload
 make shell-db              # Konsola PostgreSQL
 make test-financial        # Test API finansowych
 
+# Testy
+make test                  # Unit tests
+make test-all              # Wszystkie testy
+make test-e2e              # E2E (Docker)
+make test-e2e-dind         # E2E (Docker-in-Docker)
+make test-gui              # GUI (Playwright)
+
 # Cleanup
 make clean                 # Usuń kontenery i volumes
 ```
@@ -425,6 +432,7 @@ UI pozwala na:
 
 | Dokument | Opis |
 |----------|------|
+| [docs/INDEX.md](docs/INDEX.md) | **Menu dokumentacji** - linki do powiązanych plików, testów i entry pointów |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | **Architektura systemu** - przegląd, komponenty, przepływ danych |
 | [docs/POINTS.md](docs/POINTS.md) | **System punktów** - cennik, modele zakupu, API |
 | [docs/DSL.md](docs/DSL.md) | Pełna dokumentacja DSL, SDK Python/JS |
@@ -448,19 +456,36 @@ UI pozwala na:
 ## 🧪 Testowanie
 
 ```bash
-# Uruchom wszystkie testy
+# Unit tests
 make test
 
-# Test API finansowych
-make test-financial
+# Wszystkie testy (unit + integration)
+make test-all
 
-# Pojedyncze testy
+# E2E (Docker)
+make test-e2e
+make test-e2e-build
+make test-e2e-keep
+
+# E2E (Docker-in-Docker)
+make test-e2e-dind
+make test-e2e-dind-build
+make test-e2e-dind-keep
+make logs-e2e-dind
+
+# Debug (Docker-in-Docker, keep)
+export DOCKER_HOST=tcp://localhost:23750
+docker ps
+
+# GUI (Playwright)
+make test-gui
+make test-gui-headed
+make test-gui-docker
+
+# Health-checks domen
 curl http://localhost:8010/health  # multiplan
 curl http://localhost:8011/health  # planbudzetu
 curl http://localhost:8012/health  # planinwestycji
-
-# Test z jq
-curl -s http://localhost:8012/v1/investments/calculators | jq .
 ```
 
 ## 📄 License

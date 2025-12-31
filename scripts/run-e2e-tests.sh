@@ -9,10 +9,19 @@
 #   ./scripts/run-e2e-tests.sh --keep   # Keep containers running after tests
 
 set -e
+set -o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 COMPOSE_FILE="$PROJECT_ROOT/docker/docker-compose.e2e.yml"
+
+RESULTS_DIR="$PROJECT_ROOT/test-results"
+LOGS_DIR="$RESULTS_DIR/logs"
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
+RUN_LOG="$LOGS_DIR/e2e-${RUN_ID}.runner.log"
+
+mkdir -p "$LOGS_DIR"
+exec > >(tee -a "$RUN_LOG") 2>&1
 
 # Colors
 RED='\033[0;31m'
@@ -72,6 +81,19 @@ cd "$PROJECT_ROOT"
 
 # Cleanup function
 cleanup() {
+    echo -e "\n${YELLOW}Saving docker logs snapshot...${NC}"
+    {
+        echo "run_id=$RUN_ID"
+        echo "compose_file=$COMPOSE_FILE"
+        echo "timestamp_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    } > "$LOGS_DIR/e2e-${RUN_ID}.meta.txt" 2>/dev/null || true
+
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" ps > "$LOGS_DIR/e2e-${RUN_ID}.compose-ps.txt" 2>/dev/null || true
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs --no-color > "$LOGS_DIR/e2e-${RUN_ID}.compose.log" 2>/dev/null || true
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs --no-color api > "$LOGS_DIR/e2e-${RUN_ID}.api.log" 2>/dev/null || true
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs --no-color postgres > "$LOGS_DIR/e2e-${RUN_ID}.postgres.log" 2>/dev/null || true
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs --no-color redis > "$LOGS_DIR/e2e-${RUN_ID}.redis.log" 2>/dev/null || true
+
     if [ "$KEEP_RUNNING" = false ]; then
         echo -e "\n${YELLOW}Cleaning up containers...${NC}"
         $DOCKER_COMPOSE -f "$COMPOSE_FILE" down -v --remove-orphans 2>/dev/null || true
@@ -118,18 +140,22 @@ echo -e "\n${BLUE}Running E2E tests...${NC}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 TEST_EXIT_CODE=0
-$DOCKER_COMPOSE -f "$COMPOSE_FILE" run --rm e2e-tests || TEST_EXIT_CODE=$?
+
+if [ "$KEEP_RUNNING" = true ]; then
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d $BUILD_FLAG e2e-tests || TEST_EXIT_CODE=$?
+    if docker inspect e2e-tests >/dev/null 2>&1; then
+        TEST_EXIT_CODE=$(docker wait e2e-tests 2>/dev/null || echo 1)
+    fi
+else
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" up $BUILD_FLAG --abort-on-container-exit --exit-code-from e2e-tests e2e-tests || TEST_EXIT_CODE=$?
+fi
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Copy test results
-RESULTS_DIR="$PROJECT_ROOT/test-results"
 mkdir -p "$RESULTS_DIR"
-
-# Try to copy results from volume
-CONTAINER_ID=$($DOCKER_COMPOSE -f "$COMPOSE_FILE" ps -q e2e-tests 2>/dev/null || echo "")
-if [ -n "$CONTAINER_ID" ]; then
-    docker cp "$CONTAINER_ID:/app/results/." "$RESULTS_DIR/" 2>/dev/null || true
+if docker inspect e2e-tests >/dev/null 2>&1; then
+    docker cp "e2e-tests:/app/results/." "$RESULTS_DIR/" 2>/dev/null || true
 fi
 
 # Summary

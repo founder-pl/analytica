@@ -1676,7 +1676,42 @@ source.http(url=&quot;https://api.example.com/data&quot;)
   </div>
 
   <script>
-    const API_BASE = window.location.origin;
+    function resolveApiBase() {
+      let apiBase = null;
+      try {
+        const params = new URLSearchParams(window.location.search);
+        apiBase = params.get('apiBase') || params.get('api') || null;
+      } catch {}
+
+      if (!apiBase) {
+        try {
+          apiBase = window.ANALYTICA_API_BASE_URL || null;
+        } catch {}
+      }
+
+      if (!apiBase) {
+        try {
+          apiBase = window.localStorage.getItem('ANALYTICA_API_BASE_URL') || null;
+        } catch {}
+      }
+
+      apiBase = (apiBase || window.location.origin || '').trim();
+      if (!apiBase || apiBase === 'null' || window.location.protocol === 'file:') {
+        apiBase = 'http://localhost:18000';
+      }
+      apiBase = apiBase.replace(/\/+$/, '');
+
+      try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('apiBase') || params.get('api')) {
+          window.localStorage.setItem('ANALYTICA_API_BASE_URL', apiBase);
+        }
+      } catch {}
+
+      return apiBase;
+    }
+
+    let API_BASE = resolveApiBase();
     
     // ============================================================
     // URL STATE MANAGEMENT
@@ -1693,7 +1728,7 @@ source.http(url=&quot;https://api.example.com/data&quot;)
         if (this.outputTab !== 'json') params.set('output', this.outputTab);
         
         const hash = params.toString();
-        history.replaceState(null, '', hash ? `#${hash}` : window.location.pathname);
+        history.replaceState(null, '', hash ? `#${hash}` : (window.location.pathname + window.location.search));
         document.title = `DSL Editor${this.example ? ` - ${this.example}` : ''}`;
       },
       
@@ -2367,10 +2402,11 @@ source.http(url=&quot;https://api.example.com/data&quot;)
           logFrontend(`exportTo(${platform}): error`, 'error', { errors: data.errors || [] });
         }
       } catch (err) {
-        result.innerHTML = `Error: ${err.message}`;
+        result.innerHTML = `Error: ${err.message} (API_BASE=${API_BASE})`;
         addDeployLog(deployId, `Exception: ${err.message}`, 'error');
         setDeployStatus(deployId, 'error');
-        logFrontend(`exportTo(${platform}): exception`, 'error', { message: err.message });
+        logFrontend(`exportTo(${platform}): exception`, 'error', { message: err.message, api_base: API_BASE });
+        logFrontend('exportTo: hint', 'warn', { apiBaseParam: `${window.location.pathname}?apiBase=http://localhost:18000` });
       }
     }
     
@@ -3086,9 +3122,10 @@ jobs:
       } catch (err) {
         status.className = 'output-status error';
         status.textContent = 'Error';
-        output.textContent = `Connection error: ${err.message}`;
+        output.textContent = `Connection error: ${err.message}\nAPI_BASE: ${API_BASE}`;
         renderPreview(null);
-        logFrontend('executeDSL: exception', 'error', { message: err.message });
+        logFrontend('executeDSL: exception', 'error', { message: err.message, api_base: API_BASE });
+        logFrontend('executeDSL: hint', 'warn', { apiBaseParam: `${window.location.pathname}?apiBase=http://localhost:18000` });
       }
     }
     
@@ -3121,7 +3158,8 @@ jobs:
         }
       } catch (err) {
         showNotification('Nie można zwalidować: ' + err.message, 'error');
-        logFrontend('validateDSL: exception', 'error', { message: err.message });
+        logFrontend('validateDSL: exception', 'error', { message: err.message, api_base: API_BASE });
+        logFrontend('validateDSL: hint', 'warn', { apiBaseParam: `${window.location.pathname}?apiBase=http://localhost:18000` });
       }
     }
     
