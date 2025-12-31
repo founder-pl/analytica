@@ -70,7 +70,8 @@ def handle_desktop_run(parsed: Dict[str, Any]) -> int:
     """Handle desktop/run - launch Electron app."""
     params = parsed.get("params", {})
     project_dir = params.get("dir", params.get("project", "."))
-    url = params.get("url", "http://localhost:18000")
+    default_url = os.environ.get("DESKTOP_DEFAULT_URL", "http://localhost:18000")
+    url = params.get("url", default_url)
     
     project_path = Path(project_dir).expanduser().resolve()
     

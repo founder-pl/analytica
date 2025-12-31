@@ -24,7 +24,7 @@ import hmac
 # ============================================================
 
 SECRET_KEY = os.getenv("ANALYTICA_SECRET_KEY", "analytica-secret-key-change-in-production")
-TOKEN_EXPIRE_HOURS = 24
+TOKEN_EXPIRE_HOURS = int(os.getenv("ANALYTICA_TOKEN_EXPIRE_HOURS", "24"))
 
 # ============================================================
 # MODELS

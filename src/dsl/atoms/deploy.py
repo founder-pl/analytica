@@ -444,14 +444,26 @@ def deploy_desktop(ctx, **params) -> Dict:
     Usage:
         deploy.desktop(framework="electron", platforms=["win", "mac", "linux"])
         deploy.desktop(framework="tauri", release=true)
+        deploy.desktop(framework="electron", project_dir="/path/to/project")
     """
+    import urllib.parse as _urlparse
+    import os as _os
+    
     data = ctx.get_data()
     framework = params.get("framework", params.get("_arg0", "electron"))
     platforms = params.get("platforms", ["win", "mac", "linux"])
     release = params.get("release", False)
-    url = params.get("url", "http://localhost:18000")
+    default_url = _os.getenv("DESKTOP_DEFAULT_URL", "http://localhost:18000")
+    url = params.get("url", default_url)
+    project_dir = params.get("project_dir", params.get("dir", ""))
     access_uri = params.get("access_uri") or params.get("uri") or url
-    launch_uri = params.get("launch_uri") or "npm start"
+    
+    if params.get("launch_uri"):
+        launch_uri = params["launch_uri"]
+    elif project_dir:
+        launch_uri = f"analytica://desktop/run?dir={_urlparse.quote(project_dir)}&url={_urlparse.quote(url)}"
+    else:
+        launch_uri = "npm start"
     
     config = {
         "type": "desktop",
@@ -459,6 +471,7 @@ def deploy_desktop(ctx, **params) -> Dict:
         "platforms": platforms,
         "release": release,
         "url": url,
+        "project_dir": project_dir,
         "pipeline": data,
         "commands": {
             "dev": "npm run electron:dev" if framework == "electron" else "npm run tauri dev",
@@ -471,6 +484,97 @@ def deploy_desktop(ctx, **params) -> Dict:
     
     ctx.log(f"Desktop deploy: {framework}, platforms={platforms}, url={url}")
     return _add_deployment(ctx, config, {"platform": "desktop", "framework": framework, "url": url, "access_uri": access_uri, "launch_uri": launch_uri})
+
+
+# ============================================================
+# LAUNCH ATOMS
+# ============================================================
+
+@AtomRegistry.register("deploy", "launch")
+def deploy_launch(ctx, **params) -> Dict:
+    """
+    Launch deployed application using URI scheme.
+    
+    Usage:
+        deploy.launch(platform="desktop", dir="/path/to/project")
+        deploy.launch(uri="analytica://desktop/run?dir=/tmp")
+        deploy.launch(platform="web", url="http://localhost:3000")
+    """
+    import subprocess
+    import urllib.parse as _urlparse
+    import os as _os
+    
+    data = ctx.get_data()
+    platform = params.get("platform", params.get("_arg0", "desktop"))
+    uri = params.get("uri", "")
+    project_dir = params.get("dir", params.get("project_dir", ""))
+    default_url = _os.getenv("DESKTOP_DEFAULT_URL", "http://localhost:18000")
+    url = params.get("url", default_url)
+    
+    if not uri:
+        if platform == "desktop":
+            uri_params = {}
+            if project_dir:
+                uri_params["dir"] = project_dir
+            if url:
+                uri_params["url"] = url
+            uri = f"analytica://desktop/run?{_urlparse.urlencode(uri_params)}"
+        elif platform == "web":
+            uri = f"analytica://web/open?url={_urlparse.quote(url)}"
+        elif platform == "mobile":
+            mobile_platform = params.get("mobile_platform", "android")
+            uri = f"analytica://mobile/run?platform={mobile_platform}"
+            if project_dir:
+                uri += f"&dir={_urlparse.quote(project_dir)}"
+        else:
+            uri = f"analytica://{platform}/run"
+    
+    launched = False
+    message = ""
+    
+    try:
+        result = subprocess.Popen(
+            ["xdg-open", uri],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        launched = True
+        message = f"Launched: {uri}"
+        ctx.log(f"Launch: {uri}")
+    except Exception as e:
+        message = f"Failed to launch: {e}"
+        ctx.log(f"Launch failed: {e}", level="error")
+    
+    config = {
+        "type": "launch",
+        "platform": platform,
+        "uri": uri,
+        "launched": launched,
+        "message": message,
+    }
+    
+    if isinstance(data, dict):
+        result_data = dict(data)
+        result_data["launch"] = config
+        return result_data
+    
+    return {
+        "data": data,
+        "launch": config,
+        "status": "launched" if launched else "failed"
+    }
+
+
+@AtomRegistry.register("deploy", "run")
+def deploy_run(ctx, **params) -> Dict:
+    """
+    Alias for deploy.launch - run deployed application.
+    
+    Usage:
+        deploy.run(platform="desktop", dir="/path/to/project")
+        deploy.run("desktop")
+    """
+    return deploy_launch(ctx, **params)
 
 
 # ============================================================

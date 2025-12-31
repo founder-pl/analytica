@@ -20,6 +20,15 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import uuid
 from pathlib import Path
 
+# Load .env file if python-dotenv is available
+try:
+    from dotenv import load_dotenv
+    _env_path = Path(__file__).resolve().parent.parent.parent / ".env"
+    if _env_path.exists():
+        load_dotenv(_env_path)
+except ImportError:
+    pass  # python-dotenv not installed, use system env vars
+
 from dsl.core.parser import (
     AtomRegistry,
     PipelineContext as DSLPipelineContext,
@@ -31,9 +40,19 @@ from dsl.atoms import deploy as _dsl_atoms_deploy
 from dsl.atoms import data as _dsl_atoms_data
 from api.auth import auth_router, get_current_user, get_optional_user
 
-# Get domain from environment
+# ============================================================
+# CONFIGURATION FROM ENVIRONMENT
+# ============================================================
 DOMAIN = os.getenv("ANALYTICA_DOMAIN", "repox.pl")
-API_PORT = int(os.getenv("API_PORT", "8000"))
+API_PORT = int(os.getenv("API_PORT", "18000"))
+API_HOST = os.getenv("API_HOST", "0.0.0.0")
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:18000")
+DEBUG = os.getenv("DEBUG", "false").lower() in ("true", "1", "yes")
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+
+# CORS configuration
+CORS_ORIGINS = os.getenv("ANALYTICA_CORS_ORIGINS", "http://localhost:18000,http://localhost:3000").split(",")
+DEV_CORS_ALL = os.getenv("DEV_CORS_ALL", "false").lower() in ("true", "1", "yes")
 
 # Create FastAPI app
 app = FastAPI(
@@ -55,10 +74,10 @@ if _landing_dir.exists():
 if _frontend_dir.exists():
     app.mount("/ui", StaticFiles(directory=str(_frontend_dir), html=True), name="ui")
 
-# CORS
+# CORS - use configured origins or allow all in dev mode
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"] if DEV_CORS_ALL else CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -564,6 +583,108 @@ async def dsl_validate_pipeline(request: DSLValidateRequest):
 @dsl_router.get("/pipeline/schema")
 async def dsl_pipeline_schema():
     return _pipeline_json_schema()
+
+
+# ============ URI LAUNCHER ENDPOINTS ============
+
+class URILaunchRequest(BaseModel):
+    uri: str = Field(..., description="URI to launch (e.g., analytica://desktop/run?dir=/path)")
+
+
+class URILaunchResponse(BaseModel):
+    success: bool
+    uri: str
+    message: str
+
+
+class URISchemeStatusResponse(BaseModel):
+    scheme: str
+    registered: bool
+    handler: Optional[str] = None
+
+
+@dsl_router.get("/launcher/status")
+async def launcher_status(scheme: str = "analytica"):
+    """Check if URI scheme is registered."""
+    try:
+        from core.uri_launcher import URILauncher
+        launcher = URILauncher(scheme)
+        registered = launcher.is_registered()
+        handler = launcher.registry.get_handler(scheme) if registered else None
+        return URISchemeStatusResponse(scheme=scheme, registered=registered, handler=handler)
+    except ImportError:
+        return URISchemeStatusResponse(scheme=scheme, registered=False, handler=None)
+
+
+@dsl_router.post("/launcher/register")
+async def launcher_register(scheme: str = "analytica", terminal: bool = False):
+    """Register URI scheme handler."""
+    try:
+        from core.uri_launcher import URILauncher
+        from pathlib import Path
+        
+        launcher = URILauncher(scheme)
+        handler_path = Path(__file__).parent.parent / "core" / "uri_launcher" / "handler.py"
+        
+        success = launcher.register(
+            handler_script=str(handler_path),
+            name=f"{scheme.capitalize()} URI Handler",
+            terminal=terminal
+        )
+        
+        if success:
+            return {"success": True, "message": f"Registered {scheme}:// scheme", "handler": str(handler_path)}
+        else:
+            raise HTTPException(status_code=500, detail=f"Failed to register {scheme}:// scheme")
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"URI launcher not available: {e}")
+
+
+@dsl_router.post("/launcher/unregister")
+async def launcher_unregister(scheme: str = "analytica"):
+    """Unregister URI scheme handler."""
+    try:
+        from core.uri_launcher import URILauncher
+        launcher = URILauncher(scheme)
+        
+        if launcher.unregister():
+            return {"success": True, "message": f"Unregistered {scheme}:// scheme"}
+        else:
+            raise HTTPException(status_code=500, detail=f"Failed to unregister {scheme}:// scheme")
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"URI launcher not available: {e}")
+
+
+@dsl_router.post("/launcher/launch", response_model=URILaunchResponse)
+async def launcher_launch(request: URILaunchRequest):
+    """Launch a URI using xdg-open."""
+    try:
+        from core.uri_launcher import URILauncher
+        
+        uri = request.uri
+        scheme = uri.split("://")[0] if "://" in uri else "analytica"
+        launcher = URILauncher(scheme)
+        
+        if launcher.launch(uri):
+            return URILaunchResponse(success=True, uri=uri, message="URI launched")
+        else:
+            return URILaunchResponse(success=False, uri=uri, message="Failed to launch URI")
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"URI launcher not available: {e}")
+    except Exception as e:
+        return URILaunchResponse(success=False, uri=request.uri, message=str(e))
+
+
+@dsl_router.get("/launcher/parse")
+async def launcher_parse(uri: str):
+    """Parse a URI into components."""
+    try:
+        from core.uri_launcher import URILauncher
+        scheme = uri.split("://")[0] if "://" in uri else "analytica"
+        launcher = URILauncher(scheme)
+        return launcher.parse(uri)
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"URI launcher not available: {e}")
 
 
 @dsl_router.post("/pipeline/execute", response_model=DSLExecuteResponse)
