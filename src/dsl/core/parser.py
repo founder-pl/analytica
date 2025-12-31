@@ -71,6 +71,7 @@ class AtomType(Enum):
     INVESTMENT = "investment"
     FORECAST = "forecast"
     EXPORT = "export"
+    DEPLOY = "deploy"
     VALIDATE = "validate"
     MERGE = "merge"
     SPLIT = "split"

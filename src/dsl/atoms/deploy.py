@@ -27,6 +27,37 @@ def _deploy_result(config: Dict, metadata: Dict) -> Dict:
     }
 
 
+def _ensure_pipeline_state(data: Any) -> Dict[str, Any]:
+    if isinstance(data, dict) and "views" in data:
+        state = dict(data)
+        state.setdefault("deployments", [])
+        return state
+    return {"data": data, "views": [], "deployments": []}
+
+
+def _add_deployment(ctx, config: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
+    state = _ensure_pipeline_state(ctx.get_data())
+    entry = {
+        "platform": metadata.get("platform"),
+        "status": metadata.get("status") or "ready",
+        "access_uri": metadata.get("access_uri"),
+        "launch_uri": metadata.get("launch_uri"),
+        "url": metadata.get("url") or metadata.get("access_uri"),
+        "commands": config.get("commands", {}),
+        "config": config,
+    }
+    deployments = list(state.get("deployments") or [])
+    deployments.append(entry)
+    state["deployments"] = deployments
+
+    out = dict(state)
+    out["config"] = config
+    out["deploy"] = metadata
+    out["generated_at"] = datetime.utcnow().isoformat()
+    out["status"] = "ready"
+    return out
+
+
 # ============================================================
 # CONTAINER ATOMS
 # ============================================================
@@ -44,6 +75,8 @@ def deploy_docker(ctx, **params) -> Dict:
     image = params.get("image", params.get("_arg0", "app"))
     tag = params.get("tag", "latest")
     port = params.get("port", 8000)
+    host = params.get("host", "localhost")
+    access_uri = params.get("access_uri") or params.get("uri") or f"http://{host}:{port}"
     dockerfile = params.get("dockerfile", "Dockerfile")
     build = params.get("build", False)
     env = params.get("env", {})
@@ -64,11 +97,11 @@ def deploy_docker(ctx, **params) -> Dict:
         }
     }
     
-    if data and isinstance(data, dict):
+    if data is not None:
         config["pipeline"] = data
     
     ctx.log(f"Docker config generated: {image}:{tag}")
-    return _deploy_result(config, {"platform": "docker", "image": image})
+    return _add_deployment(ctx, config, {"platform": "docker", "image": image, "access_uri": access_uri, "launch_uri": access_uri})
 
 
 @AtomRegistry.register("deploy", "compose")
@@ -82,6 +115,9 @@ def deploy_compose(ctx, **params) -> Dict:
     data = ctx.get_data()
     services = params.get("services", params.get("_arg0", ["app"]))
     file = params.get("file", "docker-compose.yml")
+    host = params.get("host", "localhost")
+    port = params.get("port")
+    access_uri = params.get("access_uri") or params.get("uri") or (f"http://{host}:{port}" if port else None)
     
     config = {
         "type": "docker-compose",
@@ -96,7 +132,7 @@ def deploy_compose(ctx, **params) -> Dict:
     }
     
     ctx.log(f"Docker Compose config: {file}")
-    return _deploy_result(config, {"platform": "compose", "services": services})
+    return _add_deployment(ctx, config, {"platform": "compose", "services": services, "access_uri": access_uri, "launch_uri": access_uri})
 
 
 # ============================================================
@@ -117,6 +153,8 @@ def deploy_kubernetes(ctx, **params) -> Dict:
     replicas = params.get("replicas", 1)
     image = params.get("image", params.get("_arg0", "app:latest"))
     manifest = params.get("manifest", "k8s/")
+    ingress_host = params.get("ingress_host")
+    access_uri = params.get("access_uri") or params.get("uri") or (f"https://{ingress_host}" if ingress_host else None)
     resources = params.get("resources", {"cpu": "100m", "memory": "128Mi"})
     
     config = {
@@ -136,7 +174,7 @@ def deploy_kubernetes(ctx, **params) -> Dict:
     }
     
     ctx.log(f"Kubernetes config: {namespace}, replicas={replicas}")
-    return _deploy_result(config, {"platform": "kubernetes", "namespace": namespace})
+    return _add_deployment(ctx, config, {"platform": "kubernetes", "namespace": namespace, "access_uri": access_uri, "launch_uri": access_uri})
 
 
 @AtomRegistry.register("deploy", "helm")
@@ -148,8 +186,9 @@ def deploy_helm(ctx, **params) -> Dict:
         deploy.helm(chart="analytica", release="prod", values="values-prod.yaml")
     """
     chart = params.get("chart", params.get("_arg0", "analytica"))
-    release = params.get("release", "app")
+    release = params.get("release", "prod")
     namespace = params.get("namespace", "default")
+    access_uri = params.get("access_uri") or params.get("uri")
     values = params.get("values", "values.yaml")
     
     config = {
@@ -167,7 +206,7 @@ def deploy_helm(ctx, **params) -> Dict:
     }
     
     ctx.log(f"Helm chart: {chart}, release={release}")
-    return _deploy_result(config, {"platform": "helm", "chart": chart})
+    return _add_deployment(ctx, config, {"platform": "helm", "chart": chart, "access_uri": access_uri, "launch_uri": access_uri})
 
 
 # ============================================================
@@ -182,8 +221,9 @@ def deploy_github_actions(ctx, **params) -> Dict:
     Usage:
         deploy.github_actions(workflow="deploy", triggers=["push", "pull_request"])
     """
-    workflow = params.get("workflow", params.get("_arg0", "ci"))
+    workflow = params.get("workflow", params.get("_arg0", "deploy"))
     triggers = params.get("triggers", ["push"])
+    access_uri = params.get("access_uri") or params.get("uri")
     branches = params.get("branches", ["main"])
     jobs = params.get("jobs", ["build", "test", "deploy"])
     
@@ -197,7 +237,7 @@ def deploy_github_actions(ctx, **params) -> Dict:
     }
     
     ctx.log(f"GitHub Actions workflow: {workflow}")
-    return _deploy_result(config, {"platform": "github_actions", "workflow": workflow})
+    return _add_deployment(ctx, config, {"platform": "github_actions", "workflow": workflow, "access_uri": access_uri, "launch_uri": access_uri})
 
 
 @AtomRegistry.register("deploy", "gitlab_ci")
@@ -342,6 +382,10 @@ def deploy_web(ctx, **params) -> Dict:
     framework = params.get("framework", params.get("_arg0", "react"))
     build_cmd = params.get("build", "npm run build")
     output = params.get("output", "dist")
+    host = params.get("host", "localhost")
+    port = params.get("port", 3000)
+    base_path = params.get("path", "/")
+    access_uri = params.get("access_uri") or params.get("uri") or f"http://{host}:{port}{base_path}".rstrip('/')
     
     config = {
         "type": "web",
@@ -352,7 +396,7 @@ def deploy_web(ctx, **params) -> Dict:
     }
     
     ctx.log(f"Web deploy: {framework}")
-    return _deploy_result(config, {"platform": "web", "framework": framework})
+    return _add_deployment(ctx, config, {"platform": "web", "framework": framework, "access_uri": access_uri, "launch_uri": access_uri})
 
 
 @AtomRegistry.register("deploy", "mobile")
@@ -368,6 +412,11 @@ def deploy_mobile(ctx, **params) -> Dict:
     framework = params.get("framework", params.get("_arg0", "react-native"))
     platforms = params.get("platforms", ["ios", "android"])
     release = params.get("release", False)
+    host = params.get("host", "localhost")
+    dev_port = params.get("dev_port", 8081)
+    app_scheme = params.get("scheme", "analytica")
+    access_uri = params.get("access_uri") or params.get("uri") or f"{app_scheme}://"
+    launch_uri = params.get("launch_uri") or f"http://{host}:{dev_port}"
     
     config = {
         "type": "mobile",
@@ -384,7 +433,7 @@ def deploy_mobile(ctx, **params) -> Dict:
     }
     
     ctx.log(f"Mobile deploy: {framework}, platforms={platforms}")
-    return _deploy_result(config, {"platform": "mobile", "framework": framework})
+    return _add_deployment(ctx, config, {"platform": "mobile", "framework": framework, "access_uri": access_uri, "launch_uri": launch_uri})
 
 
 @AtomRegistry.register("deploy", "desktop")
@@ -400,12 +449,16 @@ def deploy_desktop(ctx, **params) -> Dict:
     framework = params.get("framework", params.get("_arg0", "electron"))
     platforms = params.get("platforms", ["win", "mac", "linux"])
     release = params.get("release", False)
+    url = params.get("url", "http://localhost:18000")
+    access_uri = params.get("access_uri") or params.get("uri") or url
+    launch_uri = params.get("launch_uri") or "npm start"
     
     config = {
         "type": "desktop",
         "framework": framework,
         "platforms": platforms,
         "release": release,
+        "url": url,
         "pipeline": data,
         "commands": {
             "dev": "npm run electron:dev" if framework == "electron" else "npm run tauri dev",
@@ -416,8 +469,8 @@ def deploy_desktop(ctx, **params) -> Dict:
         }
     }
     
-    ctx.log(f"Desktop deploy: {framework}, platforms={platforms}")
-    return _deploy_result(config, {"platform": "desktop", "framework": framework})
+    ctx.log(f"Desktop deploy: {framework}, platforms={platforms}, url={url}")
+    return _add_deployment(ctx, config, {"platform": "desktop", "framework": framework, "url": url, "access_uri": access_uri, "launch_uri": launch_uri})
 
 
 # ============================================================

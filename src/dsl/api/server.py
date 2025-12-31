@@ -34,6 +34,8 @@ from dsl.core.parser import (
     PipelineExecutor, DSLParser, AtomRegistry, parse, execute
 )
 from dsl.atoms.implementations import *  # Register atoms
+from dsl.atoms.deploy import *  # Register deploy atoms
+from dsl.atoms.data import *  # Register data definition atoms
 
 # Create FastAPI app
 app = FastAPI(

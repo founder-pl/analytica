@@ -14,6 +14,8 @@ from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
 
+import re
+
 
 @dataclass
 class PipelineContext:
@@ -59,11 +61,35 @@ class PipelineContext:
         Raises:
             ValueError: If variable is undefined
         """
-        if isinstance(value, str) and value.startswith('$'):
+        if not isinstance(value, str):
+            return value
+
+        # Exact variable reference: $VAR or ${VAR}
+        if value.startswith('${') and value.endswith('}') and len(value) > 3:
+            var_name = value[2:-1]
+            if var_name in self.variables:
+                return self.variables[var_name]
+            raise ValueError(f"Undefined variable: {value}")
+
+        if value.startswith('$') and len(value) > 1 and value[1:].isidentifier():
             var_name = value[1:]
             if var_name in self.variables:
                 return self.variables[var_name]
             raise ValueError(f"Undefined variable: {value}")
+
+        # Interpolation inside string
+        pattern = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)")
+
+        def repl(m: re.Match) -> str:
+            token = m.group(0)
+            var_name = m.group(1) or m.group(2)
+            if var_name in self.variables:
+                return str(self.variables[var_name])
+            raise ValueError(f"Undefined variable: {token}")
+
+        if '$' in value and pattern.search(value):
+            return pattern.sub(repl, value)
+
         return value
     
     def resolve_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -76,14 +102,16 @@ class PipelineContext:
         Returns:
             Dict with all variables resolved
         """
-        resolved = {}
-        for k, v in params.items():
+        def resolve_any(v: Any) -> Any:
             if isinstance(v, dict):
-                resolved[k] = self.resolve_params(v)
-            elif isinstance(v, list):
-                resolved[k] = [self.resolve_variable(item) for item in v]
-            else:
-                resolved[k] = self.resolve_variable(v)
+                return self.resolve_params(v)
+            if isinstance(v, list):
+                return [resolve_any(item) for item in v]
+            return self.resolve_variable(v)
+
+        resolved: Dict[str, Any] = {}
+        for k, v in params.items():
+            resolved[k] = resolve_any(v)
         return resolved
     
     def log(self, message: str, level: str = "info"):

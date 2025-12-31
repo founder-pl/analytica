@@ -101,19 +101,82 @@ def transform_filter(ctx: PipelineContext, **conditions) -> Any:
             if _matches_conditions(item, conditions):
                 result.append(item)
         return result
+
+    if isinstance(data, dict):
+        preferred_keys = ["data", "rows", "readings", "monthly", "items", "records"]
+        for key in preferred_keys:
+            if isinstance(data.get(key), list):
+                filtered = [item for item in data[key] if _matches_conditions(item, conditions)]
+                out = dict(data)
+                out[key] = filtered
+                return out
+
+        list_keys = [k for k, v in data.items() if isinstance(v, list)]
+        if len(list_keys) == 1:
+            key = list_keys[0]
+            filtered = [item for item in data[key] if _matches_conditions(item, conditions)]
+            out = dict(data)
+            out[key] = filtered
+            return out
     
     return {"_type": "filtered", "_data": data, "_conditions": conditions}
 
 
 def _matches_conditions(item: Dict, conditions: Dict) -> bool:
     """Check if item matches all conditions"""
+    if not isinstance(item, dict):
+        return False
+
     for key, value in conditions.items():
         if key.startswith('_'):
             continue
-        if key not in item:
+
+        if "__" in key:
+            field, op = key.split("__", 1)
+        else:
+            field, op = key, "eq"
+
+        if field not in item:
             return False
-        if item[key] != value:
+
+        item_val = item.get(field)
+
+        if op == "eq":
+            if item_val != value:
+                return False
+        elif op == "ne":
+            if item_val == value:
+                return False
+        elif op == "gt":
+            if item_val is None or item_val <= value:
+                return False
+        elif op == "gte":
+            if item_val is None or item_val < value:
+                return False
+        elif op == "lt":
+            if item_val is None or item_val >= value:
+                return False
+        elif op == "lte":
+            if item_val is None or item_val > value:
+                return False
+        elif op == "in":
+            if not isinstance(value, (list, tuple, set)):
+                return False
+            if item_val not in value:
+                return False
+        elif op == "contains":
+            if isinstance(item_val, str):
+                if str(value) not in item_val:
+                    return False
+            elif isinstance(item_val, (list, tuple, set)):
+                if value not in item_val:
+                    return False
+            else:
+                return False
+        else:
+            # Unknown operator -> treat as non-match
             return False
+
     return True
 
 

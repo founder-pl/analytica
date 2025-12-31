@@ -129,6 +129,22 @@
       margin-bottom: 16px;
     }
     
+    .pipeline-nodes {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px;
+      overflow-x: auto;
+      min-height: 200px;
+    }
+
+    .pipeline-nodes.drag-over {
+      outline: 2px dashed var(--primary);
+      outline-offset: -6px;
+      border-radius: 12px;
+      background: rgba(99, 102, 241, 0.03);
+    }
+    
     .category-header {
       display: flex;
       align-items: center;
@@ -212,6 +228,7 @@
       flex-direction: column;
       background: var(--bg);
       overflow: hidden;
+      min-height: 0;
     }
     
     .editor-tabs {
@@ -246,7 +263,9 @@
       flex-direction: column;
       padding: 16px;
       gap: 16px;
-      overflow: hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-height: 0;
     }
     
     /* Code Editor */
@@ -308,8 +327,7 @@
       background: var(--card);
       border-radius: 12px;
       border: 1px solid var(--border);
-      max-height: 250px;
-      overflow: hidden;
+
       display: flex;
       flex-direction: column;
     }
@@ -343,10 +361,33 @@
       flex: 1;
       padding: 16px;
       overflow: auto;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
+      font-family: monospace;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      white-space: pre;
+      background: var(--code-bg);
+      color: var(--code-text);
+    }
+
+    .frontend-log {
+      border-top: 1px solid var(--border);
+      padding: 10px 16px;
+      font-family: monospace;
+      font-size: 0.75rem;
+      line-height: 1.35;
+      max-height: 160px;
+      overflow: auto;
+      background: #0b1220;
+      color: #dbeafe;
       white-space: pre-wrap;
     }
+
+    .frontend-log .log-line { margin: 2px 0; }
+    .frontend-log .log-info { color: #93c5fd; }
+    .frontend-log .log-warn { color: #fbbf24; }
+    .frontend-log .log-error { color: #fca5a5; }
+    .frontend-log .log-success { color: #86efac; }
+    .frontend-log .log-dim { color: #94a3b8; }
     
     /* Right Panel - Examples & Components */
     .right-panel {
@@ -675,6 +716,88 @@
       background: var(--bg);
       font-weight: 600;
     }
+
+    .deployments-section {
+      margin: 12px 0;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+    }
+
+    .deployments-title {
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .deployments-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .deployments-table th, .deployments-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      vertical-align: top;
+    }
+
+    .deployments-table th {
+      background: white;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.72rem;
+    }
+
+    .deployments-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(99, 102, 241, 0.12);
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+
+    .deployments-uri {
+      font-family: monospace;
+      font-size: 0.8rem;
+      word-break: break-all;
+    }
+
+    .deployments-uri a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .deployments-uri a:hover {
+      text-decoration: underline;
+    }
+
+    .btn-xs {
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      border-radius: 6px;
+    }
+
+    .deployments-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .deployments-status {
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .deployments-status.ready { color: #059669; }
+    .deployments-status.pending { color: #d97706; }
+    .deployments-status.error { color: #dc2626; }
     
     .preview-chart {
       height: 150px;
@@ -1124,7 +1247,7 @@ source.http(url=&quot;https://api.example.com/data&quot;)
         </div>
         
         <!-- Output Panel with Tabs -->
-        <div class="output-panel" style="max-height:400px">
+        <div class="output-panel">
           <div class="output-header">
             <span class="output-title">📋 Output</span>
             <div class="output-tabs">
@@ -1151,6 +1274,8 @@ source.http(url=&quot;https://api.example.com/data&quot;)
             </div>
             <div id="exportResult" class="export-result"></div>
           </div>
+
+          <div id="frontendLog" class="frontend-log"></div>
         </div>
       </div>
     </main>
@@ -1361,6 +1486,44 @@ source.http(url=&quot;https://api.example.com/data&quot;)
     };
     
     window.addEventListener('hashchange', () => AppState.load());
+
+    // ============================================================
+    // FRONTEND LOGGING
+    // ============================================================
+    function logFrontend(message, level = 'info', details = null) {
+      const el = document.getElementById('frontendLog');
+      if (!el) return;
+      const ts = new Date().toISOString().slice(11, 19);
+      const cls = level === 'error'
+        ? 'log-error'
+        : level === 'warn'
+          ? 'log-warn'
+          : level === 'success'
+            ? 'log-success'
+            : level === 'dim'
+              ? 'log-dim'
+              : 'log-info';
+      const line = document.createElement('div');
+      line.className = `log-line ${cls}`;
+      const extra = details ? `\n  ${JSON.stringify(details, null, 2)}` : '';
+      line.textContent = `[${ts}] ${message}${extra}`;
+      el.appendChild(line);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function clearFrontendLog() {
+      const el = document.getElementById('frontendLog');
+      if (!el) return;
+      el.innerHTML = '';
+    }
+
+    window.addEventListener('error', (e) => {
+      logFrontend(`window.error: ${e.message}`, 'error', { filename: e.filename, lineno: e.lineno, colno: e.colno });
+    });
+
+    window.addEventListener('unhandledrejection', (e) => {
+      logFrontend('unhandledrejection', 'error', { reason: String(e.reason) });
+    });
     
     // ============================================================
     // OUTPUT TABS
@@ -1428,15 +1591,147 @@ source.http(url=&quot;https://api.example.com/data&quot;)
         });
       }
       
+      html += renderDeployments(result);
       container.innerHTML = html || '<div style="color:var(--muted)">Brak widoków do renderowania</div>';
+    }
+
+    function escapeHtml(text) {
+      const s = String(text ?? '');
+      return s
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function isHttpUrl(uri) {
+      return typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'));
+    }
+
+    function renderDeployments(result) {
+      const deployments = result?.deployments || result?.data?.deployments;
+      if (!Array.isArray(deployments) || deployments.length === 0) return '';
+
+      const rows = deployments.map(d => {
+        const platform = escapeHtml(d.platform || 'unknown');
+        const rawStatus = String(d.status || result?.status || 'unknown').toLowerCase();
+        const status = escapeHtml(rawStatus);
+        const access = d.access_uri || d.url || '';
+        const launch = normalizeLaunchUri(d.launch_uri || '');
+        const accessHtml = access
+          ? (isHttpUrl(access)
+              ? `<a href="${escapeHtml(access)}" target="_blank" rel="noopener noreferrer">${escapeHtml(access)}</a>`
+              : `${escapeHtml(access)}`)
+          : '<span style="color:var(--muted)">-</span>';
+        const launchHtml = launch
+          ? (isHttpUrl(launch)
+              ? `<a href="${escapeHtml(launch)}" target="_blank" rel="noopener noreferrer">${escapeHtml(launch)}</a>`
+              : `${escapeHtml(launch)}`)
+          : '<span style="color:var(--muted)">-</span>';
+
+        const exportKey = platformToExportKey(d.platform || '');
+        const actions = `
+          <div class="deployments-actions">
+            <button class="btn btn-secondary btn-xs" onclick="redeployDeployment('${escapeHtml(exportKey)}')">♻️ Redeploy</button>
+            <button class="btn btn-secondary btn-xs" onclick="copyDeploymentUri('${escapeJs(access)}')">📋 Copy access</button>
+            <button class="btn btn-secondary btn-xs" onclick="copyDeploymentLaunch('${escapeJs(launch)}')">📋 Copy launch</button>
+          </div>
+        `;
+        const statusClass = (rawStatus === 'ready' || rawStatus === 'pending' || rawStatus === 'error')
+          ? rawStatus
+          : '';
+
+        return `
+          <tr>
+            <td><span class="deployments-pill">${platform}</span></td>
+            <td><span class="deployments-status ${statusClass}">${status}</span></td>
+            <td class="deployments-uri">${accessHtml}</td>
+            <td class="deployments-uri">${launchHtml}</td>
+            <td>${actions}</td>
+          </tr>
+        `;
+      }).join('');
+
+      return `
+        <div class="deployments-section">
+          <div class="deployments-title">Deployments</div>
+          <table class="deployments-table">
+            <thead>
+              <tr>
+                <th>Platform</th>
+                <th>Status</th>
+                <th>Access URI</th>
+                <th>Launch URI</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function escapeJs(text) {
+      return String(text ?? '')
+        .replaceAll('\\', '\\\\')
+        .replaceAll("'", "\\'")
+        .replaceAll('\n', '\\n')
+        .replaceAll('\r', '\\r');
+    }
+
+    function platformToExportKey(platform) {
+      const p = String(platform || '').toLowerCase();
+      if (p === 'github_actions') return 'github';
+      if (p === 'compose') return 'docker';
+      return p;
+    }
+
+    function normalizeLaunchUri(uri) {
+      const s = String(uri || '');
+      if (s.startsWith('local-exec://')) return s.replace('local-exec://', '');
+      return s;
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(String(text || ''));
+        showNotification('Skopiowano do schowka', 'success');
+      } catch (err) {
+        logFrontend('copyText failed', 'error', { message: err.message });
+        showNotification('Nie można skopiować', 'error');
+      }
+    }
+
+    function copyDeploymentUri(uri) {
+      copyText(uri);
+    }
+
+    function copyDeploymentLaunch(uri) {
+      copyText(normalizeLaunchUri(uri));
+    }
+
+    function redeployDeployment(platform) {
+      const key = String(platform || '');
+      if (!key) return;
+      switchOutputTab('export');
+      exportTo(key);
     }
     
     function renderView(view, data) {
       const type = view.view_type || view.type;
+
+      const dataPayload = (data && typeof data === 'object' && data.data && typeof data.data === 'object')
+        ? data.data
+        : data;
       
       switch (type) {
         case 'card':
-          const cardValue = view.value_field ? (data[view.value_field] || view.value_field) : (view.value || '0');
+          const cardValue = view.value_field
+            ? (dataPayload?.[view.value_field] ?? data?.[view.value_field] ?? view.value_field)
+            : (view.value || '0');
           return `
             <div class="preview-card ${view.style || ''}">
               ${view.icon ? `<span class="preview-card-icon">${view.icon}</span>` : ''}
@@ -1446,7 +1741,14 @@ source.http(url=&quot;https://api.example.com/data&quot;)
           `;
         
         case 'table':
-          const tableData = data.data || data.monthly || data.readings || [];
+          let tableData = [];
+          if (Array.isArray(dataPayload)) {
+            tableData = dataPayload;
+          } else if (dataPayload && typeof dataPayload === 'object') {
+            tableData = dataPayload.data || dataPayload.rows || dataPayload.readings || dataPayload.monthly || dataPayload.items || dataPayload.records || [];
+          } else {
+            tableData = data?.data || data?.monthly || data?.readings || [];
+          }
           return renderTable(tableData, view.title);
         
         case 'chart':
@@ -1464,7 +1766,7 @@ source.http(url=&quot;https://api.example.com/data&quot;)
         case 'kpi':
           return `
             <div class="preview-card success">
-              <div class="preview-card-value">${view.value || '0'}</div>
+              <div class="preview-card-value">${formatValue(view.value || dataPayload?.[view.value_field] || '0')}</div>
               <div class="preview-card-title">${view.title || ''} ${view.trend || ''}</div>
             </div>
           `;
@@ -1506,17 +1808,32 @@ source.http(url=&quot;https://api.example.com/data&quot;)
     async function exportTo(platform) {
       const dsl = document.getElementById('dslEditor').value;
       const result = document.getElementById('exportResult');
+
+      const currentEditorUrl = window.location.origin + '/landing/dsl-editor.html' + window.location.hash;
       
+      function hasDeployStep(dslText, atom) {
+        const re = new RegExp(`(^|\\n)\\s*(\\|\\s*)?${atom}\\b`, 'm');
+        return re.test(dslText);
+      }
+
+      function ensureDeployStep(dslText, atom, snippet) {
+        if (hasDeployStep(dslText, atom)) return dslText;
+        return `${dslText}\n| ${snippet}`;
+      }
+
       const exportDSL = {
-        docker: `${dsl}\n| deploy.docker(image="analytica/app", tag="latest", port=8000)`,
-        kubernetes: `${dsl}\n| deploy.kubernetes(namespace="prod", replicas=3, image="analytica/app:latest")`,
-        web: `${dsl}\n| deploy.web(framework="react", build="npm run build", output="dist")`,
-        mobile: `${dsl}\n| deploy.mobile(framework="react-native", platforms=["ios", "android"])`,
-        desktop: `${dsl}\n| deploy.desktop(framework="electron", platforms=["win", "mac", "linux"])`,
-        github: `${dsl}\n| deploy.github_actions(workflow="deploy", triggers=["push"])`
+        docker: ensureDeployStep(dsl, 'deploy.docker', 'deploy.docker(image="analytica/app", tag="latest", port=8000)'),
+        kubernetes: ensureDeployStep(dsl, 'deploy.kubernetes', 'deploy.kubernetes(namespace="prod", replicas=3, image="analytica/app:latest")'),
+        web: ensureDeployStep(dsl, 'deploy.web', 'deploy.web(framework="react", build="npm run build", output="dist")'),
+        mobile: ensureDeployStep(dsl, 'deploy.mobile', 'deploy.mobile(framework="react-native", platforms=["ios", "android"])'),
+        desktop: ensureDeployStep(dsl, 'deploy.desktop', `deploy.desktop(framework="electron", platforms=["win", "mac", "linux"], url="${currentEditorUrl}")`),
+        github: ensureDeployStep(dsl, 'deploy.github_actions', 'deploy.github_actions(workflow="deploy", triggers=["push"])')
       };
       
       result.innerHTML = 'Generowanie konfiguracji...';
+      clearFrontendLog();
+      logFrontend(`exportTo(${platform}): start`, 'info', { endpoint: `${API_BASE}/api/v1/pipeline/execute` });
+      logFrontend('exportTo: DSL', 'dim', { dsl: exportDSL[platform] || dsl });
       
       try {
         const response = await fetch(`${API_BASE}/api/v1/pipeline/execute`, {
@@ -1524,8 +1841,15 @@ source.http(url=&quot;https://api.example.com/data&quot;)
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ dsl: exportDSL[platform] || dsl })
         });
-        
-        const data = await response.json();
+        const rawText = await response.text();
+        let data = null;
+        try {
+          data = JSON.parse(rawText);
+        } catch {
+          data = { status: 'error', errors: [{ type: 'InvalidJSON', message: rawText }] };
+        }
+        logFrontend(`exportTo(${platform}): response`, response.ok ? 'success' : 'error', { status: response.status, ok: response.ok });
+        logFrontend('exportTo: response body', 'dim', data);
         
         if (data.status === 'success' && data.result) {
           const config = data.result.config || data.result.deploy || data.result;
@@ -1533,11 +1857,16 @@ source.http(url=&quot;https://api.example.com/data&quot;)
           
           // Generate downloadable files based on platform
           generateExportFiles(platform, config);
+          if (Array.isArray(data.logs) && data.logs.length) {
+            logFrontend(`exportTo(${platform}): backend logs`, 'info', data.logs);
+          }
         } else {
           result.innerHTML = `Error: ${data.errors?.map(e => e.message).join(', ') || 'Unknown error'}`;
+          logFrontend(`exportTo(${platform}): error`, 'error', { errors: data.errors || [] });
         }
       } catch (err) {
         result.innerHTML = `Error: ${err.message}`;
+        logFrontend(`exportTo(${platform}): exception`, 'error', { message: err.message });
       }
     }
     
@@ -1691,7 +2020,43 @@ function createWindow() {
 app.whenReady().then(createWindow)
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
-})`
+})`,
+          'run.sh': `#!/usr/bin/env bash
+set -e
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "Node.js is required (node not found). Install Node.js first."
+  exit 1
+fi
+
+echo "Starting Analytica Desktop (Electron)..."
+echo "URL: ${config.url || 'http://localhost:18000'}"
+
+if [ ! -d node_modules ]; then
+  npm install
+fi
+
+npm start`,
+          'run.ps1': `Write-Host "Starting Analytica Desktop (Electron)..."
+Write-Host "URL: ${config.url || 'http://localhost:18000'}"
+
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+  Write-Host "Node.js is required (node not found). Install Node.js first."
+  exit 1
+}
+
+if (-not (Test-Path node_modules)) {
+  npm install
+}
+
+npm start`,
+          'analytica.desktop': `[Desktop Entry]
+Type=Application
+Name=Analytica Desktop (Electron)
+Comment=Run Analytica DSL Editor in desktop wrapper
+Exec=bash -lc 'cd "$(dirname "%k")" && chmod +x run.sh && ./run.sh'
+Terminal=true
+Categories=Development;` 
         },
         github: {
           '.github/workflows/deploy.yml': `name: Deploy
@@ -1728,6 +2093,10 @@ jobs:
         ).join('');
         
         document.getElementById('exportResult').innerHTML += `\n\n// Pliki do pobrania:\n${downloadHtml}`;
+
+        if (platform === 'desktop') {
+          document.getElementById('exportResult').innerHTML += `\n\n// Uruchomienie (Linux/macOS):\nchmod +x run.sh\n./run.sh\n\n// Uruchomienie (Windows PowerShell):\n.\\run.ps1`;
+        }
       }
     }
     
@@ -1865,11 +2234,18 @@ jobs:
     // Drag & Drop
     document.querySelectorAll('.atom-item').forEach(item => {
       item.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', item.dataset.atom);
+        try {
+          e.dataTransfer.setData('text/plain', item.dataset.atom);
+          e.dataTransfer.effectAllowed = 'copy';
+        } catch (err) {
+          logFrontend('dragstart: dataTransfer error', 'error', { message: err.message });
+        }
+        logFrontend('dragstart', 'info', { atom: item.dataset.atom });
         item.style.opacity = '0.5';
       });
       
       item.addEventListener('dragend', () => {
+        logFrontend('dragend', 'info', { atom: item.dataset.atom });
         item.style.opacity = '1';
       });
       
@@ -2088,6 +2464,9 @@ jobs:
       status.className = 'output-status pending';
       status.textContent = 'Wykonywanie...';
       output.textContent = 'Przetwarzanie pipeline...';
+      clearFrontendLog();
+      logFrontend('executeDSL: start', 'info', { endpoint: `${API_BASE}/api/v1/pipeline/execute` });
+      logFrontend('executeDSL: DSL', 'dim', { dsl });
       
       try {
         const response = await fetch(`${API_BASE}/api/v1/pipeline/execute`, {
@@ -2095,33 +2474,52 @@ jobs:
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ dsl })
         });
-        
-        const result = await response.json();
+        const rawText = await response.text();
+        let result = null;
+        try {
+          result = JSON.parse(rawText);
+        } catch {
+          result = { status: 'error', errors: [{ type: 'InvalidJSON', message: rawText }] };
+        }
+        logFrontend('executeDSL: response', response.ok ? 'success' : 'error', { status: response.status, ok: response.ok });
+        logFrontend('executeDSL: response body', 'dim', result);
         
         if (result.status === 'success') {
           status.className = 'output-status success';
           status.textContent = `OK (${result.execution_time_ms}ms)`;
-          output.textContent = JSON.stringify(result.result, null, 2);
+          output.textContent = JSON.stringify({
+            execution_id: result.execution_id,
+            result: result.result,
+            logs: result.logs,
+            errors: result.errors
+          }, null, 2);
           
           // Also render preview
           renderPreview(result.result);
+          if (Array.isArray(result.logs) && result.logs.length) {
+            logFrontend('executeDSL: backend logs', 'info', result.logs);
+          }
         } else {
           status.className = 'output-status error';
           status.textContent = 'Error';
           output.textContent = result.errors?.map(e => `${e.type}: ${e.message}`).join('\n') || 'Unknown error';
           renderPreview(null);
+          logFrontend('executeDSL: backend error', 'error', { errors: result.errors || [] });
         }
       } catch (err) {
         status.className = 'output-status error';
         status.textContent = 'Error';
         output.textContent = `Connection error: ${err.message}`;
         renderPreview(null);
+        logFrontend('executeDSL: exception', 'error', { message: err.message });
       }
     }
     
     // Validate DSL
     async function validateDSL() {
       const dsl = document.getElementById('dslEditor').value;
+      clearFrontendLog();
+      logFrontend('validateDSL: start', 'info', { endpoint: `${API_BASE}/api/v1/pipeline/validate` });
       
       try {
         const response = await fetch(`${API_BASE}/api/v1/pipeline/validate`, {
@@ -2129,8 +2527,15 @@ jobs:
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ dsl })
         });
-        
-        const result = await response.json();
+        const rawText = await response.text();
+        let result = null;
+        try {
+          result = JSON.parse(rawText);
+        } catch {
+          result = { valid: false, errors: [rawText] };
+        }
+        logFrontend('validateDSL: response', response.ok ? 'success' : 'error', { status: response.status, ok: response.ok });
+        logFrontend('validateDSL: response body', 'dim', result);
         
         if (result.valid) {
           showNotification('DSL jest poprawny ✓', 'success');
@@ -2139,6 +2544,7 @@ jobs:
         }
       } catch (err) {
         showNotification('Nie można zwalidować: ' + err.message, 'error');
+        logFrontend('validateDSL: exception', 'error', { message: err.message });
       }
     }
     
@@ -2164,6 +2570,7 @@ jobs:
       document.getElementById('outputStatus').style.display = 'none';
       document.getElementById('previewContainer').innerHTML = '';
       document.getElementById('exportResult').innerHTML = '';
+      clearFrontendLog();
       
       // Reset visual editor
       const pipelineNodes = document.getElementById('pipelineNodes');
@@ -2184,22 +2591,45 @@ jobs:
     
     // Initialize drop zone
     function initDropZone() {
+      const pipelineNodes = document.getElementById('pipelineNodes');
       const dropZone = document.getElementById('dropZone');
-      if (!dropZone) return;
-      
-      dropZone.addEventListener('dragover', (e) => {
+      if (!pipelineNodes) {
+        logFrontend('initDropZone: missing #pipelineNodes', 'error');
+        return;
+      }
+
+      let lastOverLogAt = 0;
+      const setOver = (isOver) => {
+        if (isOver) {
+          pipelineNodes.classList.add('drag-over');
+          if (dropZone) dropZone.classList.add('drag-over');
+        } else {
+          pipelineNodes.classList.remove('drag-over');
+          if (dropZone) dropZone.classList.remove('drag-over');
+        }
+      };
+
+      pipelineNodes.addEventListener('dragover', (e) => {
         e.preventDefault();
-        dropZone.classList.add('drag-over');
+        setOver(true);
+        const now = Date.now();
+        if (now - lastOverLogAt > 500) {
+          lastOverLogAt = now;
+          logFrontend('dragover: pipelineNodes', 'dim');
+        }
       });
-      
-      dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('drag-over');
+
+      pipelineNodes.addEventListener('dragleave', (e) => {
+        if (e.relatedTarget && pipelineNodes.contains(e.relatedTarget)) return;
+        setOver(false);
+        logFrontend('dragleave: pipelineNodes', 'dim');
       });
-      
-      dropZone.addEventListener('drop', (e) => {
+
+      pipelineNodes.addEventListener('drop', (e) => {
         e.preventDefault();
-        dropZone.classList.remove('drag-over');
-        const atom = e.dataTransfer.getData('text/plain');
+        setOver(false);
+        const atom = e.dataTransfer ? e.dataTransfer.getData('text/plain') : '';
+        logFrontend('drop: pipelineNodes', atom ? 'success' : 'warn', { atom });
         if (atom) addPipelineNode(atom);
       });
     }

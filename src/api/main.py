@@ -12,6 +12,7 @@ from datetime import datetime, date
 from decimal import Decimal
 import os
 import sys
+import re
 
 # Add src to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -26,6 +27,8 @@ from dsl.core.parser import (
     execute as dsl_execute,
 )
 from dsl.atoms import implementations as _dsl_atoms
+from dsl.atoms import deploy as _dsl_atoms_deploy
+from dsl.atoms import data as _dsl_atoms_data
 from api.auth import auth_router, get_current_user, get_optional_user
 
 # Get domain from environment
@@ -226,12 +229,96 @@ class DSLParseResponse(BaseModel):
 
 class DSLValidateRequest(BaseModel):
     dsl: str
+    variables: Dict[str, Any] = Field(default_factory=dict)
 
 
 class DSLValidateResponse(BaseModel):
     valid: bool
     errors: List[str] = []
     warnings: List[str] = []
+    missing_variables: List[str] = []
+    details: List[Dict[str, Any]] = []
+
+
+def _extract_variable_tokens(value: Any) -> List[str]:
+    """Extract variable tokens from any nested value.
+
+    Supports:
+    - ${VAR}
+    - $VAR
+    - strings containing interpolations
+    """
+    tokens: List[str] = []
+
+    if isinstance(value, dict):
+        for v in value.values():
+            tokens.extend(_extract_variable_tokens(v))
+        return tokens
+
+    if isinstance(value, list):
+        for v in value:
+            tokens.extend(_extract_variable_tokens(v))
+        return tokens
+
+    if not isinstance(value, str):
+        return tokens
+
+    # Match $VAR and ${VAR}
+    pattern = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)")
+    for m in pattern.finditer(value):
+        tokens.append(m.group(0))
+
+    return tokens
+
+
+def _token_to_var_name(token: str) -> Optional[str]:
+    if token.startswith('${') and token.endswith('}'):
+        return token[2:-1]
+    if token.startswith('$'):
+        return token[1:]
+    return None
+
+
+def _pipeline_json_schema() -> Dict[str, Any]:
+    """JSON Schema for PipelineDefinition.to_dict() representation."""
+    return {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Analytica DSL Pipeline",
+        "type": "object",
+        "required": ["name", "steps", "variables"],
+        "properties": {
+            "name": {"type": "string"},
+            "version": {"type": "string"},
+            "description": {"type": "string"},
+            "domain": {"type": ["string", "null"]},
+            "variables": {"type": "object", "additionalProperties": True},
+            "steps": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "required": ["atom"],
+                    "properties": {
+                        "atom": {
+                            "type": "object",
+                            "required": ["type", "action", "params"],
+                            "properties": {
+                                "type": {"type": "string"},
+                                "action": {"type": "string"},
+                                "params": {"type": "object", "additionalProperties": True},
+                            },
+                            "additionalProperties": False,
+                        },
+                        "condition": {"type": ["string", "null"]},
+                        "on_error": {"type": ["string", "null"], "enum": ["stop", "skip", "retry", None]},
+                        "timeout": {"type": ["integer", "null"], "minimum": 0},
+                        "cache_key": {"type": ["string", "null"]},
+                    },
+                    "additionalProperties": True,
+                },
+            },
+        },
+        "additionalProperties": True,
+    }
 
 
 # ============ DOMAIN CONFIGURATION ============
@@ -416,31 +503,74 @@ async def dsl_parse_pipeline(request: DSLParseRequest):
 async def dsl_validate_pipeline(request: DSLValidateRequest):
     errors: List[str] = []
     warnings: List[str] = []
+    details: List[Dict[str, Any]] = []
+    missing_vars_set: set[str] = set()
     try:
         pipeline = dsl_parse(request.dsl)
     except SyntaxError as e:
-        return DSLValidateResponse(valid=False, errors=[str(e)], warnings=[])
+        return DSLValidateResponse(valid=False, errors=[str(e)], warnings=[], missing_variables=[], details=[])
 
-    for step in pipeline.steps:
+    known_vars = {**(pipeline.variables or {}), **(request.variables or {})}
+
+    for i, step in enumerate(pipeline.steps):
         atom = step.atom
         handler = AtomRegistry.get(atom.type.value, atom.action)
         if not handler:
-            errors.append(f"Unknown atom: {atom.type.value}.{atom.action}")
+            msg = f"Unknown atom: {atom.type.value}.{atom.action}"
+            errors.append(msg)
+            details.append({
+                "type": "UnknownAtom",
+                "message": msg,
+                "step": i,
+                "atom_type": atom.type.value,
+                "action": atom.action,
+                "suggestion": "Check atom name or register missing atom implementation",
+            })
 
-    for step in pipeline.steps:
-        for _, value in step.atom.params.items():
-            if isinstance(value, str) and value.startswith('$'):
-                var_name = value[1:]
-                if var_name not in pipeline.variables:
-                    warnings.append(f"Unresolved variable: {value}")
+        # Variables in params (supports ${VAR} and $VAR anywhere in strings)
+        for param_name, param_value in (atom.params or {}).items():
+            for token in _extract_variable_tokens(param_value):
+                var_name = _token_to_var_name(token)
+                if not var_name:
+                    continue
+                if var_name not in known_vars:
+                    missing_vars_set.add(var_name)
+                    details.append({
+                        "type": "MissingVariable",
+                        "message": f"Unresolved variable: {token}",
+                        "step": i,
+                        "atom": f"{atom.type.value}.{atom.action}",
+                        "param": param_name,
+                        "variable": var_name,
+                        "token": token,
+                        "suggestion": f"Provide variable '{var_name}' in request.variables or declare `$${var_name} = ...` in DSL",
+                    })
 
-    return DSLValidateResponse(valid=len(errors) == 0, errors=errors, warnings=warnings)
+    # Summarize missing variables
+    if missing_vars_set:
+        for var_name in sorted(missing_vars_set):
+            warnings.append(f"Missing variable: {var_name}")
+        errors.append("Missing variables: " + ", ".join(sorted(missing_vars_set)))
+
+    return DSLValidateResponse(
+        valid=(len(errors) == 0 and len(missing_vars_set) == 0),
+        errors=errors,
+        warnings=warnings,
+        missing_variables=sorted(missing_vars_set),
+        details=details,
+    )
+
+
+@dsl_router.get("/pipeline/schema")
+async def dsl_pipeline_schema():
+    return _pipeline_json_schema()
 
 
 @dsl_router.post("/pipeline/execute", response_model=DSLExecuteResponse)
 async def dsl_execute_pipeline(request: DSLExecuteRequest):
     execution_id = f"exec_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:8]}"
     start_time = datetime.utcnow()
+    ctx: DSLPipelineContext | None = None
     try:
         pipeline = dsl_parse(request.dsl)
         variables = {**pipeline.variables, **(request.variables or {})}
@@ -462,16 +592,18 @@ async def dsl_execute_pipeline(request: DSLExecuteRequest):
             execution_id=execution_id,
             status="error",
             result=None,
-            logs=[],
+            logs=(ctx.logs if ctx else []),
             errors=[{"type": "SyntaxError", "message": str(e)}],
         )
     except Exception as e:
+        logs = ctx.logs if ctx else []
+        ctx_errors = ctx.errors if ctx else []
         return DSLExecuteResponse(
             execution_id=execution_id,
             status="error",
             result=None,
-            logs=[],
-            errors=[{"type": type(e).__name__, "message": str(e)}],
+            logs=logs,
+            errors=[*ctx_errors, {"type": type(e).__name__, "message": str(e)}],
         )
 
 
