@@ -147,7 +147,7 @@ if [ "$KEEP_RUNNING" = true ]; then
         TEST_EXIT_CODE=$(docker wait e2e-tests 2>/dev/null || echo 1)
     fi
 else
-    $DOCKER_COMPOSE -f "$COMPOSE_FILE" up $BUILD_FLAG --abort-on-container-exit --exit-code-from e2e-tests e2e-tests || TEST_EXIT_CODE=$?
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" up $BUILD_FLAG --abort-on-container-exit --exit-code-from e2e-tests postgres redis api e2e-tests || TEST_EXIT_CODE=$?
 fi
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

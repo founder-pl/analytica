@@ -16,6 +16,10 @@ Supports:
 from typing import Any, Dict, List, Optional, Union
 from datetime import datetime
 import json
+import csv
+import io
+
+import httpx
 
 from ..core.parser import AtomRegistry, PipelineContext
 
@@ -55,20 +59,61 @@ def source_http(ctx: PipelineContext, **params) -> Dict:
     retry = params.get("retry", 3)
     
     ctx.log(f"HTTP {method} {url}")
-    
-    # In production, this would use aiohttp/httpx
-    return _source_result(
-        {"_pending": True, "_url": url},
-        {
-            "type": "http",
-            "url": url,
-            "method": method,
-            "headers": headers,
-            "auth_type": auth.get("type") if auth else None,
-            "timeout": timeout,
-            "retry": retry
-        }
-    )
+
+    request_headers = headers if isinstance(headers, dict) else {}
+    request_auth = None
+    if isinstance(auth, dict):
+        if auth.get("type") == "bearer" and auth.get("token"):
+            request_headers = dict(request_headers)
+            request_headers["Authorization"] = f"Bearer {auth.get('token')}"
+        if auth.get("type") == "basic" and auth.get("user") is not None and auth.get("pass") is not None:
+            request_auth = (auth.get("user"), auth.get("pass"))
+
+    last_exc: Exception | None = None
+    for attempt in range(int(retry) if retry else 1):
+        try:
+            with httpx.Client(follow_redirects=True, timeout=float(timeout)) as client:
+                resp = client.request(
+                    method,
+                    url,
+                    headers=request_headers,
+                    json=body if isinstance(body, (dict, list)) else None,
+                    content=body if isinstance(body, (str, bytes)) else None,
+                    auth=request_auth,
+                )
+                resp.raise_for_status()
+
+                content_type = (resp.headers.get("content-type") or "").lower()
+                data: Any
+
+                if "application/json" in content_type or url.lower().endswith(".json"):
+                    data = resp.json()
+                elif "text/csv" in content_type or url.lower().endswith(".csv"):
+                    reader = csv.DictReader(io.StringIO(resp.text))
+                    data = [dict(r) for r in reader]
+                else:
+                    try:
+                        data = resp.json()
+                    except Exception:
+                        data = resp.text
+
+                return _source_result(
+                    data,
+                    {
+                        "type": "http",
+                        "url": url,
+                        "method": method,
+                        "headers": request_headers,
+                        "auth_type": auth.get("type") if isinstance(auth, dict) else None,
+                        "timeout": timeout,
+                        "retry": retry,
+                    },
+                )
+        except Exception as e:
+            last_exc = e
+            ctx.log(f"HTTP error (attempt {attempt + 1}/{retry}): {e}", level="warn")
+
+    raise last_exc if last_exc else RuntimeError("HTTP request failed")
 
 
 @AtomRegistry.register("source", "graphql")

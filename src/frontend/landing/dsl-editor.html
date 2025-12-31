@@ -1324,9 +1324,9 @@
               <div class="atom-name">data.define</div>
               <div class="atom-desc">Inline data</div>
             </div>
-            <div class="atom-item" draggable="true" data-atom="data.mock">
-              <div class="atom-name">data.mock</div>
-              <div class="atom-desc">Generate mock data</div>
+            <div class="atom-item" draggable="true" data-atom="data.load">
+              <div class="atom-name">data.load</div>
+              <div class="atom-desc">Load data from file/URL</div>
             </div>
             <div class="atom-item" draggable="true" data-atom="data.sample">
               <div class="atom-name">data.sample</div>
@@ -1447,9 +1447,9 @@
           </div>
           <textarea id="dslEditor" class="code-editor" placeholder="// Przeciągnij atomy z biblioteki lub wpisz DSL
 // Przykład:
-source.http(url=&quot;https://api.example.com/data&quot;)
-| transform.filter(status=&quot;active&quot;)
-| view.table(title=&quot;Aktywni użytkownicy&quot;)"></textarea>
+data.load(&quot;/landing/sample-data/iot.json&quot;)
+| transform.filter(value__gt=0)
+| view.table(title=&quot;Odczyty sensorów&quot;)" data-lt-tmp-id="lt-364316" spellcheck="false" data-gramm="false"></textarea>
         </div>
         
         <!-- Visual Editor (hidden by default) -->
@@ -2667,31 +2667,31 @@ jobs:
     
     // Examples Library
     const EXAMPLES = {
-      'iot-sensor': `data.mock(type="iot", rows=10)
+      'iot-sensor': `data.load("/landing/sample-data/iot.json")
 | transform.filter(value__gt=0)
-| view.chart(type="line", x="sensor", y="value", title="Odczyty sensorow")`,
+| view.table(title="Odczyty sensorów", columns=["ts", "sensor", "value", "unit"])`,
 
-      'api-dashboard': `data.sample(dataset="ecommerce")
+      'api-dashboard': `data.load("/landing/sample-data/ecommerce.json")
 | view.card(value="total_revenue", title="Przychod calkowity", icon="💰")
 | view.card(value="avg_order", title="Srednie zamowienie", icon="📦")
 | view.table(title="Miesieczne przychody", columns=["month", "revenue", "orders"])`,
 
-      'finance-alert': `data.sample(dataset="finance")
+      'finance-alert': `data.load("/landing/sample-data/finance.json")
 | view.kpi(value="roi", title="ROI", trend="+15.5%")
-| view.chart(type="bar", x="month", y="income", title="Przychody miesieczne")`,
+| view.table(title="Miesięczne finanse", columns=["month", "income", "expenses"])`,
 
-      'industrial-plc': `data.mock(type="iot", rows=20)
+      'industrial-plc': `data.load("/landing/sample-data/plc.json")
 | transform.filter(value__gt=15)
-| view.table(title="Odczyty PLC", columns=["sensor", "value", "unit"])`,
+| view.table(title="Odczyty PLC", columns=["ts", "sensor", "value", "unit"])`,
 
-      'etl-pipeline': `data.mock(type="sales", rows=100)
+      'etl-pipeline': `data.load("/landing/sample-data/sales.csv")
 | transform.filter(revenue__gt=1000)
-| transform.sort(field="revenue", order="desc")
-| view.table(title="Top sprzedaz", columns=["month", "revenue", "orders"])`,
+| transform.sort(by="revenue", order="desc")
+| view.table(title="Top sprzedaż", columns=["month", "revenue", "orders"])`,
 
-      'kafka-stream': `data.mock(type="orders", rows=50)
+      'kafka-stream': `data.load("/landing/sample-data/orders.json")
 | transform.filter(status="completed")
-| view.chart(type="pie", x="status", y="total", title="Statusy zamowien")`,
+| view.table(title="Zamówienia", columns=["id", "status", "total"])`,
 
       'dashboard-kpi': `data.define(total_revenue=125000, avg_order=450, orders_count=278, growth_rate=12.5)
 | view.card(value="total_revenue", title="Przychod calkowity", icon="💰", style="success")
@@ -2703,7 +2703,7 @@ jobs:
 | deploy.docker(image="analytica/app", tag="latest", port=8000)
 | deploy.kubernetes(namespace="prod", replicas=3)`,
 
-      'deploy-mobile': `data.sample(dataset="ecommerce")
+      'deploy-mobile': `data.load("/landing/sample-data/ecommerce.json")
 | view.dashboard(layout="grid", widgets=["revenue", "orders", "chart"])
 | deploy.mobile(framework="react-native", platforms=["ios", "android"])`,
 
@@ -2879,7 +2879,7 @@ jobs:
     function getAtomTemplate(atom) {
       const templates = {
         // Sources
-        'source.http': 'source.http(url="https://api.example.com/data")',
+        'source.http': 'source.http(url="https://jsonplaceholder.typicode.com/posts")',
         'source.graphql': 'source.graphql(endpoint="...", query="{ ... }")',
         'source.websocket': 'source.websocket(url="wss://...")',
         'source.sse': 'source.sse(url="https://...")',
@@ -2900,8 +2900,8 @@ jobs:
         'source.nats': 'source.nats(url="nats://localhost:4222", subject="...")',
         // Data Definition
         'data.define': 'data.define(total_revenue=125000, avg_order=450, orders_count=278)',
-        'data.mock': 'data.mock(type="sales", rows=100)',
-        'data.sample': 'data.sample(dataset="ecommerce")',
+        'data.load': 'data.load("/landing/sample-data/ecommerce.json")',
+        'data.sample': 'data.load("/landing/sample-data/ecommerce.json")',
         'data.sql': 'data.sql(query="SELECT * FROM sales", connection="postgresql://...")',
         'data.dql': 'data.dql(select=["revenue", "orders"], from_source="sales", where={"year": 2024})',
         'data.compute': 'data.compute(profit="revenue - costs", margin="profit / revenue * 100")',
@@ -2910,7 +2910,7 @@ jobs:
         'transform.filter': 'transform.filter(field__gt=0)',
         'transform.map': 'transform.map(field="...", expr="...")',
         'transform.group': 'transform.group(by=["field"], agg={"count": "count()"})',
-        'transform.sort': 'transform.sort(field="...", order="desc")',
+        'transform.sort': 'transform.sort(by="...", order="desc")',
         'transform.limit': 'transform.limit(100)',
         // Views
         'view.chart': 'view.chart(type="line", x="...", y="...", title="...")',

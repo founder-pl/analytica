@@ -1,0 +1,13 @@
+{
+  "total_revenue": 125000,
+  "avg_order": 450,
+  "orders_count": 278,
+  "monthly": [
+    {"month":"Jan","revenue":15000,"orders":33},
+    {"month":"Feb","revenue":18000,"orders":40},
+    {"month":"Mar","revenue":22000,"orders":49},
+    {"month":"Apr","revenue":19000,"orders":42},
+    {"month":"May","revenue":25000,"orders":56},
+    {"month":"Jun","revenue":26000,"orders":58}
+  ]
+}

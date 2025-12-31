@@ -70,6 +70,7 @@
 - Compose: `docker/docker-compose.e2e.yml`
 - Runner: `scripts/run-e2e-tests.sh`
 - Wyniki: `test-results/` (HTML/XML)
+- Logi: `test-results/logs/` (snapshot + output runnera)
 
 ### E2E (Docker-in-Docker)
 
@@ -77,6 +78,7 @@
 - Runner: `scripts/run-e2e-dind.sh`
 - Inner compose: `docker/docker-compose.e2e.inner.yml`
 - Wyniki: `test-results/e2e-dind/`
+- Logi: `test-results/e2e-dind/logs/` (outer) oraz `test-results/e2e-dind/inner-*.compose.log` (inner)
 
 Debug (tryb `--keep`):
 
@@ -91,6 +93,7 @@ Debug (tryb `--keep`):
 
 - Testy: `tests/e2e/test_gui.py`
 - Runner: `scripts/run-gui-tests.sh`
+- Logi: `test-results/logs/`
 
 ## Troubleshooting
 

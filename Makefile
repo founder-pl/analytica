@@ -167,6 +167,11 @@ status: ## Show status of all services
 logs: ## Show logs (usage: make logs service=api-multiplan)
 	cd docker && docker-compose logs -f $(service)
 
+logs-snapshot: ## Save current docker logs to test-results/logs/stack-<timestamp>.log
+	@mkdir -p test-results/logs
+	@TS=$$(date -u +%Y%m%dT%H%M%SZ); cd docker && docker-compose logs --no-color > ../test-results/logs/stack-$$TS.log
+	@echo "$(GREEN)Saved logs to test-results/logs/stack-$$TS.log$(NC)"
+
 logs-multiplan: ## Show multiplan.pl logs
 	cd docker && docker-compose logs -f api-multiplan
 

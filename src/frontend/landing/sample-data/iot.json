@@ -1,0 +1,8 @@
+[
+  {"ts":"2025-01-01T12:00:00Z","sensor":"temp-01","value":22.5,"unit":"C"},
+  {"ts":"2025-01-01T12:00:05Z","sensor":"temp-01","value":22.7,"unit":"C"},
+  {"ts":"2025-01-01T12:00:10Z","sensor":"temp-01","value":22.6,"unit":"C"},
+  {"ts":"2025-01-01T12:00:00Z","sensor":"humid-01","value":45.0,"unit":"%"},
+  {"ts":"2025-01-01T12:00:05Z","sensor":"humid-01","value":45.2,"unit":"%"},
+  {"ts":"2025-01-01T12:00:10Z","sensor":"humid-01","value":45.1,"unit":"%"}
+]

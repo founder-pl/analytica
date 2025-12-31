@@ -9,9 +9,18 @@
 #   ./scripts/run-gui-tests.sh --docker     # Run in Docker
 
 set -e
+set -o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+RESULTS_DIR="$PROJECT_ROOT/test-results"
+LOGS_DIR="$RESULTS_DIR/logs"
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
+RUN_LOG="$LOGS_DIR/gui-${RUN_ID}.runner.log"
+
+mkdir -p "$LOGS_DIR"
+exec > >(tee -a "$RUN_LOG") 2>&1
 
 # Colors
 RED='\033[0;31m'
@@ -107,6 +116,7 @@ if [ "$USE_DOCKER" = true ]; then
         mcr.microsoft.com/playwright/python:v1.40.0-jammy \
         pytest /app/tests/e2e/test_gui.py -v \
         --tb=short \
+        --junitxml=/app/results/gui-results.xml \
         --html=/app/results/gui-report.html \
         --self-contained-html \
         -x
@@ -119,12 +129,19 @@ else
         pip install playwright
         playwright install chromium
     fi
+
+    if ! python3 -c "import pytest_html" 2>/dev/null; then
+        pip install pytest-html
+    fi
     
     # Run tests
     API_BASE_URL="${API_BASE_URL}" \
     PYTHONPATH=src \
     python3 -m pytest tests/e2e/test_gui.py -v \
         --tb=short \
+        --junitxml="$RESULTS_DIR/gui-results.xml" \
+        --html="$RESULTS_DIR/gui-report.html" \
+        --self-contained-html \
         ${HEADED} \
         -x
 fi

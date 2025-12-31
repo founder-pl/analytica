@@ -8,6 +8,9 @@ from typing import Any, Dict, List, Optional, Union
 import json
 import csv
 import io
+from pathlib import Path
+
+import httpx
 from datetime import datetime, date
 from decimal import Decimal
 
@@ -28,12 +31,22 @@ def data_load(ctx: PipelineContext, source: str = None, **params) -> Any:
     
     ctx.log(f"Loading data from: {source}")
     
+    if source.startswith('/landing/'):
+        landing_root = Path(__file__).resolve().parents[2] / 'frontend' / 'landing'
+        rel = source.lstrip('/')
+        resolved = landing_root / rel.split('/', 1)[1] if rel.startswith('landing/') else landing_root / rel
+        if resolved.suffix.lower() == '.csv':
+            return _load_csv(str(resolved), params)
+        if resolved.suffix.lower() == '.json':
+            return _load_json(str(resolved), params)
+        raise ValueError(f"Unsupported landing file type: {resolved}")
+
     # Determine source type
     if source.endswith('.csv'):
         return _load_csv(source, params)
     elif source.endswith('.json'):
         return _load_json(source, params)
-    elif source.startswith('http'):
+    elif source.startswith('http://') or source.startswith('https://'):
         return _load_http(source, params)
     elif source.startswith('db:'):
         return _load_database(source[3:], params)
@@ -44,19 +57,77 @@ def data_load(ctx: PipelineContext, source: str = None, **params) -> Any:
 
 def _load_csv(path: str, params: Dict) -> List[Dict]:
     """Load CSV file"""
-    # In production, this would actually load the file
-    # For now, return mock structure
-    return {"_type": "csv", "_path": path, "_loaded": True}
+    file_path = Path(path)
+    if not file_path.is_absolute():
+        repo_root = Path(__file__).resolve().parents[3]
+        candidate = repo_root / path
+        if candidate.exists():
+            file_path = candidate
+
+    if not file_path.exists():
+        raise FileNotFoundError(f"CSV file not found: {path}")
+
+    def _cast_value(v: Any) -> Any:
+        if not isinstance(v, str):
+            return v
+        s = v.strip()
+        if s == "":
+            return s
+        try:
+            if s.isdigit() or (s.startswith('-') and s[1:].isdigit()):
+                return int(s)
+            return float(s)
+        except Exception:
+            return v
+
+    with file_path.open('r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        rows: List[Dict] = []
+        for row in reader:
+            casted = {k: _cast_value(val) for k, val in dict(row).items()}
+            rows.append(casted)
+        return rows
 
 
 def _load_json(path: str, params: Dict) -> Any:
     """Load JSON file"""
-    return {"_type": "json", "_path": path, "_loaded": True}
+    file_path = Path(path)
+    if not file_path.is_absolute():
+        repo_root = Path(__file__).resolve().parents[3]
+        candidate = repo_root / path
+        if candidate.exists():
+            file_path = candidate
+
+    if not file_path.exists():
+        raise FileNotFoundError(f"JSON file not found: {path}")
+
+    with file_path.open('r', encoding='utf-8') as f:
+        return json.load(f)
 
 
 def _load_http(url: str, params: Dict) -> Any:
     """Load from HTTP endpoint"""
-    return {"_type": "http", "_url": url, "_loaded": True}
+    timeout = float(params.get('timeout', 10))
+    headers = params.get('headers') if isinstance(params.get('headers'), dict) else None
+
+    with httpx.Client(follow_redirects=True, timeout=timeout) as client:
+        resp = client.get(url, headers=headers)
+        resp.raise_for_status()
+
+        content_type = (resp.headers.get('content-type') or '').lower()
+
+        if url.lower().endswith('.json') or 'application/json' in content_type:
+            return resp.json()
+
+        if url.lower().endswith('.csv') or 'text/csv' in content_type:
+            text = resp.text
+            reader = csv.DictReader(io.StringIO(text))
+            return [dict(row) for row in reader]
+
+        try:
+            return resp.json()
+        except Exception:
+            return resp.text
 
 
 def _load_database(query: str, params: Dict) -> Any:

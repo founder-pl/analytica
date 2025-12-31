@@ -1,0 +1,8 @@
+[
+  {"ts":"2025-01-01T13:00:00Z","sensor":"plc-temp","value":61.2,"unit":"C"},
+  {"ts":"2025-01-01T13:00:01Z","sensor":"plc-temp","value":61.8,"unit":"C"},
+  {"ts":"2025-01-01T13:00:02Z","sensor":"plc-temp","value":62.1,"unit":"C"},
+  {"ts":"2025-01-01T13:00:00Z","sensor":"plc-vibration","value":12.4,"unit":"mm/s"},
+  {"ts":"2025-01-01T13:00:01Z","sensor":"plc-vibration","value":16.0,"unit":"mm/s"},
+  {"ts":"2025-01-01T13:00:02Z","sensor":"plc-vibration","value":18.7,"unit":"mm/s"}
+]
