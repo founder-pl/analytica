@@ -209,86 +209,31 @@
       </p>
     </div>
     
-    <div class="dsl-container">
+    <div class="dsl-container" data-landing-dsl-demo>
       <div class="dsl-editor">
         <div class="dsl-editor-header">
           <span class="dsl-editor-dot red"></span>
           <span class="dsl-editor-dot yellow"></span>
           <span class="dsl-editor-dot green"></span>
-          <span class="dsl-editor-title">full_investment_analysis.dsl</span>
+          <span class="dsl-editor-title">investment_live_demo.dsl</span>
         </div>
-        <div class="dsl-code">
-<span class="comment"># Pełna analiza inwestycji z raportowaniem</span>
-<span class="keyword">@pipeline</span> <span class="function">investment_full_analysis</span>:
-    <span class="variable">$project</span> = <span class="string">"Nowa fabryka"</span>
-    <span class="variable">$initial</span> = <span class="number">5000000</span>
-    <span class="variable">$rate</span> = <span class="number">0.15</span>
-    <span class="variable">$flows</span> = [
-        <span class="number">1000000</span>, <span class="number">1500000</span>, <span class="number">2000000</span>,
-        <span class="number">2500000</span>, <span class="number">3000000</span>
-    ]
-    
-    <span class="comment"># Analiza podstawowa</span>
-    <span class="function">investment.analyze</span>(
-        name=<span class="variable">$project</span>,
-        initial_investment=<span class="variable">$initial</span>,
-        discount_rate=<span class="variable">$rate</span>,
-        cash_flows=<span class="variable">$flows</span>
-    )
-    
-    <span class="comment"># Wskaźniki finansowe</span>
-    | <span class="function">investment.roi</span>()
-    | <span class="function">investment.npv</span>(rate=<span class="variable">$rate</span>)
-    | <span class="function">investment.irr</span>()
-    | <span class="function">investment.payback</span>()
-    
-    <span class="comment"># Scenariusze</span>
-    | <span class="function">investment.scenario</span>(
-        name=<span class="string">"optimistic"</span>, 
-        multiplier=<span class="number">1.2</span>
-    )
-    
-    <span class="comment"># Raport dla zarządu</span>
-    | <span class="function">report.generate</span>(
-        format=<span class="string">"pdf"</span>,
-        template=<span class="string">"investment_proposal"</span>
-    )
-    | <span class="function">report.send</span>(
-        to=[<span class="string">"board@company.pl"</span>]
-    )
+        <textarea class="dsl-code" data-dsl style="width: 100%; min-height: 260px; border: 0; outline: none; background: transparent; color: inherit; resize: vertical;">data.from_input()
+| investment.analyze(initial_investment=1000000, discount_rate=0.12, cash_flows=[200000,300000,400000,500000])
+| view.card(value="npv", title="NPV", icon="🧮", style="info")
+| view.card(value="roi", title="ROI %", icon="📈", style="success")
+| view.table(title="Szczegóły", columns=["initial_investment","discount_rate","periods","npv","roi"])\
+</textarea>
+        <div style="display: flex; gap: 12px; align-items: center; padding: 16px 24px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+          <button class="btn btn-primary" data-run>▶️ Uruchom demo (LIVE)</button>
+          <span class="status-badge" data-status style="display:none;"></span>
+          <a class="btn btn-ghost" href="dsl-editor.html">Otwórz DSL Editor</a>
         </div>
       </div>
       
       <div class="dsl-result">
-        <div class="dsl-result-title">Wynik analizy</div>
-        <div class="dsl-result-content">
-{
-  "status": "success",
-  "project": "Nowa fabryka",
-  "investment_summary": {
-    "initial_investment": 5000000,
-    "total_cash_flows": 10000000,
-    "net_profit": 5000000
-  },
-  "metrics": {
-    "roi": 100.0,
-    "roi_formatted": "100.00%",
-    "npv": 2847520.45,
-    "npv_positive": true,
-    "irr": 0.2845,
-    "irr_formatted": "28.45%",
-    "payback_years": 2.67,
-    "profitability_index": 1.57
-  },
-  "risk_assessment": {
-    "level": "low",
-    "score": 25,
-    "factors": ["positive_npv", "high_irr", "short_payback"]
-  },
-  "recommendation": "INVEST",
-  "report_url": "/reports/investment_proposal.pdf"
-}
-        </div>
+        <div class="dsl-result-title">Wynik (views + JSON)</div>
+        <div data-output-views></div>
+        <div class="dsl-result-content" data-output-json style="margin-top: 16px;"></div>
       </div>
     </div>
   </div>
@@ -433,6 +378,8 @@
     </div>
   </div>
 </footer>
+
+<script type="module" src="./landing-dsl.js"></script>
 
 </body>
 </html>

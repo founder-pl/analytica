@@ -2,6 +2,19 @@
 # =======================================
 # Generated: 2024-12-31
 
+## Menu
+
+- [README](README.md)
+- [Dokumentacja (INDEX)](docs/INDEX.md)
+- [Architektura](docs/ARCHITECTURE.md)
+- [API](docs/API.md)
+- [DSL](docs/DSL.md)
+- [Moduły](docs/MODULES.md)
+- [System punktów](docs/POINTS.md)
+- [Compliance](docs/COMPLIANCE.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Views Roadmap](docs/VIEWS_ROADMAP.md)
+
 ## 📁 STRUCTURE OVERVIEW
 
 ```
@@ -228,18 +241,7 @@ analytica/
 - **S3** - Cloud storage
 - **REST API** - Generic connector
 
-## 🚀 QUICK START
+## Quick Start
 
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run tests
-pytest tests/ -v
-
-# Start API server
-python -m uvicorn src.dsl.api.server:app --port 8080
-
-# Use CLI
-./analytica run 'data.load("sales") | metrics.sum("amount")'
-```
+- [Quick Start (README)](README.md#-quick-start)
+- [Testowanie i logi testów (docs/INDEX)](docs/INDEX.md#testowanie)

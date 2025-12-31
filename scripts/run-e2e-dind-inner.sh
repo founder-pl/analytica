@@ -39,6 +39,9 @@ set -e
 echo "[dind] copying results"
 CID=$(docker compose -f "$INNER_COMPOSE" ps -q e2e-tests || true)
 if [ -z "$CID" ]; then
+  CID=$(docker ps -aq --filter "label=com.docker.compose.service=e2e-tests" --latest 2>/dev/null || true)
+fi
+if [ -z "$CID" ]; then
   echo "[dind] ERROR: could not find e2e-tests container id" >&2
   echo "missing_container_id" > "$RESULTS_DIR/inner-${RUN_ID}.error.txt" 2>/dev/null || true
 else

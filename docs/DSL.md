@@ -2,6 +2,19 @@
 
 > Domain Specific Language for Analytics Pipelines
 
+## Menu
+
+- [Dokumentacja (INDEX)](INDEX.md)
+- [README](../README.md)
+- [Architektura](ARCHITECTURE.md)
+- [API](API.md)
+- [Moduły](MODULES.md)
+- [System punktów](POINTS.md)
+- [Compliance](COMPLIANCE.md)
+- [Roadmap](ROADMAP.md)
+- [Views Roadmap](VIEWS_ROADMAP.md)
+- [Mapa plików projektu](../PROJECT_FILES.md)
+
 ## Overview
 
 ANALYTICA DSL is a powerful, expressive language for building analytics pipelines. It provides:
@@ -63,7 +76,7 @@ analytica build
 
 ```bash
 # Execute pipeline
-curl -X POST http://localhost:8080/api/v1/pipeline/execute \
+curl -X POST http://localhost:18000/api/v1/pipeline/execute \
   -H "Content-Type: application/json" \
   -d '{"dsl": "data.load(\"sales\") | metrics.sum(\"amount\")"}'
 ```
@@ -302,7 +315,7 @@ from analytica import Pipeline, Analytica, configure
 
 # Configure
 configure(
-    api_url='http://localhost:8080',
+    api_url='http://localhost:18000',
     domain='planbudzetu.pl',
     local_execution=True
 )
@@ -335,7 +348,7 @@ import { Pipeline, Analytica, configure } from '@analytica/sdk';
 
 // Configure
 configure({
-  apiUrl: 'http://localhost:8080',
+  apiUrl: 'http://localhost:18000',
   domain: 'planbudzetu.pl'
 });
 
@@ -378,7 +391,7 @@ analytica list-atoms
 analytica build
 
 # Start API server
-analytica serve --port 8080
+analytica serve --port 18000
 
 # Convert formats
 analytica convert pipeline.dsl --format json
@@ -402,11 +415,11 @@ analytica convert pipeline.dsl --format json
 ### With Docker
 
 ```bash
-# Start DSL API server
-docker-compose up dsl-api
+# Start API (repox.pl)
+make up-repox
 
 # Run pipeline
-curl http://localhost:8080/api/v1/pipeline/execute \
+curl http://localhost:18000/api/v1/pipeline/execute \
   -d '{"dsl": "data.load(\"sales\") | metrics.sum(\"amount\")"}'
 ```
 
@@ -456,7 +469,7 @@ It reuses the JS DSL SDK (`/ui/sdk/analytica.js`) and works with both:
 Typical URLs:
 
 ```text
-http://localhost:8000/ui/    (repox.pl)
+http://localhost:18000/ui/   (repox.pl)
 http://localhost:8010/ui/    (multiplan.pl)
 http://localhost:8011/ui/    (planbudzetu.pl)
 http://localhost:8012/ui/    (planinwestycji.pl)

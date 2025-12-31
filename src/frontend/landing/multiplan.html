@@ -212,81 +212,32 @@
       </p>
     </div>
     
-    <div class="dsl-container">
+    <div class="dsl-container" data-landing-dsl-demo data-sample="/landing/sample-data/ecommerce.json" data-input-path="monthly">
       <div class="dsl-editor">
         <div class="dsl-editor-header">
           <span class="dsl-editor-dot red"></span>
           <span class="dsl-editor-dot yellow"></span>
           <span class="dsl-editor-dot green"></span>
-          <span class="dsl-editor-title">multi_scenario_analysis.dsl</span>
+          <span class="dsl-editor-title">multiplan_live_demo.dsl</span>
         </div>
-        <div class="dsl-code">
-<span class="comment"># Pełna analiza wieloscenariuszowa</span>
-<span class="keyword">@pipeline</span> <span class="function">scenario_comparison</span>:
-    <span class="variable">$base_budget</span> = <span class="string">"budget_2025"</span>
-    
-    <span class="comment"># Załaduj bazowy budżet</span>
-    <span class="function">budget.load</span>(<span class="variable">$base_budget</span>)
-    | <span class="function">budget.variance</span>()
-    
-    <span class="comment"># Scenariusz optymistyczny</span>
-    | <span class="function">investment.scenario</span>(
-        name=<span class="string">"optimistic"</span>,
-        multiplier=<span class="number">1.20</span>
-    )
-    
-    <span class="comment"># Rolling forecast 6 miesięcy</span>
-    | <span class="function">forecast.predict</span>(
-        periods=<span class="number">6</span>,
-        method=<span class="string">"linear"</span>
-    )
-    | <span class="function">forecast.confidence</span>(level=<span class="number">0.95</span>)
-    
-    <span class="comment"># Porównaj z planem</span>
-    | <span class="function">budget.compare</span>(scenario=<span class="string">"planned"</span>)
-    
-    <span class="comment"># Wygeneruj raport</span>
-    | <span class="function">report.generate</span>(
-        format=<span class="string">"xlsx"</span>,
-        template=<span class="string">"scenario_comparison"</span>
-    )
+        <textarea class="dsl-code" data-dsl style="width: 100%; min-height: 260px; border: 0; outline: none; background: transparent; color: inherit; resize: vertical;">data.load("/landing/sample-data/ecommerce.json")
+| view.card(value="total_revenue", title="Przychód", icon="💰", style="success")
+| view.card(value="orders_count", title="Zamówienia", icon="📦", style="info")
+| transform.filter(month__ne="")
+| view.chart(type="bar", x="month", y="revenue", title="Revenue (mies.)")
+| view.table(title="Monthly", columns=["month","revenue","orders"])\
+</textarea>
+        <div style="display: flex; gap: 12px; align-items: center; padding: 16px 24px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+          <button class="btn btn-primary" data-run>▶️ Uruchom demo (LIVE)</button>
+          <span class="status-badge" data-status style="display:none;"></span>
+          <a class="btn btn-ghost" href="dsl-editor.html">Otwórz DSL Editor</a>
         </div>
       </div>
       
       <div class="dsl-result">
-        <div class="dsl-result-title">Porównanie scenariuszy</div>
-        <div class="dsl-result-content">
-{
-  "status": "success",
-  "scenarios": {
-    "base": {
-      "revenue": 10000000,
-      "costs": 7500000,
-      "profit": 2500000
-    },
-    "optimistic": {
-      "revenue": 12000000,
-      "costs": 7875000,
-      "profit": 4125000,
-      "change_vs_base": "+65%"
-    },
-    "pessimistic": {
-      "revenue": 8500000,
-      "costs": 7125000,
-      "profit": 1375000,
-      "change_vs_base": "-45%"
-    }
-  },
-  "forecast": {
-    "method": "linear",
-    "periods": 6,
-    "confidence": 0.95,
-    "trend": "up",
-    "predicted_revenue": 11200000
-  },
-  "recommendation": "Proceed with optimistic plan, monitor Q2 KPIs"
-}
-        </div>
+        <div class="dsl-result-title">Wynik (views + JSON)</div>
+        <div data-output-views></div>
+        <div class="dsl-result-content" data-output-json style="margin-top: 16px;"></div>
       </div>
     </div>
   </div>
@@ -431,6 +382,8 @@
     </div>
   </div>
 </footer>
+
+<script type="module" src="./landing-dsl.js"></script>
 
 </body>
 </html>

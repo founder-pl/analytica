@@ -2,6 +2,19 @@
 
 > Business logic modules for domain-specific functionality
 
+## Menu
+
+- [Dokumentacja (INDEX)](INDEX.md)
+- [README](../README.md)
+- [Architektura](ARCHITECTURE.md)
+- [API](API.md)
+- [DSL](DSL.md)
+- [System punktów](POINTS.md)
+- [Compliance](COMPLIANCE.md)
+- [Roadmap](ROADMAP.md)
+- [Views Roadmap](VIEWS_ROADMAP.md)
+- [Mapa plików projektu](../PROJECT_FILES.md)
+
 ## Overview
 
 ANALYTICA uses a modular architecture where each module provides:
@@ -734,7 +747,7 @@ data.from_input()
 
 ### Frontend Rendering
 
-Views are rendered by `ViewRenderer.js`:
+Views are rendered by `view-renderer.js`:
 
 ```javascript
 import { createViewRenderer } from '/ui/view-renderer.js';

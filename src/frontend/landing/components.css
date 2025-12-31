@@ -452,6 +452,17 @@ body {
   overflow-x: auto;
 }
 
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.running { background: #fef3c7; color: #d97706; }
+.status-badge.success { background: #d1fae5; color: #059669; }
+.status-badge.error { background: #fee2e2; color: #dc2626; }
+
 /* ============================================================
    PRICING SECTION
    ============================================================ */

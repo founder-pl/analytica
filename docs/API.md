@@ -2,22 +2,23 @@
 
 > Complete reference for the ANALYTICA REST API
 
-## Base URLs
+## Menu
 
-| Domain | Port | URL | UI |
-|--------|------|-----|-----|
-| **repox.pl** | 18000 | `http://localhost:18000` | `/ui/` |
-| analizowanie.pl | 8001 | `http://localhost:8001` | `/ui/` |
-| przeanalizuj.pl | 8002 | `http://localhost:8002` | `/ui/` |
-| alerts.pl | 8003 | `http://localhost:8003` | `/ui/` |
-| estymacja.pl | 8004 | `http://localhost:8004` | `/ui/` |
-| retrospektywa.pl | 8005 | `http://localhost:8005` | `/ui/` |
-| persony.pl | 8006 | `http://localhost:8006` | `/ui/` |
-| specyfikacja.pl | 8007 | `http://localhost:8007` | `/ui/` |
-| nisza.pl | 8008 | `http://localhost:8008` | `/ui/` |
-| **multiplan.pl** | 8010 | `http://localhost:8010` | `/ui/` |
-| **planbudzetu.pl** | 8011 | `http://localhost:8011` | `/ui/` |
-| **planinwestycji.pl** | 8012 | `http://localhost:8012` | `/ui/` |
+- [Dokumentacja (INDEX)](INDEX.md)
+- [README](../README.md)
+- [Architektura](ARCHITECTURE.md)
+- [DSL](DSL.md)
+- [Moduły](MODULES.md)
+- [System punktów](POINTS.md)
+- [Compliance](COMPLIANCE.md)
+- [Roadmap](ROADMAP.md)
+- [Views Roadmap](VIEWS_ROADMAP.md)
+- [Mapa plików projektu](../PROJECT_FILES.md)
+
+## Base URL
+
+- Domyślnie (dev): `http://localhost:18000`
+- Pełna mapa portów i domen: [README - Port Mapping](../README.md#port-mapping)
 
 ### Dostępne widoki web (repox.pl - port 18000)
 
@@ -766,7 +767,7 @@ result = run('data.load("sales") | metrics.sum("amount")')
 ```javascript
 import { Analytica } from '@analytica/sdk';
 
-const client = new Analytica('http://localhost:8000');
+const client = new Analytica('http://localhost:18000');
 
 // Execute DSL
 const result = await client.execute('data.load("sales") | metrics.count()');
@@ -782,12 +783,12 @@ const result = await client.execute(
 
 ```bash
 # Execute pipeline
-curl -X POST http://localhost:8000/api/v1/pipeline/execute \
+curl -X POST http://localhost:18000/api/v1/pipeline/execute \
   -H "Content-Type: application/json" \
   -d '{"dsl": "data.from_input() | metrics.count()", "input_data": [1,2,3]}'
 
 # Parse pipeline
-curl -X POST http://localhost:8000/api/v1/pipeline/parse \
+curl -X POST http://localhost:18000/api/v1/pipeline/parse \
   -H "Content-Type: application/json" \
   -d '{"dsl": "data.load(\"test\") | metrics.sum(\"x\")"}'
 ```
@@ -799,7 +800,7 @@ curl -X POST http://localhost:8000/api/v1/pipeline/parse \
 Real-time pipeline execution updates:
 
 ```
-ws://localhost:8000/ws/pipeline/{execution_id}
+ws://localhost:18000/ws/pipeline/{execution_id}
 ```
 
 ---
@@ -807,9 +808,9 @@ ws://localhost:8000/ws/pipeline/{execution_id}
 ## OpenAPI Schema
 
 Interactive API documentation available at:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-- OpenAPI JSON: `http://localhost:8000/openapi.json`
+- Swagger UI: `http://localhost:18000/docs`
+- ReDoc: `http://localhost:18000/redoc`
+- OpenAPI JSON: `http://localhost:18000/openapi.json`
 
 ---
 

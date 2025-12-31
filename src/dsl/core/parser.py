@@ -262,10 +262,13 @@ class DSLParser:
         
         # Parse steps
         while not self._is_at_end():
+            start_pos = self.pos
             step = self._parse_step()
             if step:
                 steps.append(step)
-            
+            if self.pos == start_pos:
+                raise SyntaxError(f"Unexpected token: {self._current()}")
+
             # Handle pipe operator
             if self._check('PIPE'):
                 self._advance()
@@ -292,6 +295,9 @@ class DSLParser:
         module = self._expect('IDENTIFIER')[1]
         self._expect('DOT')
         action = self._expect('IDENTIFIER')[1]
+
+        if self._check('DOT'):
+            raise SyntaxError(f"Unexpected '.' after '{module}.{action}'")
         
         params = {}
         if self._check('LPAREN'):

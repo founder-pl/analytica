@@ -1,8 +1,19 @@
 # ANALYTICA - Plan Kontynuacji i Refaktoryzacji Architektury
 
-> Status: **186/186 testów przechodzi** ✅
-> Data: 2024-12-31
 > DSL Schema Version: **2.0.0**
+
+## Menu
+
+- [Dokumentacja (INDEX)](INDEX.md)
+- [README](../README.md)
+- [Architektura](ARCHITECTURE.md)
+- [API](API.md)
+- [DSL](DSL.md)
+- [Moduły](MODULES.md)
+- [System punktów](POINTS.md)
+- [Compliance](COMPLIANCE.md)
+- [Views Roadmap](VIEWS_ROADMAP.md)
+- [Mapa plików projektu](../PROJECT_FILES.md)
 
 ---
 

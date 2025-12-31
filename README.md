@@ -4,6 +4,19 @@
 > 
 > Jeden core. Wiele domen. Nieskończone możliwości.
 
+## Menu
+
+- [Dokumentacja (INDEX)](docs/INDEX.md)
+- [Architektura](docs/ARCHITECTURE.md)
+- [API](docs/API.md)
+- [DSL](docs/DSL.md)
+- [Moduły](docs/MODULES.md)
+- [System punktów](docs/POINTS.md)
+- [Compliance](docs/COMPLIANCE.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Views Roadmap](docs/VIEWS_ROADMAP.md)
+- [Mapa plików projektu](PROJECT_FILES.md)
+
 ## 🚀 Quick Start
 
 ```bash
@@ -87,41 +100,8 @@ Funkcje:
 
 ## 📦 Struktura projektu
 
-```
-analytica/
-├── config/
-│   ├── analytica.yaml           # Główna konfiguracja
-│   └── domains/                  # Konfiguracje per-domena
-│       ├── repox.yaml
-│       ├── multiplan.yaml       # 💰 Financial
-│       ├── planbudzetu.yaml     # 💰 Financial
-│       ├── planinwestycji.yaml  # 💰 Financial
-│       └── ...
-├── src/
-│   ├── core/
-│   │   └── domain_router.py     # Routing domen
-│   ├── modules/
-│   │   ├── reports/
-│   │   ├── alerts/
-│   │   ├── budget/              # 💰 Moduł budżetowy
-│   │   ├── investment/          # 💰 Moduł inwestycyjny
-│   │   ├── forecast/
-│   │   └── voice/
-│   └── api/
-│       └── main.py              # FastAPI application
-├── docker/
-│   ├── docker-compose.yml       # Wszystkie serwisy
-│   ├── Dockerfile.api
-│   ├── init-db.sql              # Schema bazy danych
-│   └── prometheus.yml
-├── nginx/
-│   ├── nginx.conf               # Reverse proxy
-│   └── domains/
-├── scripts/
-│   └── start.sh
-├── Makefile
-└── requirements.txt
-```
+- Pełna mapa plików: [PROJECT_FILES.md](PROJECT_FILES.md)
+- Opis architektury i komponentów: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ## 🛠️ Komendy
 
@@ -384,13 +364,13 @@ analytica exec monthly_report.pipe --var year=2024
 analytica build
 
 # Start API server
-analytica serve --port 8080
+analytica serve --port 18000
 ```
 
 ### REST API
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/pipeline/execute \
+curl -X POST http://localhost:18000/api/v1/pipeline/execute \
   -H "Content-Type: application/json" \
   -d '{"dsl": "data.load(\"sales\") | metrics.sum(\"amount\")"}'
 ```
@@ -417,7 +397,7 @@ Każde API domenowe udostępnia wbudowany interfejs pod `/ui/`:
 
 | Domena | URL |
 |--------|-----|
-| repox.pl | http://localhost:8000/ui/ |
+| repox.pl | http://localhost:18000/ui/ |
 | multiplan.pl | http://localhost:8010/ui/ |
 | planbudzetu.pl | http://localhost:8011/ui/ |
 | planinwestycji.pl | http://localhost:8012/ui/ |
@@ -430,17 +410,11 @@ UI pozwala na:
 
 ## 📚 Dokumentacja
 
-| Dokument | Opis |
-|----------|------|
-| [docs/INDEX.md](docs/INDEX.md) | **Menu dokumentacji** - linki do powiązanych plików, testów i entry pointów |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | **Architektura systemu** - przegląd, komponenty, przepływ danych |
-| [docs/POINTS.md](docs/POINTS.md) | **System punktów** - cennik, modele zakupu, API |
-| [docs/DSL.md](docs/DSL.md) | Pełna dokumentacja DSL, SDK Python/JS |
-| [docs/API.md](docs/API.md) | REST API reference, endpointy, przykłady |
-| [docs/MODULES.md](docs/MODULES.md) | Moduły: Budget, Investment, Forecast, Reports, Alerts, Voice |
-| [docs/COMPLIANCE.md](docs/COMPLIANCE.md) | Moduł zgodności: KSeF, CBAM, ESG, ViDA |
-| [docs/ROADMAP.md](docs/ROADMAP.md) | Plan rozwoju i refaktoryzacji architektury |
-| [examples/pipelines.dsl](examples/pipelines.dsl) | Przykłady pipeline'ów DSL |
+- Pełne menu dokumentacji: [docs/INDEX.md](docs/INDEX.md)
+- [docs/MODULES.md](docs/MODULES.md) - Moduły: Budget, Investment, Forecast, Reports, Alerts, Voice
+- [docs/COMPLIANCE.md](docs/COMPLIANCE.md) - Moduł zgodności: KSeF, CBAM, ESG, ViDA
+- [docs/ROADMAP.md](docs/ROADMAP.md) - Plan rozwoju i refaktoryzacji architektury
+- [examples/pipelines.dsl](examples/pipelines.dsl) - Przykłady pipeline'ów DSL
 
 ### Landing Pages (SaaS)
 

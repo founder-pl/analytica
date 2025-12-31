@@ -1,5 +1,18 @@
 # Analytica - System Punktów
 
+## Menu
+
+- [Dokumentacja (INDEX)](INDEX.md)
+- [README](../README.md)
+- [Architektura](ARCHITECTURE.md)
+- [API](API.md)
+- [DSL](DSL.md)
+- [Moduły](MODULES.md)
+- [Compliance](COMPLIANCE.md)
+- [Roadmap](ROADMAP.md)
+- [Views Roadmap](VIEWS_ROADMAP.md)
+- [Mapa plików projektu](../PROJECT_FILES.md)
+
 ## Spis Treści
 
 - [Przegląd](#przegląd)

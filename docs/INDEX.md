@@ -2,6 +2,19 @@
 
 ## Menu
 
+- [README](../README.md)
+- [Architektura](ARCHITECTURE.md)
+- [API](API.md)
+- [DSL](DSL.md)
+- [Moduły](MODULES.md)
+- [System punktów](POINTS.md)
+- [Compliance](COMPLIANCE.md)
+- [Roadmap](ROADMAP.md)
+- [Views Roadmap](VIEWS_ROADMAP.md)
+- [Mapa plików projektu](../PROJECT_FILES.md)
+
+## Menu (rozszerzone)
+
 ### Start
 
 - [Quick Start (README)](../README.md#-quick-start)

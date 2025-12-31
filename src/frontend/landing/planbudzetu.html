@@ -207,69 +207,32 @@
       </p>
     </div>
     
-    <div class="dsl-container">
+    <div class="dsl-container" data-landing-dsl-demo data-sample="/landing/sample-data/finance.json" data-input-path="monthly">
       <div class="dsl-editor">
         <div class="dsl-editor-header">
           <span class="dsl-editor-dot red"></span>
           <span class="dsl-editor-dot yellow"></span>
           <span class="dsl-editor-dot green"></span>
-          <span class="dsl-editor-title">budget_variance.dsl</span>
+          <span class="dsl-editor-title">budget_live_demo.dsl</span>
         </div>
-        <div class="dsl-code">
-<span class="comment"># Kompleksowa analiza budżetu</span>
-<span class="keyword">@pipeline</span> <span class="function">budget_variance_report</span>:
-    <span class="variable">$budget_id</span> = <span class="string">"bdgt_2025_q1"</span>
-    <span class="variable">$threshold</span> = <span class="number">0.1</span>
-    
-    <span class="comment"># Załaduj budżet i oblicz wariancję</span>
-    <span class="function">budget.load</span>(<span class="variable">$budget_id</span>)
-    | <span class="function">budget.variance</span>()
-    | <span class="function">budget.categorize</span>()
-    
-    <span class="comment"># Sprawdź przekroczenia</span>
-    | <span class="function">alert.threshold</span>(
-        metric=<span class="string">"variance_percent"</span>,
-        operator=<span class="string">"gt"</span>,
-        threshold=<span class="variable">$threshold</span>
-    )
-    
-    <span class="comment"># Wygeneruj raport</span>
-    | <span class="function">report.generate</span>(
-        format=<span class="string">"pdf"</span>,
-        template=<span class="string">"budget_variance"</span>
-    )
-    | <span class="function">report.send</span>(
-        to=[<span class="string">"finance@company.pl"</span>]
-    )
+        <textarea class="dsl-code" data-dsl style="width: 100%; min-height: 260px; border: 0; outline: none; background: transparent; color: inherit; resize: vertical;">data.load("/landing/sample-data/finance.json")
+| view.card(value="total_assets", title="Aktywa", icon="🏦", style="info")
+| view.card(value="equity", title="Kapitał", icon="💎", style="success")
+| transform.filter(month__ne="")
+| view.chart(type="bar", x="month", y="income", title="Przychody (mies.)")
+| view.table(title="Monthly", columns=["month","income","expenses"])\
+</textarea>
+        <div style="display: flex; gap: 12px; align-items: center; padding: 16px 24px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+          <button class="btn btn-primary" data-run>▶️ Uruchom demo (LIVE)</button>
+          <span class="status-badge" data-status style="display:none;"></span>
+          <a class="btn btn-ghost" href="dsl-editor.html">Otwórz DSL Editor</a>
         </div>
       </div>
       
       <div class="dsl-result">
-        <div class="dsl-result-title">Wynik wykonania</div>
-        <div class="dsl-result-content">
-{
-  "status": "success",
-  "execution_id": "exec_abc123",
-  "results": {
-    "budget": {
-      "total_planned": 500000,
-      "total_actual": 485000,
-      "variance": -15000,
-      "variance_percent": -3.0
-    },
-    "categories": [
-      {"name": "Marketing", "variance": -5000},
-      {"name": "IT", "variance": -8000},
-      {"name": "HR", "variance": -2000}
-    ],
-    "alerts": [],
-    "report": {
-      "format": "pdf",
-      "url": "/reports/budget_q1.pdf"
-    }
-  }
-}
-        </div>
+        <div class="dsl-result-title">Wynik (views + JSON)</div>
+        <div data-output-views></div>
+        <div class="dsl-result-content" data-output-json style="margin-top: 16px;"></div>
       </div>
     </div>
   </div>
@@ -414,6 +377,8 @@
     </div>
   </div>
 </footer>
+
+<script type="module" src="./landing-dsl.js"></script>
 
 </body>
 </html>

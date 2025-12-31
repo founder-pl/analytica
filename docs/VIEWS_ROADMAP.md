@@ -1,8 +1,21 @@
 # DSL-Driven Views - Roadmap
 
+## Menu
+
+- [Dokumentacja (INDEX)](INDEX.md)
+- [README](../README.md)
+- [Architektura](ARCHITECTURE.md)
+- [API](API.md)
+- [DSL](DSL.md)
+- [Moduły](MODULES.md)
+- [System punktów](POINTS.md)
+- [Compliance](COMPLIANCE.md)
+- [Roadmap](ROADMAP.md)
+- [Mapa plików projektu](../PROJECT_FILES.md)
+
 ## Przegląd
 
-System DSL-driven views pozwala na generowanie dynamicznych widoków UI bezpośrednio z pipeline'ów DSL. Backend generuje specyfikację widoków w JSON, a frontend (`ViewRenderer.js`) renderuje je do HTML.
+System DSL-driven views pozwala na generowanie dynamicznych widoków UI bezpośrednio z pipeline'ów DSL. Backend generuje specyfikację widoków w JSON, a frontend (`src/frontend/view-renderer.js`) renderuje je do HTML.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -59,7 +72,7 @@ System DSL-driven views pozwala na generowanie dynamicznych widoków UI bezpośr
 | `view.dashboard` | ✅ | Kompletny dashboard z widgetami |
 | `view.text` | ✅ | Text, markdown, HTML |
 | `view.list` | ✅ | Lista z primary/secondary |
-| `ViewRenderer.js` | ✅ | Frontend renderer |
+| `view-renderer.js` | ✅ | Frontend renderer |
 | Testy jednostkowe | ✅ | 24/24 passed |
 
 ### 🔄 Faza 2: Enhanced Charts (W TRAKCIE)
