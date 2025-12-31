@@ -12,8 +12,7 @@ GREEN := \033[0;32m
 YELLOW := \033[1;33m
 NC := \033[0m
 
-REPOX_HOST_PORT ?= 8000
-REPOX_FALLBACK_HOST_PORT ?= 18000
+REPOX_HOST_PORT ?= 18000
 
 help: ## Show this help
 	@echo ""
@@ -62,20 +61,9 @@ down-infra: ## Stop infrastructure
 
 up: ## Start all services
 	@echo "$(CYAN)Starting all services...$(NC)"
-	@PORT="$(REPOX_HOST_PORT)"; \
-	if command -v ss >/dev/null 2>&1; then \
-		if ss -ltn "sport = :$$PORT" 2>/dev/null | grep -q LISTEN; then \
-			echo "$(YELLOW)Port $$PORT is already in use. Using $(REPOX_FALLBACK_HOST_PORT) for repox.pl (override with REPOX_HOST_PORT=...).$(NC)"; \
-			PORT="$(REPOX_FALLBACK_HOST_PORT)"; \
-		fi; \
-	elif command -v lsof >/dev/null 2>&1; then \
-		if lsof -iTCP:$$PORT -sTCP:LISTEN >/dev/null 2>&1; then \
-			echo "$(YELLOW)Port $$PORT is already in use. Using $(REPOX_FALLBACK_HOST_PORT) for repox.pl (override with REPOX_HOST_PORT=...).$(NC)"; \
-			PORT="$(REPOX_FALLBACK_HOST_PORT)"; \
-		fi; \
-	fi; \
-	cd docker && REPOX_HOST_PORT=$$PORT docker-compose up -d; \
-	$(MAKE) -C .. status REPOX_HOST_PORT=$$PORT
+	cd docker && REPOX_HOST_PORT=$(REPOX_HOST_PORT) docker-compose up -d
+	@echo ""
+	@$(MAKE) status
 
 down: ## Stop all services
 	@echo "$(YELLOW)Stopping all services...$(NC)"
@@ -141,22 +129,34 @@ status: ## Show status of all services
 	@cd docker && docker-compose ps
 	@echo ""
 	@echo "$(YELLOW)API Endpoints:$(NC)"
-	@echo "┌────────────────────┬──────────┬────────────────────────────────┐"
-	@echo "│ Domain             │ API Port │ Status                         │"
-	@echo "├────────────────────┼──────────┼────────────────────────────────┤"
-	@echo "│ repox.pl           │ $(REPOX_HOST_PORT)     │ http://localhost:$(REPOX_HOST_PORT)          │"
-	@echo "│ analizowanie.pl    │ 8001     │ http://localhost:8001          │"
-	@echo "│ przeanalizuj.pl    │ 8002     │ http://localhost:8002          │"
-	@echo "│ alerts.pl          │ 8003     │ http://localhost:8003          │"
-	@echo "│ estymacja.pl       │ 8004     │ http://localhost:8004          │"
-	@echo "│ retrospektywa.pl   │ 8005     │ http://localhost:8005          │"
-	@echo "│ persony.pl         │ 8006     │ http://localhost:8006          │"
-	@echo "│ specyfikacja.pl    │ 8007     │ http://localhost:8007          │"
-	@echo "│ nisza.pl           │ 8008     │ http://localhost:8008          │"
-	@echo "│ $(GREEN)multiplan.pl$(NC)       │ $(GREEN)8010$(NC)     │ $(GREEN)http://localhost:8010$(NC)          │"
-	@echo "│ $(GREEN)planbudzetu.pl$(NC)     │ $(GREEN)8011$(NC)     │ $(GREEN)http://localhost:8011$(NC)          │"
-	@echo "│ $(GREEN)planinwestycji.pl$(NC)  │ $(GREEN)8012$(NC)     │ $(GREEN)http://localhost:8012$(NC)          │"
-	@echo "└────────────────────┴──────────┴────────────────────────────────┘"
+	@echo "┌────────────────────┬──────────┬──────────────────────────────────┐"
+	@echo "│ Domain             │ Port     │ URL                              │"
+	@echo "├────────────────────┼──────────┼──────────────────────────────────┤"
+	@echo "│ repox.pl           │ 18000    │ http://localhost:18000           │"
+	@echo "│ analizowanie.pl    │ 8001     │ http://localhost:8001            │"
+	@echo "│ przeanalizuj.pl    │ 8002     │ http://localhost:8002            │"
+	@echo "│ alerts.pl          │ 8003     │ http://localhost:8003            │"
+	@echo "│ estymacja.pl       │ 8004     │ http://localhost:8004            │"
+	@echo "│ retrospektywa.pl   │ 8005     │ http://localhost:8005            │"
+	@echo "│ persony.pl         │ 8006     │ http://localhost:8006            │"
+	@echo "│ specyfikacja.pl    │ 8007     │ http://localhost:8007            │"
+	@echo "│ nisza.pl           │ 8008     │ http://localhost:8008            │"
+	@echo "│ $(GREEN)multiplan.pl$(NC)       │ $(GREEN)8010$(NC)     │ $(GREEN)http://localhost:8010$(NC)            │"
+	@echo "│ $(GREEN)planbudzetu.pl$(NC)     │ $(GREEN)8011$(NC)     │ $(GREEN)http://localhost:8011$(NC)            │"
+	@echo "│ $(GREEN)planinwestycji.pl$(NC)  │ $(GREEN)8012$(NC)     │ $(GREEN)http://localhost:8012$(NC)            │"
+	@echo "└────────────────────┴──────────┴──────────────────────────────────┘"
+	@echo ""
+	@echo "$(YELLOW)🎯 Dla KLIENTÓW (oferta + logowanie):$(NC)"
+	@echo "  - Strona główna:    http://localhost:18000/landing/"
+	@echo "  - Logowanie:        http://localhost:18000/landing/login.html"
+	@echo "  - PlanBudzetu:      http://localhost:18000/landing/planbudzetu.html"
+	@echo "  - PlanInwestycji:   http://localhost:18000/landing/planinwestycji.html"
+	@echo "  - MultiPlan:        http://localhost:18000/landing/multiplan.html"
+	@echo "  - Estymacja:        http://localhost:18000/landing/estymacja.html"
+	@echo ""
+	@echo "$(YELLOW)🔧 Dla DEVELOPERÓW (narzędzia):$(NC)"
+	@echo "  - Dashboard UI:     http://localhost:18000/ui/"
+	@echo "  - API Docs:         http://localhost:18000/docs"
 	@echo ""
 	@echo "$(YELLOW)Infrastructure:$(NC)"
 	@echo "  - Grafana:    http://localhost:3100 (admin/admin)"

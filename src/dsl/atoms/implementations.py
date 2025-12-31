@@ -717,3 +717,250 @@ def export_to_api(ctx: PipelineContext, url: str, method: str = "POST", **params
         "status": "sent",
         "payload_size": len(json.dumps(data, default=str)) if data else 0
     }
+
+
+# ============================================================
+# VIEW ATOMS - Generate view specifications for frontend rendering
+# ============================================================
+
+_view_counter = 0
+
+def _generate_view_id(prefix: str) -> str:
+    global _view_counter
+    _view_counter += 1
+    return f"{prefix}_{_view_counter}"
+
+
+def _wrap_view_result(data: Any, view_spec: Dict) -> Dict:
+    """Wrap data and view spec into result format"""
+    if isinstance(data, dict) and "views" in data:
+        data["views"].append(view_spec)
+        return data
+    return {"data": data, "views": [view_spec]}
+
+
+@AtomRegistry.register("view", "chart")
+def view_chart(ctx: PipelineContext, **params) -> Dict:
+    """Generate chart view specification"""
+    data = ctx.get_data()
+    
+    chart_type = params.get("type", params.get("_arg0", "bar"))
+    x_field = params.get("x", params.get("x_field", ""))
+    y_field = params.get("y", params.get("y_field", ""))
+    series = params.get("series", [])
+    title = params.get("title", "")
+    colors = params.get("colors", [])
+    show_legend = params.get("legend", True)
+    show_grid = params.get("grid", True)
+    
+    ctx.log(f"Creating chart view: {chart_type}")
+    
+    spec = {
+        "type": "chart",
+        "id": _generate_view_id("chart"),
+        "title": title,
+        "chart_type": chart_type,
+        "x_field": x_field,
+        "y_field": y_field,
+        "series": series if isinstance(series, list) else [series],
+        "colors": colors if isinstance(colors, list) else [colors],
+        "show_legend": show_legend,
+        "show_grid": show_grid,
+    }
+    
+    return _wrap_view_result(data, spec)
+
+
+@AtomRegistry.register("view", "table")
+def view_table(ctx: PipelineContext, **params) -> Dict:
+    """Generate table view specification"""
+    data = ctx.get_data()
+    
+    columns_input = params.get("columns", params.get("_arg0", []))
+    title = params.get("title", "")
+    sortable = params.get("sortable", True)
+    filterable = params.get("filterable", True)
+    paginate = params.get("paginate", True)
+    page_size = params.get("page_size", 10)
+    striped = params.get("striped", True)
+    
+    # Convert simple column names to column specs
+    columns = []
+    if isinstance(columns_input, list):
+        for col in columns_input:
+            if isinstance(col, str):
+                columns.append({"field": col, "header": col.replace("_", " ").title()})
+            elif isinstance(col, dict):
+                columns.append(col)
+    
+    # Auto-detect columns from data if not specified
+    if not columns and isinstance(data, list) and len(data) > 0:
+        if isinstance(data[0], dict):
+            columns = [{"field": k, "header": k.replace("_", " ").title()} 
+                      for k in data[0].keys()]
+    
+    ctx.log(f"Creating table view with {len(columns)} columns")
+    
+    spec = {
+        "type": "table",
+        "id": _generate_view_id("table"),
+        "title": title,
+        "columns": columns,
+        "sortable": sortable,
+        "filterable": filterable,
+        "paginate": paginate,
+        "page_size": page_size,
+        "striped": striped,
+    }
+    
+    return _wrap_view_result(data, spec)
+
+
+@AtomRegistry.register("view", "card")
+def view_card(ctx: PipelineContext, **params) -> Dict:
+    """Generate metric card specification"""
+    data = ctx.get_data()
+    
+    value_field = params.get("value", params.get("_arg0", ""))
+    title = params.get("title", "")
+    format_str = params.get("format", "")
+    icon = params.get("icon", "")
+    style = params.get("style", "default")
+    trend_field = params.get("trend", "")
+    
+    ctx.log(f"Creating card view: {title}")
+    
+    spec = {
+        "type": "card",
+        "id": _generate_view_id("card"),
+        "title": title,
+        "value_field": value_field,
+        "format": format_str,
+        "icon": icon,
+        "style": style,
+        "trend_field": trend_field,
+    }
+    
+    return _wrap_view_result(data, spec)
+
+
+@AtomRegistry.register("view", "kpi")
+def view_kpi(ctx: PipelineContext, **params) -> Dict:
+    """Generate KPI widget specification"""
+    data = ctx.get_data()
+    
+    value_field = params.get("value", params.get("_arg0", ""))
+    target_field = params.get("target", "")
+    title = params.get("title", "")
+    format_str = params.get("format", "")
+    icon = params.get("icon", "")
+    show_progress = params.get("progress", True)
+    
+    ctx.log(f"Creating KPI view: {title}")
+    
+    spec = {
+        "type": "kpi",
+        "id": _generate_view_id("kpi"),
+        "title": title,
+        "value_field": value_field,
+        "target_field": target_field,
+        "format": format_str,
+        "icon": icon,
+        "show_progress": show_progress,
+    }
+    
+    return _wrap_view_result(data, spec)
+
+
+@AtomRegistry.register("view", "grid")
+def view_grid(ctx: PipelineContext, **params) -> Dict:
+    """Generate grid layout specification"""
+    data = ctx.get_data()
+    
+    columns = params.get("columns", params.get("_arg0", 2))
+    gap = params.get("gap", 16)
+    items = params.get("items", [])
+    title = params.get("title", "")
+    
+    ctx.log(f"Creating grid view: {columns} columns")
+    
+    spec = {
+        "type": "grid",
+        "id": _generate_view_id("grid"),
+        "title": title,
+        "columns": columns,
+        "gap": gap,
+        "items": items,
+    }
+    
+    return _wrap_view_result(data, spec)
+
+
+@AtomRegistry.register("view", "dashboard")
+def view_dashboard(ctx: PipelineContext, **params) -> Dict:
+    """Generate dashboard specification"""
+    data = ctx.get_data()
+    
+    layout = params.get("layout", params.get("_arg0", "grid"))
+    widgets = params.get("widgets", [])
+    title = params.get("title", "")
+    refresh = params.get("refresh", 0)
+    
+    ctx.log(f"Creating dashboard view: {title}")
+    
+    spec = {
+        "type": "dashboard",
+        "id": _generate_view_id("dashboard"),
+        "title": title,
+        "layout": layout,
+        "widgets": widgets,
+        "refresh_interval": refresh,
+    }
+    
+    return _wrap_view_result(data, spec)
+
+
+@AtomRegistry.register("view", "text")
+def view_text(ctx: PipelineContext, **params) -> Dict:
+    """Generate text/markdown view specification"""
+    data = ctx.get_data()
+    
+    content = params.get("content", params.get("_arg0", ""))
+    format_type = params.get("format", "text")
+    title = params.get("title", "")
+    
+    ctx.log(f"Creating text view")
+    
+    spec = {
+        "type": "text",
+        "id": _generate_view_id("text"),
+        "title": title,
+        "content": content,
+        "format": format_type,
+    }
+    
+    return _wrap_view_result(data, spec)
+
+
+@AtomRegistry.register("view", "list")
+def view_list(ctx: PipelineContext, **params) -> Dict:
+    """Generate list view specification"""
+    data = ctx.get_data()
+    
+    title = params.get("title", "")
+    primary_field = params.get("primary", params.get("_arg0", ""))
+    secondary_field = params.get("secondary", "")
+    icon_field = params.get("icon", "")
+    
+    ctx.log(f"Creating list view")
+    
+    spec = {
+        "type": "list",
+        "id": _generate_view_id("list"),
+        "title": title,
+        "primary_field": primary_field,
+        "secondary_field": secondary_field,
+        "icon_field": icon_field,
+    }
+    
+    return _wrap_view_result(data, spec)

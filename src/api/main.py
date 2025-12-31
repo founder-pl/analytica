@@ -44,7 +44,7 @@ _frontend_dir = _src_dir / "frontend"
 _landing_dir = _frontend_dir / "landing"
 _sdk_js_dir = _src_dir / "sdk" / "js"
 
-# Mount static directories
+# Mount static directories (order matters - more specific paths first)
 if _sdk_js_dir.exists():
     app.mount("/ui/sdk", StaticFiles(directory=str(_sdk_js_dir)), name="ui-sdk")
 if _landing_dir.exists():

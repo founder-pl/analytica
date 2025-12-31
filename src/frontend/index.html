@@ -36,6 +36,14 @@
             <button class="template-btn" data-template="forecast">🔮 Forecast</button>
             <button class="template-btn" data-template="alert">🚨 Alert Setup</button>
           </div>
+          <div class="templates" style="margin-top: 8px;">
+            <span class="templates-label">DSL Views:</span>
+            <button class="template-btn" data-template="viewChart">📊 Chart</button>
+            <button class="template-btn" data-template="viewTable">📋 Table</button>
+            <button class="template-btn" data-template="viewCards">🎴 Cards</button>
+            <button class="template-btn" data-template="viewKPI">🎯 KPI</button>
+            <button class="template-btn" data-template="viewDashboard">🖥️ Dashboard</button>
+          </div>
 
           <div class="grid2">
             <label class="field">
@@ -81,6 +89,9 @@
             <button id="btnExecute" class="button">Execute</button>
           </div>
 
+          <!-- View Container for dynamic rendering -->
+          <div id="viewContainer" class="view-container" style="display: none;"></div>
+          
           <div class="output">
             <div class="output-title">Output</div>
             <pre id="output" class="output-pre"></pre>

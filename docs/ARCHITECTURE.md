@@ -377,6 +377,44 @@ curl -X POST http://localhost:18000/api/v1/pipeline/execute \
 
 ---
 
+## Port Mapping
+
+| Domena | Port | URL | Opis |
+|--------|------|-----|------|
+| **repox.pl** | 18000 | http://localhost:18000 | Hub główny |
+| analizowanie.pl | 8001 | http://localhost:8001 | General analytics |
+| przeanalizuj.pl | 8002 | http://localhost:8002 | Voice commands |
+| alerts.pl | 8003 | http://localhost:8003 | Monitoring |
+| estymacja.pl | 8004 | http://localhost:8004 | Forecasting |
+| retrospektywa.pl | 8005 | http://localhost:8005 | Historical |
+| persony.pl | 8006 | http://localhost:8006 | Marketing |
+| specyfikacja.pl | 8007 | http://localhost:8007 | Documentation |
+| nisza.pl | 8008 | http://localhost:8008 | White-label |
+| **multiplan.pl** | 8010 | http://localhost:8010 | Financial planning |
+| **planbudzetu.pl** | 8011 | http://localhost:8011 | Budget management |
+| **planinwestycji.pl** | 8012 | http://localhost:8012 | Investment analysis |
+
+### Widoki dla KLIENTÓW (oferta, logowanie)
+
+| URL | Opis |
+|-----|------|
+| http://localhost:18000/landing/ | **Strona główna** - oferta produktów SaaS |
+| http://localhost:18000/landing/login.html | **Logowanie/Rejestracja** - panel klienta |
+| http://localhost:18000/landing/planbudzetu.html | Oferta PlanBudzetu.pl |
+| http://localhost:18000/landing/planinwestycji.html | Oferta PlanInwestycji.pl |
+| http://localhost:18000/landing/multiplan.html | Oferta MultiPlan.pl |
+| http://localhost:18000/landing/estymacja.html | Oferta Estymacja.pl |
+
+### Widoki dla DEVELOPERÓW (narzędzia)
+
+| URL | Opis |
+|-----|------|
+| http://localhost:18000/ui/ | Dashboard UI - Pipeline Builder z DSL Views |
+| http://localhost:18000/docs | Swagger API docs |
+| http://localhost:18000/redoc | ReDoc API docs |
+
+---
+
 ## Linki do dokumentacji
 
 | Dokument | Opis |
@@ -386,6 +424,7 @@ curl -X POST http://localhost:18000/api/v1/pipeline/execute \
 | [MODULES.md](./MODULES.md) | Dokumentacja modułów |
 | [POINTS.md](./POINTS.md) | System punktów |
 | [DSL.md](./DSL.md) | Język DSL |
+| [VIEWS_ROADMAP.md](./VIEWS_ROADMAP.md) | DSL-driven views |
 | [ROADMAP.md](./ROADMAP.md) | Plan rozwoju |
 
 ---
@@ -395,9 +434,9 @@ curl -X POST http://localhost:18000/api/v1/pipeline/execute \
 ```bash
 # Development
 make up
+# → http://localhost:18000/ui/          # Dashboard UI
 # → http://localhost:18000/landing/     # Landing pages
-# → http://localhost:18000/ui/          # Dashboard
-# → http://localhost:18000/api/v1/docs  # API docs
+# → http://localhost:18000/docs         # Swagger API docs
 
 # Testy
 make test

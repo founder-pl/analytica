@@ -1,6 +1,10 @@
 import { configure, Atom, createClient } from '/ui/sdk/analytica.js';
+import { createViewRenderer, injectStyles } from '/ui/view-renderer.js';
 
 const el = (id) => document.getElementById(id);
+
+// Initialize view renderer
+let viewRenderer = null;
 
 const apiBaseUrlInput = el('apiBaseUrl');
 const reloadBtn = el('reload');
@@ -496,16 +500,45 @@ async function execute(action) {
       const res = await client.run(dsl, { variables, inputData, domain });
       const duration = (performance.now() - startTime).toFixed(0);
       
-      let output = pretty(res);
-      output += `\n\n--- Execution Info ---\nDuration: ${duration}ms`;
-      if (res.execution_time_ms) {
-        output += `\nServer time: ${res.execution_time_ms.toFixed(2)}ms`;
-      }
-      if (res.logs && res.logs.length > 0) {
-        output += `\n\n--- Logs ---\n${res.logs.join('\n')}`;
+      // Check if result contains views for dynamic rendering
+      const result = res.result || res;
+      const hasViews = result && result.views && Array.isArray(result.views) && result.views.length > 0;
+      
+      if (hasViews) {
+        // Use ViewRenderer for dynamic view rendering
+        const viewContainer = el('viewContainer');
+        if (viewContainer) {
+          viewContainer.style.display = 'block';
+          if (!viewRenderer) {
+            viewRenderer = createViewRenderer(viewContainer);
+          }
+          viewRenderer.render(result);
+        }
+        
+        // Also show JSON in output for debugging
+        let output = `--- Rendered ${result.views.length} view(s) ---\n\n`;
+        output += pretty(res);
+        output += `\n\n--- Execution Info ---\nDuration: ${duration}ms`;
+        if (res.execution_time_ms) {
+          output += `\nServer time: ${res.execution_time_ms.toFixed(2)}ms`;
+        }
+        outputPre.textContent = output;
+      } else {
+        // Standard JSON output
+        const viewContainer = el('viewContainer');
+        if (viewContainer) viewContainer.style.display = 'none';
+        
+        let output = pretty(res);
+        output += `\n\n--- Execution Info ---\nDuration: ${duration}ms`;
+        if (res.execution_time_ms) {
+          output += `\nServer time: ${res.execution_time_ms.toFixed(2)}ms`;
+        }
+        if (res.logs && res.logs.length > 0) {
+          output += `\n\n--- Logs ---\n${res.logs.join('\n')}`;
+        }
+        outputPre.textContent = output;
       }
       
-      outputPre.textContent = output;
       setStatus(res.status === 'success', res.status === 'success' ? `Done (${duration}ms)` : res.status || 'Error');
       return;
     }
@@ -584,6 +617,85 @@ const TEMPLATES = {
       { type: 'alert', action: 'threshold', paramsObj: { metric: 'total', operator: 'gt', threshold: 1000000 } },
       { type: 'alert', action: 'send', paramsObj: { channel: 'email', recipient: 'team@company.pl', message: 'Threshold exceeded!' } }
     ]
+  },
+  // DSL-Driven Views Templates
+  viewChart: {
+    name: 'View: Chart Dashboard',
+    steps: [
+      { type: 'data', action: 'from_input', paramsObj: {} },
+      { type: 'view', action: 'chart', paramsObj: { type: 'bar', x: 'month', y: 'sales', title: 'Monthly Sales' } }
+    ],
+    inputData: [
+      { month: 'Jan', sales: 12000 },
+      { month: 'Feb', sales: 15000 },
+      { month: 'Mar', sales: 18000 },
+      { month: 'Apr', sales: 14000 },
+      { month: 'May', sales: 21000 },
+      { month: 'Jun', sales: 19000 }
+    ]
+  },
+  viewTable: {
+    name: 'View: Data Table',
+    steps: [
+      { type: 'data', action: 'from_input', paramsObj: {} },
+      { type: 'view', action: 'table', paramsObj: { title: 'Transaction Log', columns: ['id', 'date', 'amount', 'status'] } }
+    ],
+    inputData: [
+      { id: 1, date: '2024-01-15', amount: 1250, status: 'completed' },
+      { id: 2, date: '2024-01-16', amount: 890, status: 'pending' },
+      { id: 3, date: '2024-01-17', amount: 2100, status: 'completed' },
+      { id: 4, date: '2024-01-18', amount: 450, status: 'failed' },
+      { id: 5, date: '2024-01-19', amount: 3200, status: 'completed' }
+    ]
+  },
+  viewCards: {
+    name: 'View: KPI Cards',
+    steps: [
+      { type: 'data', action: 'from_input', paramsObj: {} },
+      { type: 'view', action: 'card', paramsObj: { value: 'total_sales', title: 'Total Sales', icon: '💰', style: 'success' } },
+      { type: 'view', action: 'card', paramsObj: { value: 'avg_order', title: 'Avg Order', icon: '📊', style: 'info' } },
+      { type: 'view', action: 'card', paramsObj: { value: 'customers', title: 'Customers', icon: '👥', style: 'default' } }
+    ],
+    inputData: {
+      total_sales: 125000,
+      avg_order: 2500,
+      customers: 847,
+      growth: 12.5
+    }
+  },
+  viewDashboard: {
+    name: 'View: Full Dashboard',
+    steps: [
+      { type: 'data', action: 'from_input', paramsObj: {} },
+      { type: 'view', action: 'card', paramsObj: { value: 'revenue', title: 'Revenue', icon: '💰', style: 'success' } },
+      { type: 'view', action: 'card', paramsObj: { value: 'orders', title: 'Orders', icon: '📦', style: 'info' } },
+      { type: 'view', action: 'chart', paramsObj: { type: 'bar', x: 'month', y: 'value', title: 'Monthly Trend' } },
+      { type: 'view', action: 'table', paramsObj: { title: 'Recent Orders' } }
+    ],
+    inputData: {
+      revenue: 98500,
+      orders: 342,
+      data: [
+        { month: 'Jan', value: 15000, id: 1, product: 'Widget A', amount: 1200 },
+        { month: 'Feb', value: 18000, id: 2, product: 'Widget B', amount: 890 },
+        { month: 'Mar', value: 22000, id: 3, product: 'Widget C', amount: 2100 },
+        { month: 'Apr', value: 19000, id: 4, product: 'Widget A', amount: 1500 }
+      ]
+    }
+  },
+  viewKPI: {
+    name: 'View: KPI Progress',
+    steps: [
+      { type: 'data', action: 'from_input', paramsObj: {} },
+      { type: 'view', action: 'kpi', paramsObj: { value: 'current', target: 'goal', title: 'Sales Target', icon: '🎯' } },
+      { type: 'view', action: 'kpi', paramsObj: { value: 'customers_new', target: 'customers_target', title: 'New Customers', icon: '👥' } }
+    ],
+    inputData: {
+      current: 78500,
+      goal: 100000,
+      customers_new: 156,
+      customers_target: 200
+    }
   }
 };
 
@@ -593,6 +705,13 @@ function loadTemplate(templateId) {
   
   // Clear current steps
   steps = [];
+  
+  // Set input data if template has it
+  if (template.inputData) {
+    inputDataJsonTextarea.value = JSON.stringify(template.inputData, null, 2);
+  } else {
+    inputDataJsonTextarea.value = '';
+  }
   
   // Add template steps
   for (const step of template.steps) {
@@ -644,6 +763,9 @@ function init() {
 async function boot() {
   outputPre.textContent = '';
   setStatus(true, 'Loading...');
+
+  // Inject ViewRenderer styles
+  injectStyles();
 
   try {
     await loadDomainInfo();

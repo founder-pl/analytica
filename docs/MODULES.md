@@ -568,12 +568,193 @@ register_module(MyModule())
 
 ---
 
-## See Also
+## Views Module
 
-- [DSL Documentation](DSL.md)
-- [API Reference](API.md)
-- [Architecture Roadmap](ROADMAP.md)
+**Location:** `src/modules/views/` + `src/dsl/atoms/implementations.py`
+
+DSL atoms for generating view specifications that can be rendered dynamically by the frontend.
+
+### Features
+- Generate chart, table, card, KPI views from DSL
+- Automatic column detection for tables
+- Multiple views in single pipeline
+- Data preservation through view chain
+
+### DSL Atoms
+
+#### `view.chart`
+Generate chart view specification.
+
+```dsl
+data.from_input()
+| view.chart(type="bar", x="month", y="sales", title="Sales Chart")
+```
+
+**Parameters:**
+- `type` (str) - Chart type: bar, line, pie, area, scatter, donut, gauge
+- `x` (str) - X-axis field name
+- `y` (str) - Y-axis field name
+- `series` (list) - Multiple series field names
+- `title` (str) - Chart title
+- `colors` (list) - Custom color palette
+- `legend` (bool) - Show legend (default: true)
 
 ---
 
-*Last updated: 2024-12-31*
+#### `view.table`
+Generate table view specification.
+
+```dsl
+data.from_input()
+| view.table(columns=["name", "amount", "date"], title="Transactions")
+```
+
+**Parameters:**
+- `columns` (list) - Column names or specs (auto-detected if empty)
+- `title` (str) - Table title
+- `sortable` (bool) - Enable sorting (default: true)
+- `filterable` (bool) - Enable filtering (default: true)
+- `paginate` (bool) - Enable pagination (default: true)
+- `page_size` (int) - Rows per page (default: 10)
+
+---
+
+#### `view.card`
+Generate metric card specification.
+
+```dsl
+metrics.sum("amount")
+| view.card(value="sum", title="Total Sales", icon="💰", style="success")
+```
+
+**Parameters:**
+- `value` (str) - Field name for main value
+- `title` (str) - Card title
+- `format` (str) - Value format: number, currency, percent
+- `icon` (str) - Icon (emoji or icon name)
+- `style` (str) - Card style: default, success, warning, danger, info
+- `trend` (str) - Field name for trend indicator
+
+---
+
+#### `view.kpi`
+Generate KPI widget specification.
+
+```dsl
+data.from_input()
+| view.kpi(value="current", target="goal", title="Progress", icon="📈")
+```
+
+**Parameters:**
+- `value` (str) - Field name for current value
+- `target` (str) - Field name for target value
+- `title` (str) - KPI title
+- `format` (str) - Value format
+- `icon` (str) - Icon
+- `progress` (bool) - Show progress bar (default: true)
+
+---
+
+#### `view.grid`
+Generate grid layout specification.
+
+```dsl
+view.grid(columns=3, gap=20)
+```
+
+**Parameters:**
+- `columns` (int) - Number of columns (default: 2)
+- `gap` (int) - Gap between items in pixels (default: 16)
+- `items` (list) - List of view specifications
+
+---
+
+#### `view.dashboard`
+Generate complete dashboard specification.
+
+```dsl
+view.dashboard(layout="grid", title="Sales Dashboard", refresh=30)
+```
+
+**Parameters:**
+- `layout` (str) - Layout type: grid, flex, stack
+- `widgets` (list) - List of widget specifications
+- `title` (str) - Dashboard title
+- `refresh` (int) - Auto-refresh interval in seconds
+
+---
+
+#### `view.text`
+Generate text/markdown view.
+
+```dsl
+view.text(content="**Summary**: Total sales increased by 15%", format="markdown")
+```
+
+**Parameters:**
+- `content` (str) - Text content (supports {{field}} placeholders)
+- `format` (str) - Format type: text, markdown, html
+- `title` (str) - Title
+
+---
+
+#### `view.list`
+Generate list view specification.
+
+```dsl
+data.from_input()
+| view.list(primary="name", secondary="description", icon="icon")
+```
+
+**Parameters:**
+- `primary` (str) - Primary text field
+- `secondary` (str) - Secondary text field
+- `icon` (str) - Icon field
+
+### Example: Multi-View Dashboard
+
+```dsl
+data.from_input()
+| view.card(value="total", title="Total Sales", icon="💰", style="success")
+| view.chart(type="bar", x="month", y="sales", title="Monthly Sales")
+| view.table(columns=["month", "sales", "growth"], title="Details")
+```
+
+**Result:**
+```json
+{
+  "data": [...],
+  "views": [
+    {"type": "card", "title": "Total Sales", ...},
+    {"type": "chart", "chart_type": "bar", ...},
+    {"type": "table", "columns": [...], ...}
+  ]
+}
+```
+
+### Frontend Rendering
+
+Views are rendered by `ViewRenderer.js`:
+
+```javascript
+import { createViewRenderer } from '/ui/view-renderer.js';
+
+const renderer = createViewRenderer('#container');
+renderer.render(apiResponse);
+```
+
+---
+
+## Powiązana dokumentacja
+
+| Dokument | Opis |
+|----------|------|
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Architektura systemu |
+| [API.md](./API.md) | REST API reference |
+| [DSL.md](./DSL.md) | Język DSL - składnia, atomy |
+| [POINTS.md](./POINTS.md) | System punktów - cennik |
+| [ROADMAP.md](./ROADMAP.md) | Plan rozwoju |
+
+---
+
+*Last updated: 2025-01-01*

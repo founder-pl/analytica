@@ -543,6 +543,21 @@ steps:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+---
+
+## Powiązana dokumentacja
+
+| Dokument | Opis |
+|----------|------|
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Architektura systemu |
+| [API.md](./API.md) | REST API reference |
+| [POINTS.md](./POINTS.md) | System punktów - cennik |
+| [MODULES.md](./MODULES.md) | Moduły biznesowe |
+
+---
+
 ## License
 
-MIT License - Softreck
+Apache 2
+
+*Last updated: 2025-01-01*

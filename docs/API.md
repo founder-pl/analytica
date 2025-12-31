@@ -4,19 +4,258 @@
 
 ## Base URLs
 
-| Domain | URL | Description |
-|--------|-----|-------------|
-| repox.pl | `http://localhost:8000` | Main hub |
-| multiplan.pl | `http://localhost:8010` | Financial planning |
-| planbudzetu.pl | `http://localhost:8011` | Budget management |
-| planinwestycji.pl | `http://localhost:8012` | Investment analysis |
+| Domain | Port | URL | UI |
+|--------|------|-----|-----|
+| **repox.pl** | 18000 | `http://localhost:18000` | `/ui/` |
+| analizowanie.pl | 8001 | `http://localhost:8001` | `/ui/` |
+| przeanalizuj.pl | 8002 | `http://localhost:8002` | `/ui/` |
+| alerts.pl | 8003 | `http://localhost:8003` | `/ui/` |
+| estymacja.pl | 8004 | `http://localhost:8004` | `/ui/` |
+| retrospektywa.pl | 8005 | `http://localhost:8005` | `/ui/` |
+| persony.pl | 8006 | `http://localhost:8006` | `/ui/` |
+| specyfikacja.pl | 8007 | `http://localhost:8007` | `/ui/` |
+| nisza.pl | 8008 | `http://localhost:8008` | `/ui/` |
+| **multiplan.pl** | 8010 | `http://localhost:8010` | `/ui/` |
+| **planbudzetu.pl** | 8011 | `http://localhost:8011` | `/ui/` |
+| **planinwestycji.pl** | 8012 | `http://localhost:8012` | `/ui/` |
+
+### Dostępne widoki web (repox.pl - port 18000)
+
+| Endpoint | Opis |
+|----------|------|
+| `/ui/` | Dashboard UI - Pipeline Builder z DSL Views |
+| `/landing/` | Landing pages - strony produktowe SaaS |
+| `/landing/login.html` | Logowanie i rejestracja |
+| `/docs` | Swagger UI - interaktywna dokumentacja API |
+| `/redoc` | ReDoc - alternatywna dokumentacja API |
 
 ## Authentication
 
-Currently the API does not require authentication. Future versions will support:
-- API Key authentication
-- JWT tokens
-- OAuth2
+API wykorzystuje JWT (JSON Web Tokens) do uwierzytelniania.
+
+### Rejestracja
+
+```http
+POST /api/v1/auth/register
+```
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "secret123",
+  "name": "Jan Kowalski",
+  "company": "Firma Sp. z o.o."
+}
+```
+
+**Response (201):**
+```json
+{
+  "access_token": "eyJ1c2VyX2lkIjog...",
+  "token_type": "bearer",
+  "expires_in": 86400,
+  "user": {
+    "id": "user_abc12345",
+    "email": "user@example.com",
+    "name": "Jan Kowalski",
+    "company": "Firma Sp. z o.o.",
+    "points_balance": 10,
+    "plan": "free"
+  }
+}
+```
+
+> 💡 Nowi użytkownicy otrzymują **10 punktów GRATIS**
+
+---
+
+### Logowanie
+
+```http
+POST /api/v1/auth/login
+```
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "secret123"
+}
+```
+
+**Response (200):**
+```json
+{
+  "access_token": "eyJ1c2VyX2lkIjog...",
+  "token_type": "bearer",
+  "expires_in": 86400,
+  "user": {
+    "id": "user_abc12345",
+    "email": "user@example.com",
+    "name": "Jan Kowalski",
+    "points_balance": 150,
+    "plan": "subscription"
+  }
+}
+```
+
+**Demo user:**
+- Email: `demo@analytica.pl`
+- Password: `demo123`
+- Points: 100
+
+---
+
+### Profil użytkownika
+
+```http
+GET /api/v1/auth/me
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "id": "user_abc12345",
+  "email": "user@example.com",
+  "name": "Jan Kowalski",
+  "company": "Firma Sp. z o.o.",
+  "points_balance": 150,
+  "plan": "subscription",
+  "created_at": "2024-12-01T10:00:00"
+}
+```
+
+---
+
+### Wylogowanie
+
+```http
+POST /api/v1/auth/logout
+Authorization: Bearer <token>
+```
+
+**Response (200):**
+```json
+{
+  "message": "Logged out successfully"
+}
+```
+
+---
+
+## System Punktów
+
+### Sprawdzenie salda
+
+```http
+GET /api/v1/auth/points
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "user_id": "user_abc12345",
+  "points_balance": 150,
+  "plan": "subscription",
+  "transactions": [
+    {
+      "id": "tx_001",
+      "type": "purchase",
+      "amount": 200,
+      "timestamp": "2024-12-01T10:00:00"
+    },
+    {
+      "id": "tx_002",
+      "type": "usage",
+      "amount": -5,
+      "description": "Pipeline execution",
+      "timestamp": "2024-12-15T14:30:00"
+    }
+  ]
+}
+```
+
+---
+
+### Zakup punktów
+
+```http
+POST /api/v1/auth/points/purchase
+Authorization: Bearer <token>
+```
+
+**Request Body:**
+```json
+{
+  "amount": 100,
+  "payment_method": "card"
+}
+```
+
+**Response (200):**
+```json
+{
+  "user_id": "user_abc12345",
+  "points_balance": 250,
+  "transaction_id": "tx_003",
+  "amount": 100,
+  "type": "purchase"
+}
+```
+
+---
+
+### Wykorzystanie punktów
+
+```http
+POST /api/v1/auth/points/use
+Authorization: Bearer <token>
+```
+
+**Request Body:**
+```json
+{
+  "amount": 5,
+  "description": "Manual deduction"
+}
+```
+
+**Response (200):**
+```json
+{
+  "user_id": "user_abc12345",
+  "points_balance": 145,
+  "transaction_id": "tx_004",
+  "amount": 5,
+  "type": "usage"
+}
+```
+
+**Response (402 - brak punktów):**
+```json
+{
+  "detail": "Insufficient points. Need 5, have 3",
+  "code": "INSUFFICIENT_POINTS"
+}
+```
+
+---
+
+### Przelicznik punktów
+
+| Operacja | Koszt |
+|----------|-------|
+| `report.generate()` | 1 pkt |
+| `budget.variance()` | 1 pkt |
+| `investment.analyze()` | 1 pkt |
+| `forecast.predict()` | 1 pkt |
+| `data.*`, `transform.*`, `metrics.*` | 0 pkt |
+| `alert.*`, `export.*` | 0 pkt |
+
+📄 Więcej: [POINTS.md](./POINTS.md)
 
 ## Common Endpoints
 
@@ -478,7 +717,11 @@ All errors return appropriate HTTP status codes:
 | Code | Description |
 |------|-------------|
 | 200 | Success |
+| 201 | Created - Resource created |
 | 400 | Bad Request - Invalid input |
+| 401 | Unauthorized - Invalid or missing token |
+| 402 | Payment Required - Insufficient points |
+| 403 | Forbidden - Access denied |
 | 404 | Not Found - Resource doesn't exist |
 | 422 | Validation Error - Invalid data |
 | 500 | Internal Server Error |
@@ -570,4 +813,15 @@ Interactive API documentation available at:
 
 ---
 
-*Last updated: 2024-12-31*
+## Powiązana dokumentacja
+
+| Dokument | Opis |
+|----------|------|
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Architektura systemu |
+| [POINTS.md](./POINTS.md) | System punktów - cennik, modele zakupu |
+| [DSL.md](./DSL.md) | Język DSL - składnia, atomy |
+| [MODULES.md](./MODULES.md) | Moduły biznesowe |
+
+---
+
+*Last updated: 2025-01-01*

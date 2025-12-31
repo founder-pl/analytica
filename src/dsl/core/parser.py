@@ -71,6 +71,7 @@ class AtomType(Enum):
     MERGE = "merge"
     SPLIT = "split"
     CACHE = "cache"
+    VIEW = "view"
 
 
 @dataclass

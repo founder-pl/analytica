@@ -25,20 +25,29 @@ make status
 
 ### Port Mapping
 
-| Domena | Typ | API Port | Frontend Port | URL |
-|--------|-----|----------|---------------|-----|
-| **repox.pl** | Hub | 8000 | 3000 | http://localhost:8000 |
-| analizowanie.pl | General | 8001 | 3001 | http://localhost:8001 |
-| przeanalizuj.pl | Voice | 8002 | 3002 | http://localhost:8002 |
-| alerts.pl | Monitoring | 8003 | 3003 | http://localhost:8003 |
-| estymacja.pl | Forecasting | 8004 | 3004 | http://localhost:8004 |
-| retrospektywa.pl | Historical | 8005 | 3005 | http://localhost:8005 |
-| persony.pl | Marketing | 8006 | 3006 | http://localhost:8006 |
-| specyfikacja.pl | Documentation | 8007 | 3007 | http://localhost:8007 |
-| nisza.pl | White-label | 8008 | 3008 | http://localhost:8008 |
-| **multiplan.pl** | 💰 Financial | **8010** | 3010 | http://localhost:8010 |
-| **planbudzetu.pl** | 💰 Financial | **8011** | 3011 | http://localhost:8011 |
-| **planinwestycji.pl** | 💰 Financial | **8012** | 3012 | http://localhost:8012 |
+| Domena | Typ | Port | URL | UI |
+|--------|-----|------|-----|-----|
+| **repox.pl** | Hub | 18000 | http://localhost:18000 | `/ui/` |
+| analizowanie.pl | General | 8001 | http://localhost:8001 | `/ui/` |
+| przeanalizuj.pl | Voice | 8002 | http://localhost:8002 | `/ui/` |
+| alerts.pl | Monitoring | 8003 | http://localhost:8003 | `/ui/` |
+| estymacja.pl | Forecasting | 8004 | http://localhost:8004 | `/ui/` |
+| retrospektywa.pl | Historical | 8005 | http://localhost:8005 | `/ui/` |
+| persony.pl | Marketing | 8006 | http://localhost:8006 | `/ui/` |
+| specyfikacja.pl | Documentation | 8007 | http://localhost:8007 | `/ui/` |
+| nisza.pl | White-label | 8008 | http://localhost:8008 | `/ui/` |
+| **multiplan.pl** | 💰 Financial | 8010 | http://localhost:8010 | `/ui/` |
+| **planbudzetu.pl** | 💰 Financial | 8011 | http://localhost:8011 | `/ui/` |
+| **planinwestycji.pl** | 💰 Financial | 8012 | http://localhost:8012 | `/ui/` |
+
+### Dostępne widoki web
+
+| URL | Opis |
+|-----|------|
+| http://localhost:18000/ui/ | Dashboard UI (Pipeline Builder) |
+| http://localhost:18000/landing/ | Landing pages (SaaS) |
+| http://localhost:18000/landing/login.html | Logowanie/Rejestracja |
+| http://localhost:18000/docs | Swagger API docs |
 
 ### 💰 Domeny Finansowe (NEW!)
 
@@ -305,6 +314,27 @@ STRIPE_SECRET_KEY=sk_...
 ## 🔤 DSL - Domain Specific Language
 
 ANALYTICA DSL umożliwia budowanie pipeline'ów analitycznych w prosty sposób:
+
+### DSL-Driven Views (NEW!)
+
+Generuj dynamiczne widoki UI bezpośrednio z DSL:
+
+```dsl
+data.from_input()
+| view.card(value="total", title="Total Sales", icon="💰", style="success")
+| view.chart(type="bar", x="month", y="sales", title="Monthly Sales")
+| view.table(columns=["month", "sales", "growth"])
+```
+
+**Dostępne widoki:**
+- `view.chart` - Wykresy (bar, line, pie, area, donut, gauge)
+- `view.table` - Tabele z sortowaniem i paginacją
+- `view.card` - Karty metryczne z ikonami
+- `view.kpi` - Wskaźniki KPI z progress bar
+- `view.grid` - Grid layout
+- `view.dashboard` - Kompletny dashboard
+
+📄 Dokumentacja: [docs/VIEWS_ROADMAP.md](docs/VIEWS_ROADMAP.md)
 
 ### Python SDK
 
