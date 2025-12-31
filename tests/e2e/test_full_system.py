@@ -20,7 +20,7 @@ import json
 from typing import Dict, Any
 
 # API base URL from environment or default
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:18080")
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:18000")
 
 
 # ============================================================

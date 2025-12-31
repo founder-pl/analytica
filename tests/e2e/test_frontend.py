@@ -11,7 +11,7 @@ import httpx
 import os
 import re
 
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:18080")
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:18000")
 
 
 @pytest.fixture

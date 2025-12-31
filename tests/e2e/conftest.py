@@ -11,12 +11,14 @@ import os
 import time
 
 # API base URL from environment
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:18080")
+# Default to the standard local stack started via `make up`.
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:18000")
 
 
 def pytest_configure(config):
     """Configure pytest markers"""
     config.addinivalue_line("markers", "e2e: End-to-end tests")
+    config.addinivalue_line("markers", "gui: GUI/Browser tests with Playwright")
     config.addinivalue_line("markers", "slow: Slow tests")
 
 

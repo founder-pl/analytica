@@ -17,7 +17,8 @@ import re
 from playwright.sync_api import Page, expect, sync_playwright
 
 # API base URL
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:18080")
+# Default to the standard local stack started via `make up`.
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:18000")
 DSL_EDITOR_URL = f"{API_BASE_URL}/landing/dsl-editor.html"
 
 

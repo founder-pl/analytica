@@ -4,7 +4,7 @@
 # Runs Playwright GUI tests against running API
 #
 # Usage:
-#   ./scripts/run-gui-tests.sh              # Run against localhost:18080
+#   ./scripts/run-gui-tests.sh              # Run against API_BASE_URL from .env or localhost:18000
 #   ./scripts/run-gui-tests.sh --headed     # Run with visible browser
 #   ./scripts/run-gui-tests.sh --docker     # Run in Docker
 
@@ -21,7 +21,19 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Default values
-API_BASE_URL="${API_BASE_URL:-http://localhost:18080}"
+# If API_BASE_URL is not provided, try reading it from .env, otherwise fallback to localhost:18000.
+if [ -z "${API_BASE_URL}" ]; then
+    if [ -f "$PROJECT_ROOT/.env" ]; then
+        ENV_URL=$(grep -E '^API_BASE_URL=' "$PROJECT_ROOT/.env" | tail -n 1 | cut -d= -f2-)
+        ENV_URL="${ENV_URL%\"}"
+        ENV_URL="${ENV_URL#\"}"
+        if [ -n "$ENV_URL" ]; then
+            API_BASE_URL="$ENV_URL"
+        fi
+    fi
+fi
+
+API_BASE_URL="${API_BASE_URL:-http://localhost:18000}"
 HEADED=""
 USE_DOCKER=false
 
@@ -43,7 +55,7 @@ for arg in "$@"; do
             echo "Options:"
             echo "  --headed     Run with visible browser window"
             echo "  --docker     Run tests in Docker container"
-            echo "  --url=URL    Set API base URL (default: http://localhost:18080)"
+            echo "  --url=URL    Set API base URL (default: from .env or http://localhost:18000)"
             echo "  --help       Show this help message"
             exit 0
             ;;
@@ -59,11 +71,11 @@ echo ""
 
 # Check if API is running
 echo -e "${YELLOW}Checking API availability...${NC}"
-MAX_RETRIES=10
+MAX_RETRIES=60
 RETRY_COUNT=0
 
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-    if curl -s "${API_BASE_URL}/health" > /dev/null 2>&1; then
+    if curl -fsS "${API_BASE_URL}/health" > /dev/null 2>&1; then
         echo -e "${GREEN}API is available!${NC}"
         break
     fi
@@ -78,6 +90,8 @@ if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
     echo "  make dev"
     echo "  # or"
     echo "  PYTHONPATH=src uvicorn src.api.main:app --host 0.0.0.0 --port 18000"
+    echo ""
+    echo -e "${YELLOW}Tip:${NC} try: curl -v ${API_BASE_URL}/health"
     exit 1
 fi
 

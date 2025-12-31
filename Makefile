@@ -245,15 +245,15 @@ test-coverage: ## Run tests with coverage
 
 test-gui: ## Run GUI tests with Playwright
 	@echo "$(CYAN)Running GUI tests...$(NC)"
-	./scripts/run-gui-tests.sh
+	API_BASE_URL=http://localhost:$(REPOX_HOST_PORT) ./scripts/run-gui-tests.sh
 
 test-gui-headed: ## Run GUI tests with visible browser
 	@echo "$(CYAN)Running GUI tests (headed)...$(NC)"
-	./scripts/run-gui-tests.sh --headed
+	API_BASE_URL=http://localhost:$(REPOX_HOST_PORT) ./scripts/run-gui-tests.sh --headed
 
 test-gui-docker: ## Run GUI tests in Docker
 	@echo "$(CYAN)Running GUI tests in Docker...$(NC)"
-	./scripts/run-gui-tests.sh --docker
+	API_BASE_URL=http://localhost:$(REPOX_HOST_PORT) ./scripts/run-gui-tests.sh --docker
 
 # ============================================================
 # CLEANUP
