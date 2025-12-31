@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Analytica</title>
+  <link rel="stylesheet" href="components.css">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --accent: #8b5cf6;
+    }
+    
+    .dashboard-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .dashboard-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .dashboard-subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .user-points {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    
+    .dashboard-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+    
+    .dashboard-card h3 {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    .dashboard-card .value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .dashboard-card .trend {
+      font-size: 0.85rem;
+      margin-top: 8px;
+    }
+    
+    .trend.up { color: #10b981; }
+    .trend.down { color: #ef4444; }
+    
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      color: var(--text);
+    }
+    
+    .action-btn:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+    }
+    
+    .action-btn .icon {
+      font-size: 1.5rem;
+    }
+    
+    .action-btn .label {
+      font-weight: 600;
+    }
+    
+    .action-btn .desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    
+    .dsl-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    
+    .dsl-section h2 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .dsl-input {
+      width: 100%;
+      min-height: 120px;
+      padding: 16px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 14px;
+      resize: vertical;
+      margin-bottom: 16px;
+    }
+    
+    .dsl-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .run-btn {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .run-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    
+    .run-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    #viewOutput {
+      min-height: 200px;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-top: 24px;
+    }
+    
+    #viewOutput:empty::before {
+      content: "Wyniki pojawią się tutaj po uruchomieniu pipeline'a";
+      color: var(--muted);
+      font-style: italic;
+    }
+    
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .template-btn {
+      padding: 12px 16px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    
+    .template-btn:hover {
+      background: white;
+      border-color: var(--primary);
+    }
+    
+    .template-btn .name {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .template-btn .desc {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    
+    /* View Renderer Styles */
+    .view-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+    
+    .view-card .card-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .view-card .card-title {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+    
+    .view-card.success { border-left: 4px solid #10b981; }
+    .view-card.warning { border-left: 4px solid #f59e0b; }
+    .view-card.danger { border-left: 4px solid #ef4444; }
+    .view-card.info { border-left: 4px solid #3b82f6; }
+    
+    .view-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    
+    .view-table th, .view-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .view-table th {
+      background: #f8fafc;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    
+    .view-chart {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 200px;
+      padding: 16px 0;
+    }
+    
+    .chart-bar {
+      flex: 1;
+      background: linear-gradient(to top, var(--primary), var(--accent));
+      border-radius: 4px 4px 0 0;
+      min-width: 30px;
+      position: relative;
+    }
+    
+    .chart-bar-label {
+      position: absolute;
+      bottom: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    
+    .chart-bar-value {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .status-badge.running { background: #fef3c7; color: #d97706; }
+    .status-badge.success { background: #d1fae5; color: #059669; }
+    .status-badge.error { background: #fee2e2; color: #dc2626; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">
+      <span class="nav-logo">📊</span>
+      Analytica
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Produkty</a>
+      <a href="#" onclick="logout()" class="btn btn-secondary btn-sm">Wyloguj</a>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <div class="dashboard-header">
+      <div>
+        <div class="dashboard-title">👋 Witaj, <span id="userName">Użytkowniku</span>!</div>
+        <div class="dashboard-subtitle">Panel klienta Analytica</div>
+      </div>
+      <div class="user-info">
+        <div class="user-points">💎 <span id="userPoints">0</span> punktów</div>
+        <a href="login.html" class="btn btn-primary btn-sm">Doładuj</a>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="dashboard-grid">
+      <div class="dashboard-card">
+        <h3>📊 Wykonane analizy</h3>
+        <div class="value" id="statsAnalyses">0</div>
+        <div class="trend up">↑ 12% vs poprzedni miesiąc</div>
+      </div>
+      <div class="dashboard-card">
+        <h3>💎 Zużyte punkty</h3>
+        <div class="value" id="statsPoints">0</div>
+        <div class="trend">Ten miesiąc</div>
+      </div>
+      <div class="dashboard-card">
+        <h3>📈 Ostatnia analiza</h3>
+        <div class="value" style="font-size: 1.2rem;" id="statsLast">-</div>
+        <div class="trend" id="statsLastTime">Brak analiz</div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <a href="planbudzetu.html" class="action-btn">
+        <span class="icon">💰</span>
+        <div>
+          <div class="label">Plan Budżetu</div>
+          <div class="desc">Raporty finansowe</div>
+        </div>
+      </a>
+      <a href="planinwestycji.html" class="action-btn">
+        <span class="icon">📈</span>
+        <div>
+          <div class="label">Plan Inwestycji</div>
+          <div class="desc">Analiza ROI</div>
+        </div>
+      </a>
+      <a href="multiplan.html" class="action-btn">
+        <span class="icon">🎯</span>
+        <div>
+          <div class="label">MultiPlan</div>
+          <div class="desc">Scenariusze</div>
+        </div>
+      </a>
+      <a href="estymacja.html" class="action-btn">
+        <span class="icon">🔮</span>
+        <div>
+          <div class="label">Estymacja</div>
+          <div class="desc">Prognozy AI</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- DSL Pipeline Builder -->
+    <div class="dsl-section">
+      <h2>🔧 DSL Pipeline Builder</h2>
+      
+      <div class="templates-grid">
+        <button class="template-btn" onclick="loadTemplate('salesChart')">
+          <div class="name">📊 Wykres sprzedaży</div>
+          <div class="desc">Bar chart z danymi</div>
+        </button>
+        <button class="template-btn" onclick="loadTemplate('kpiCards')">
+          <div class="name">🎴 Karty KPI</div>
+          <div class="desc">Metryki w kartach</div>
+        </button>
+        <button class="template-btn" onclick="loadTemplate('dataTable')">
+          <div class="name">📋 Tabela danych</div>
+          <div class="desc">Sortowalna tabela</div>
+        </button>
+        <button class="template-btn" onclick="loadTemplate('fullDashboard')">
+          <div class="name">🖥️ Dashboard</div>
+          <div class="desc">Kompletny widok</div>
+        </button>
+      </div>
+      
+      <textarea id="dslInput" class="dsl-input" placeholder="Wpisz pipeline DSL lub wybierz szablon...">data.from_input()
+| view.card(value="total", title="Suma", icon="💰", style="success")
+| view.chart(type="bar", x="month", y="value", title="Miesięczny trend")</textarea>
+      
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <button id="runBtn" class="run-btn" onclick="runPipeline()">▶️ Uruchom (1 pkt)</button>
+        <span id="statusBadge" class="status-badge" style="display: none;"></span>
+      </div>
+      
+      <div id="viewOutput"></div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="dsl-section">
+      <h2>📜 Ostatnie analizy</h2>
+      <div id="recentActivity">
+        <p style="color: var(--muted); text-align: center; padding: 24px;">
+          Brak ostatnich analiz. Uruchom pierwszy pipeline powyżej!
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    
+    // Templates
+    const TEMPLATES = {
+      salesChart: {
+        dsl: `data.from_input()
+| view.chart(type="bar", x="month", y="sales", title="Sprzedaż miesięczna")`,
+        data: [
+          { month: "Sty", sales: 12000 },
+          { month: "Lut", sales: 15000 },
+          { month: "Mar", sales: 18000 },
+          { month: "Kwi", sales: 14000 },
+          { month: "Maj", sales: 21000 },
+          { month: "Cze", sales: 19000 }
+        ]
+      },
+      kpiCards: {
+        dsl: `data.from_input()
+| view.card(value="revenue", title="Przychód", icon="💰", style="success")
+| view.card(value="orders", title="Zamówienia", icon="📦", style="info")
+| view.card(value="customers", title="Klienci", icon="👥", style="default")`,
+        data: { revenue: 125000, orders: 342, customers: 1250 }
+      },
+      dataTable: {
+        dsl: `data.from_input()
+| view.table(title="Transakcje", columns=["id", "date", "amount", "status"])`,
+        data: [
+          { id: 1, date: "2024-01-15", amount: 1250, status: "completed" },
+          { id: 2, date: "2024-01-16", amount: 890, status: "pending" },
+          { id: 3, date: "2024-01-17", amount: 2100, status: "completed" },
+          { id: 4, date: "2024-01-18", amount: 450, status: "failed" },
+          { id: 5, date: "2024-01-19", amount: 3200, status: "completed" }
+        ]
+      },
+      fullDashboard: {
+        dsl: `data.from_input()
+| view.card(value="total_revenue", title="Przychód całkowity", icon="💰", style="success")
+| view.card(value="avg_order", title="Średnie zamówienie", icon="📊", style="info")
+| view.chart(type="bar", x="month", y="revenue", title="Przychody miesięczne")
+| view.table(title="Szczegóły", columns=["month", "revenue", "orders"])`,
+        data: {
+          total_revenue: 485000,
+          avg_order: 2850,
+          data: [
+            { month: "Sty", revenue: 75000, orders: 28 },
+            { month: "Lut", revenue: 82000, orders: 31 },
+            { month: "Mar", revenue: 95000, orders: 35 },
+            { month: "Kwi", revenue: 88000, orders: 30 },
+            { month: "Maj", revenue: 145000, orders: 46 }
+          ]
+        }
+      }
+    };
+    
+    let currentData = null;
+    
+    function loadTemplate(name) {
+      const template = TEMPLATES[name];
+      if (template) {
+        document.getElementById('dslInput').value = template.dsl;
+        currentData = template.data;
+      }
+    }
+    
+    async function runPipeline() {
+      const dsl = document.getElementById('dslInput').value;
+      const output = document.getElementById('viewOutput');
+      const statusBadge = document.getElementById('statusBadge');
+      const runBtn = document.getElementById('runBtn');
+      
+      statusBadge.style.display = 'inline-block';
+      statusBadge.className = 'status-badge running';
+      statusBadge.textContent = 'Przetwarzanie...';
+      runBtn.disabled = true;
+      
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/dsl/pipeline/execute`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            dsl: dsl,
+            input_data: currentData || { total: 12345, month: "Sty", value: 100 }
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success' && result.result) {
+          statusBadge.className = 'status-badge success';
+          statusBadge.textContent = `OK (${result.execution_time_ms?.toFixed(0) || '?'}ms)`;
+          renderViews(result.result, output);
+          updateStats();
+        } else {
+          throw new Error(result.errors?.[0]?.message || 'Unknown error');
+        }
+      } catch (err) {
+        statusBadge.className = 'status-badge error';
+        statusBadge.textContent = 'Błąd';
+        output.innerHTML = `<div style="color: #dc2626; padding: 16px; background: #fee2e2; border-radius: 8px;">
+          <strong>Błąd:</strong> ${err.message}
+        </div>`;
+      }
+      
+      runBtn.disabled = false;
+    }
+    
+    function renderViews(result, container) {
+      const views = result.views || [];
+      const data = result.data || result;
+      
+      if (views.length === 0) {
+        container.innerHTML = `<pre style="background: #f8fafc; padding: 16px; border-radius: 8px; overflow: auto;">${JSON.stringify(result, null, 2)}</pre>`;
+        return;
+      }
+      
+      let html = '';
+      
+      for (const view of views) {
+        switch (view.type) {
+          case 'card':
+            html += renderCard(view, data);
+            break;
+          case 'chart':
+            html += renderChart(view, data);
+            break;
+          case 'table':
+            html += renderTable(view, data);
+            break;
+          case 'kpi':
+            html += renderKPI(view, data);
+            break;
+          default:
+            html += `<div class="view-card"><pre>${JSON.stringify(view, null, 2)}</pre></div>`;
+        }
+      }
+      
+      container.innerHTML = html;
+    }
+    
+    function renderCard(view, data) {
+      const value = data[view.value_field] || view.value_field || '—';
+      const formattedValue = typeof value === 'number' ? value.toLocaleString('pl-PL') : value;
+      const style = view.style || 'default';
+      const icon = view.icon || '';
+      
+      return `
+        <div class="view-card ${style}">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            ${icon ? `<span style="font-size: 2rem;">${icon}</span>` : ''}
+            <div>
+              <div class="card-value">${formattedValue}</div>
+              <div class="card-title">${view.title || ''}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    function renderChart(view, data) {
+      const chartData = Array.isArray(data) ? data : (data.data || []);
+      const xField = view.x_field || 'x';
+      const yField = view.y_field || 'y';
+      const maxValue = Math.max(...chartData.map(d => d[yField] || 0));
+      
+      let barsHtml = '';
+      for (const item of chartData) {
+        const height = maxValue > 0 ? ((item[yField] || 0) / maxValue) * 100 : 0;
+        barsHtml += `
+          <div class="chart-bar" style="height: ${height}%;">
+            <span class="chart-bar-value">${(item[yField] || 0).toLocaleString('pl-PL')}</span>
+            <span class="chart-bar-label">${item[xField] || ''}</span>
+          </div>
+        `;
+      }
+      
+      return `
+        <div class="view-chart">
+          <h3 style="margin-bottom: 16px;">${view.title || 'Wykres'}</h3>
+          <div class="chart-bars" style="padding-bottom: 32px;">
+            ${barsHtml}
+          </div>
+        </div>
+      `;
+    }
+    
+    function renderTable(view, data) {
+      const tableData = Array.isArray(data) ? data : (data.data || []);
+      const columns = view.columns || [];
+      
+      // Auto-detect columns if not specified
+      const cols = columns.length > 0 ? columns : (tableData[0] ? Object.keys(tableData[0]) : []);
+      
+      let headerHtml = '<tr>';
+      for (const col of cols) {
+        const header = typeof col === 'object' ? col.header : col.replace(/_/g, ' ').toUpperCase();
+        headerHtml += `<th>${header}</th>`;
+      }
+      headerHtml += '</tr>';
+      
+      let rowsHtml = '';
+      for (const row of tableData) {
+        rowsHtml += '<tr>';
+        for (const col of cols) {
+          const field = typeof col === 'object' ? col.field : col;
+          const value = row[field];
+          const formatted = typeof value === 'number' ? value.toLocaleString('pl-PL') : value;
+          rowsHtml += `<td>${formatted}</td>`;
+        }
+        rowsHtml += '</tr>';
+      }
+      
+      return `
+        <div class="view-card">
+          <h3 style="margin-bottom: 16px;">${view.title || 'Tabela'}</h3>
+          <table class="view-table">
+            <thead>${headerHtml}</thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>
+      `;
+    }
+    
+    function renderKPI(view, data) {
+      const current = data[view.value_field] || 0;
+      const target = data[view.target_field] || 100;
+      const progress = Math.min((current / target) * 100, 100);
+      
+      return `
+        <div class="view-card">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+            ${view.icon ? `<span style="font-size: 1.5rem;">${view.icon}</span>` : ''}
+            <div class="card-title">${view.title || 'KPI'}</div>
+          </div>
+          <div class="card-value">${current.toLocaleString('pl-PL')} / ${target.toLocaleString('pl-PL')}</div>
+          <div style="background: #e5e7eb; border-radius: 4px; height: 8px; margin-top: 12px;">
+            <div style="background: linear-gradient(90deg, var(--primary), var(--accent)); height: 100%; border-radius: 4px; width: ${progress}%;"></div>
+          </div>
+          <div style="text-align: right; font-size: 0.85rem; color: var(--muted); margin-top: 4px;">${progress.toFixed(0)}%</div>
+        </div>
+      `;
+    }
+    
+    function updateStats() {
+      const stats = JSON.parse(localStorage.getItem('analytica_stats') || '{"analyses":0,"points":0}');
+      stats.analyses++;
+      stats.points += 1;
+      stats.lastAnalysis = new Date().toISOString();
+      localStorage.setItem('analytica_stats', JSON.stringify(stats));
+      
+      document.getElementById('statsAnalyses').textContent = stats.analyses;
+      document.getElementById('statsPoints').textContent = stats.points;
+      document.getElementById('statsLast').textContent = 'Pipeline DSL';
+      document.getElementById('statsLastTime').textContent = 'Przed chwilą';
+    }
+    
+    function loadUserData() {
+      const user = JSON.parse(localStorage.getItem('analytica_user') || '{}');
+      const stats = JSON.parse(localStorage.getItem('analytica_stats') || '{"analyses":0,"points":0}');
+      
+      document.getElementById('userName').textContent = user.email?.split('@')[0] || 'Użytkowniku';
+      document.getElementById('userPoints').textContent = user.points || 100;
+      document.getElementById('statsAnalyses').textContent = stats.analyses || 0;
+      document.getElementById('statsPoints').textContent = stats.points || 0;
+      
+      if (stats.lastAnalysis) {
+        document.getElementById('statsLast').textContent = 'Pipeline DSL';
+        document.getElementById('statsLastTime').textContent = new Date(stats.lastAnalysis).toLocaleDateString('pl-PL');
+      }
+    }
+    
+    function logout() {
+      localStorage.removeItem('analytica_token');
+      localStorage.removeItem('analytica_user');
+      window.location.href = 'login.html';
+    }
+    
+    // Check auth
+    const token = localStorage.getItem('analytica_token');
+    if (!token) {
+      // Allow demo access
+      localStorage.setItem('analytica_user', JSON.stringify({ email: 'demo@example.com', points: 100 }));
+    }
+    
+    loadUserData();
+    loadTemplate('kpiCards'); // Load default template
+  </script>
+</body>
+</html>

@@ -356,7 +356,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     
     // Redirect to dashboard
     setTimeout(() => {
-      window.location.href = '/ui/';
+      window.location.href = 'dashboard.html';
     }, 1000);
     
   } catch (err) {
@@ -399,7 +399,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     
     // Redirect to dashboard
     setTimeout(() => {
-      window.location.href = '/ui/';
+      window.location.href = 'dashboard.html';
     }, 1500);
     
   } catch (err) {
@@ -415,7 +415,7 @@ if (token) {
     headers: { 'Authorization': `Bearer ${token}` }
   }).then(res => {
     if (res.ok) {
-      window.location.href = '/ui/';
+      window.location.href = 'dashboard.html';
     } else {
       localStorage.removeItem('analytica_token');
       localStorage.removeItem('analytica_user');

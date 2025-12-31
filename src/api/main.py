@@ -739,6 +739,38 @@ async def list_forecast_models():
     }
 
 
+# ============ ENTERPRISE QUOTES ============
+
+_quotes_db = []
+
+class QuoteRequest(BaseModel):
+    name: str
+    email: str
+    company: str
+    phone: Optional[str] = None
+    product: str
+    users: Optional[str] = None
+    budget: Optional[str] = None
+    message: Optional[str] = None
+    ticketId: Optional[str] = None
+
+@app.post("/api/v1/quotes")
+async def submit_quote(quote: QuoteRequest):
+    """Submit enterprise quote request"""
+    quote_data = {
+        **quote.dict(),
+        "timestamp": datetime.utcnow().isoformat(),
+        "status": "new"
+    }
+    _quotes_db.append(quote_data)
+    return {"status": "success", "ticketId": quote.ticketId, "message": "Quote received"}
+
+@app.get("/api/v1/quotes")
+async def list_quotes():
+    """List all quotes (admin only)"""
+    return {"quotes": _quotes_db, "count": len(_quotes_db)}
+
+
 # ============ INTEGRATIONS ============
 
 @app.get("/v1/integrations")

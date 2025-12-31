@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise Quote - Analytica</title>
+  <link rel="stylesheet" href="components.css">
+  <style>
+    .quote-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    .quote-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .quote-header h1 {
+      font-size: 2rem;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    
+    .quote-header p {
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+    
+    .quote-form {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+    }
+    
+    .features-list {
+      margin-top: 32px;
+      padding: 24px;
+      background: #f8fafc;
+      border-radius: 12px;
+    }
+    
+    .features-list h3 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    
+    .features-list ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .features-list li {
+      padding: 8px 0;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .features-list li::before {
+      content: "✓";
+      color: var(--primary);
+      font-weight: bold;
+    }
+    
+    .success-message {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+    
+    .success-message.show {
+      display: block;
+    }
+    
+    .success-message h2 {
+      color: #10b981;
+      font-size: 1.5rem;
+      margin-bottom: 16px;
+    }
+    
+    .success-message p {
+      color: var(--muted);
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-top: 24px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">
+      <span class="nav-logo">📊</span>
+      Analytica
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Produkty</a>
+      <a href="login.html" class="btn btn-primary btn-sm">Zaloguj</a>
+    </div>
+  </nav>
+
+  <div class="quote-container">
+    <div class="quote-header">
+      <h1>🏢 Zapytanie Enterprise</h1>
+      <p>Wypełnij formularz, a skontaktujemy się w ciągu 24h</p>
+    </div>
+    
+    <div class="quote-form" id="quoteForm">
+      <form id="enterpriseForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Imię i nazwisko *</label>
+            <input type="text" id="name" name="name" required placeholder="Jan Kowalski">
+          </div>
+          <div class="form-group">
+            <label for="email">Email służbowy *</label>
+            <input type="email" id="email" name="email" required placeholder="jan@firma.pl">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="company">Nazwa firmy *</label>
+            <input type="text" id="company" name="company" required placeholder="Firma Sp. z o.o.">
+          </div>
+          <div class="form-group">
+            <label for="phone">Telefon</label>
+            <input type="tel" id="phone" name="phone" placeholder="+48 123 456 789">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="product">Interesujący produkt *</label>
+          <select id="product" name="product" required>
+            <option value="">Wybierz produkt...</option>
+            <option value="planbudzetu">PlanBudzetu.pl - Raporty finansowe</option>
+            <option value="planinwestycji">PlanInwestycji.pl - Analiza ROI</option>
+            <option value="multiplan">MultiPlan.pl - Scenariusze</option>
+            <option value="estymacja">Estymacja.pl - Prognozy AI</option>
+            <option value="all">Pełen pakiet - Wszystkie produkty</option>
+          </select>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="users">Liczba użytkowników</label>
+            <select id="users" name="users">
+              <option value="1-10">1-10</option>
+              <option value="11-50">11-50</option>
+              <option value="51-200">51-200</option>
+              <option value="200+">200+</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="budget">Budżet miesięczny</label>
+            <select id="budget" name="budget">
+              <option value="unknown">Nie wiem jeszcze</option>
+              <option value="500-1000">500 - 1 000 zł</option>
+              <option value="1000-5000">1 000 - 5 000 zł</option>
+              <option value="5000+">5 000+ zł</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="message">Opisz swoje potrzeby</label>
+          <textarea id="message" name="message" placeholder="Jakie problemy chcesz rozwiązać? Jakie integracje są potrzebne? Czy masz szczególne wymagania dotyczące SLA?"></textarea>
+        </div>
+        
+        <button type="submit" class="submit-btn">Wyślij zapytanie</button>
+      </form>
+      
+      <div class="features-list">
+        <h3>Co zawiera pakiet Enterprise:</h3>
+        <ul>
+          <li>Nielimitowane punkty i użytkownicy</li>
+          <li>Dedykowany opiekun klienta</li>
+          <li>Własna instancja (on-premise lub cloud)</li>
+          <li>Integracje z ERP/CRM</li>
+          <li>SLA 99.99% z gwarancją</li>
+          <li>Szkolenia dla zespołu</li>
+          <li>Priorytetowy support 24/7</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="success-message" id="successMessage">
+      <h2>✅ Dziękujemy za zapytanie!</h2>
+      <p>Otrzymaliśmy Twoje zgłoszenie. Nasz zespół skontaktuje się z Tobą w ciągu 24 godzin roboczych.</p>
+      <p style="margin-top: 16px; font-size: 0.9rem;">Numer zgłoszenia: <strong id="ticketId"></strong></p>
+      <a href="index.html" class="back-link">← Wróć do strony głównej</a>
+    </div>
+  </div>
+
+  <script>
+    // Get product from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productParam = urlParams.get('product');
+    if (productParam) {
+      document.getElementById('product').value = productParam;
+    }
+
+    document.getElementById('enterpriseForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        company: document.getElementById('company').value,
+        phone: document.getElementById('phone').value,
+        product: document.getElementById('product').value,
+        users: document.getElementById('users').value,
+        budget: document.getElementById('budget').value,
+        message: document.getElementById('message').value,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Generate ticket ID
+      const ticketId = 'ENT-' + Date.now().toString(36).toUpperCase();
+      
+      try {
+        // Try to send to API
+        const response = await fetch('/api/v1/quotes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...formData, ticketId })
+        });
+        
+        if (!response.ok) {
+          throw new Error('API error');
+        }
+      } catch (err) {
+        // Store locally if API fails
+        const quotes = JSON.parse(localStorage.getItem('enterprise_quotes') || '[]');
+        quotes.push({ ...formData, ticketId });
+        localStorage.setItem('enterprise_quotes', JSON.stringify(quotes));
+        console.log('Quote stored locally:', formData);
+      }
+      
+      // Show success message
+      document.getElementById('quoteForm').style.display = 'none';
+      document.getElementById('successMessage').classList.add('show');
+      document.getElementById('ticketId').textContent = ticketId;
+    });
+  </script>
+</body>
+</html>
