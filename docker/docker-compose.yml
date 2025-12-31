@@ -15,8 +15,6 @@
 # - planbudzetu.pl:  API 8011, Frontend 3011
 # - planinwestycji.pl: API 8012, Frontend 3012
 
-version: '3.8'
-
 x-api-common: &api-common
   build:
     context: ..
@@ -24,6 +22,7 @@ x-api-common: &api-common
   volumes:
     - ../src:/app/src:ro
     - ../config:/app/config:ro
+    - ../tests:/app/tests:ro
   depends_on:
     - postgres
     - redis
@@ -84,7 +83,7 @@ services:
       - DATABASE_URL=postgresql://analytica:analytica_secret_2024@postgres:5432/analytica
       - REDIS_URL=redis://redis:6379/0
     ports:
-      - "8000:8000"
+      - "${REPOX_HOST_PORT:-8000}:8000"
     command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
 
   # ============================================================

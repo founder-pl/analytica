@@ -655,10 +655,9 @@ class TestErrorHandling:
         """Test missing required parameter"""
         ctx = PipelineContext()
         
-        # Should handle gracefully
-        result = execute('data.load()', ctx)
-        # May raise or return error in result
-        assert result is not None
+        # Should raise ValueError for missing required parameter
+        with pytest.raises(ValueError, match="Source is required"):
+            execute('data.load()', ctx)
     
     def test_pipeline_with_errors_continues(self, sample_sales_data):
         """Test pipeline continues after non-fatal errors"""

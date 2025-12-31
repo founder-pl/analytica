@@ -258,6 +258,41 @@ export.to_api(url, method)         # Send to API
     | alert.send("slack", "Budget exceeded 90%!")
 ```
 
+### More Examples (end-to-end)
+
+#### Execute with variables + input_data (curl)
+
+```bash
+curl -X POST http://localhost:8012/api/v1/pipeline/execute \
+  -H "Content-Type: application/json" \
+  -d '{
+    "dsl": "@pipeline quick_roi:\n  data.from_input() | investment.analyze(discount_rate=$rate) | investment.roi()",
+    "variables": {"rate": 0.12},
+    "input_data": {"initial_investment": 500000, "total_return": 740000},
+    "domain": "planinwestycji.pl"
+  }'
+```
+
+#### Validate DSL (curl)
+
+```bash
+curl -X POST http://localhost:8011/api/v1/pipeline/validate \
+  -H "Content-Type: application/json" \
+  -d '{"dsl": "data.load(\"sales\") | metrics.sum(\"amount\")"}'
+```
+
+#### Parse DSL to AST (curl)
+
+```bash
+curl -X POST http://localhost:8011/api/v1/pipeline/parse \
+  -H "Content-Type: application/json" \
+  -d '{"dsl": "data.load(\"sales\") | transform.filter(year=2024) | metrics.calculate([\"sum\",\"avg\"])"}'
+```
+
+#### Full set of pipelines
+
+See `examples/pipelines.dsl` for a larger collection of ready-to-run pipelines.
+
 ## API Reference
 
 ### Python SDK
@@ -409,6 +444,31 @@ function Dashboard() {
 }
 ```
 
+### Universal UI (built-in)
+
+Each domain API serves a universal UI at `GET /ui/`.
+
+It reuses the JS DSL SDK (`/ui/sdk/analytica.js`) and works with both:
+
+- Direct container ports, e.g. `http://localhost:8011/ui/` (planbudzetu.pl)
+- Nginx domain routing, where `/api/*` is rewritten to `/` upstream
+
+Typical URLs:
+
+```text
+http://localhost:8000/ui/    (repox.pl)
+http://localhost:8010/ui/    (multiplan.pl)
+http://localhost:8011/ui/    (planbudzetu.pl)
+http://localhost:8012/ui/    (planinwestycji.pl)
+```
+
+The UI supports:
+
+- Selecting atom type + action from `GET /api/v1/atoms`
+- Editing step params as JSON
+- Generating DSL via the SDK (`Pipeline().toDSL()`)
+- Calling `parse`, `validate`, `execute` via `/api/v1/pipeline/*`
+
 ## Extending DSL
 
 ### Custom Atoms
@@ -461,10 +521,10 @@ steps:
 ┌─────────────────────────────────────────────────────────────────┐
 │                        DSL Layer                                │
 ├─────────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
-│  │  DSL Text   │  │   Fluent    │  │   REST/WS   │             │
-│  │   Parser    │  │    API      │  │    API      │             │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘             │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
+│  │  DSL Text   │  │   Fluent    │  │   REST/WS   │              │
+│  │   Parser    │  │    API      │  │    API      │              │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘              │
 │         │                │                │                     │
 │         └────────────────┼────────────────┘                     │
 │                          ▼                                      │
@@ -476,10 +536,10 @@ steps:
 │              │    Atom Registry      │                          │
 │              └───────────┬───────────┘                          │
 │                          ▼                                      │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐  │
-│  │  Data   │ │Transform│ │ Metrics │ │ Budget  │ │Forecast │  │
-│  │  Atoms  │ │  Atoms  │ │  Atoms  │ │  Atoms  │ │  Atoms  │  │
-│  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘  │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐    │
+│  │  Data   │ │Transform│ │ Metrics │ │ Budget  │ │Forecast │    │
+│  │  Atoms  │ │  Atoms  │ │  Atoms  │ │  Atoms  │ │  Atoms  │    │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 

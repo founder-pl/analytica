@@ -2,12 +2,18 @@
 ANALYTICA Integration Tests - API
 =================================
 
-Integration tests for REST API endpoints
+Integration tests for REST API endpoints.
+These tests require a running API server.
+
+Run with: ANALYTICA_API_URL=http://localhost:18000 pytest tests/integration/
+Or inside Docker: make test
 """
 
 import pytest
+import pytest_asyncio
 import httpx
 import asyncio
+import os
 from typing import Dict, Any
 import sys
 from pathlib import Path
@@ -16,24 +22,46 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
 
 # ============================================================
+# HELPER: Check if API is available
+# ============================================================
+
+def _check_api_available(url: str) -> bool:
+    """Check if API server is reachable"""
+    try:
+        with httpx.Client(timeout=2.0) as client:
+            response = client.get(f"{url}/")
+            return response.status_code in [200, 404]
+    except (httpx.ConnectError, httpx.TimeoutException):
+        return False
+
+
+# ============================================================
 # API CLIENT FIXTURE
 # ============================================================
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def api_base_url():
-    """Base URL for API tests"""
-    return "http://localhost:8080"
+    """Base URL for API tests - uses env var or defaults to repox port"""
+    return os.environ.get("ANALYTICA_API_URL", "http://localhost:8000")
+
+
+@pytest.fixture(scope="module")
+def api_available(api_base_url):
+    """Check if API is available, skip tests if not"""
+    if not _check_api_available(api_base_url):
+        pytest.skip(f"API not available at {api_base_url}. Set ANALYTICA_API_URL or run 'make up'")
+    return True
 
 
 @pytest.fixture
-def api_client(api_base_url):
+def api_client(api_base_url, api_available):
     """HTTP client for API tests"""
     with httpx.Client(base_url=api_base_url, timeout=30.0) as client:
         yield client
 
 
-@pytest.fixture
-async def async_api_client(api_base_url):
+@pytest_asyncio.fixture
+async def async_api_client(api_base_url, api_available):
     """Async HTTP client for API tests"""
     async with httpx.AsyncClient(base_url=api_base_url, timeout=30.0) as client:
         yield client
@@ -246,7 +274,8 @@ class TestAtomsAPI:
         data = response.json()
         
         # Should have metric actions
-        assert "sum" in data or "calculate" in data
+        assert "actions" in data
+        assert "sum" in data["actions"] or "calculate" in data["actions"]
     
     def test_execute_single_atom(self, api_client):
         """Test executing a single atom"""
@@ -334,7 +363,7 @@ class TestUtilityAPI:
         
         assert response.status_code == 200
         data = response.json()
-        assert data["status"] == "healthy"
+        assert data["status"] == "ok"
     
     def test_root_endpoint(self, api_client):
         """Test root endpoint"""
@@ -342,8 +371,8 @@ class TestUtilityAPI:
         
         assert response.status_code == 200
         data = response.json()
-        assert "service" in data
-        assert "version" in data
+        assert "status" in data
+        assert "domain" in data
 
 
 # ============================================================

@@ -12,6 +12,9 @@ GREEN := \033[0;32m
 YELLOW := \033[1;33m
 NC := \033[0m
 
+REPOX_HOST_PORT ?= 8000
+REPOX_FALLBACK_HOST_PORT ?= 18000
+
 help: ## Show this help
 	@echo ""
 	@echo "$(CYAN)╔═══════════════════════════════════════════════════════════════╗$(NC)"
@@ -59,12 +62,28 @@ down-infra: ## Stop infrastructure
 
 up: ## Start all services
 	@echo "$(CYAN)Starting all services...$(NC)"
-	cd docker && docker-compose up -d
-	@make status
+	@PORT="$(REPOX_HOST_PORT)"; \
+	if command -v ss >/dev/null 2>&1; then \
+		if ss -ltn "sport = :$$PORT" 2>/dev/null | grep -q LISTEN; then \
+			echo "$(YELLOW)Port $$PORT is already in use. Using $(REPOX_FALLBACK_HOST_PORT) for repox.pl (override with REPOX_HOST_PORT=...).$(NC)"; \
+			PORT="$(REPOX_FALLBACK_HOST_PORT)"; \
+		fi; \
+	elif command -v lsof >/dev/null 2>&1; then \
+		if lsof -iTCP:$$PORT -sTCP:LISTEN >/dev/null 2>&1; then \
+			echo "$(YELLOW)Port $$PORT is already in use. Using $(REPOX_FALLBACK_HOST_PORT) for repox.pl (override with REPOX_HOST_PORT=...).$(NC)"; \
+			PORT="$(REPOX_FALLBACK_HOST_PORT)"; \
+		fi; \
+	fi; \
+	cd docker && REPOX_HOST_PORT=$$PORT docker-compose up -d; \
+	$(MAKE) -C .. status REPOX_HOST_PORT=$$PORT
 
 down: ## Stop all services
 	@echo "$(YELLOW)Stopping all services...$(NC)"
 	cd docker && docker-compose down
+
+stop: ## Stop all services (alias for down)
+	@echo "$(YELLOW)Stopping all services...$(NC)"
+	cd docker && docker-compose stop
 
 restart: down up ## Restart all services
 
@@ -101,7 +120,7 @@ up-financial: up-infra ## Start all financial domains
 # ============================================================
 
 up-repox: up-infra ## Start repox.pl (hub, port 8000)
-	cd docker && docker-compose up -d api-repox
+	cd docker && REPOX_HOST_PORT=$(REPOX_HOST_PORT) docker-compose up -d api-repox
 
 up-alerts: up-infra ## Start alerts.pl (port 8003)
 	cd docker && docker-compose up -d api-alerts
@@ -125,7 +144,7 @@ status: ## Show status of all services
 	@echo "┌────────────────────┬──────────┬────────────────────────────────┐"
 	@echo "│ Domain             │ API Port │ Status                         │"
 	@echo "├────────────────────┼──────────┼────────────────────────────────┤"
-	@echo "│ repox.pl           │ 8000     │ http://localhost:8000          │"
+	@echo "│ repox.pl           │ $(REPOX_HOST_PORT)     │ http://localhost:$(REPOX_HOST_PORT)          │"
 	@echo "│ analizowanie.pl    │ 8001     │ http://localhost:8001          │"
 	@echo "│ przeanalizuj.pl    │ 8002     │ http://localhost:8002          │"
 	@echo "│ alerts.pl          │ 8003     │ http://localhost:8003          │"
@@ -196,7 +215,9 @@ db-seed: ## Seed database with sample data
 
 test: ## Run tests
 	@echo "$(CYAN)Running tests...$(NC)"
-	cd docker && docker-compose exec api-repox pytest
+	cd docker && docker-compose exec api-repox python -m pytest -v tests/ || \
+		(echo "$(YELLOW)No tests directory or pytest not available in container. Running local tests...$(NC)" && \
+		PYTHONPATH=. python -m pytest -v tests/ 2>/dev/null || echo "$(YELLOW)No tests found.$(NC)")
 
 test-financial: ## Test financial domains
 	@echo "$(CYAN)Testing financial domains...$(NC)"

@@ -58,7 +58,8 @@ const ATOM_TYPES = {
   EXPORT: 'export',
   VALIDATE: 'validate',
   MERGE: 'merge',
-  CACHE: 'cache'
+  CACHE: 'cache',
+  VOICE: 'voice'
 };
 
 // ============================================================
@@ -321,8 +322,8 @@ class PipelineBuilder {
   get forecast() {
     const self = this;
     return {
-      predict(periods = 30, model = 'prophet') {
-        return self._addStep('forecast', 'predict', { periods, model });
+      predict(periods = 30, method = 'linear') {
+        return self._addStep('forecast', 'predict', { periods, method });
       },
       trend() {
         return self._addStep('forecast', 'trend', {});
@@ -332,6 +333,28 @@ class PipelineBuilder {
       },
       confidence(level = 0.95) {
         return self._addStep('forecast', 'confidence', { level });
+      },
+      smooth(method = 'exponential', alpha = 0.3) {
+        return self._addStep('forecast', 'smooth', { method, alpha });
+      }
+    };
+  }
+
+  // ============================================================
+  // VOICE OPERATIONS
+  // ============================================================
+
+  get voice() {
+    const self = this;
+    return {
+      transcribe(audioUrl, language = 'pl') {
+        return self._addStep('voice', 'transcribe', { audio_url: audioUrl, language });
+      },
+      parse(text) {
+        return self._addStep('voice', 'parse', { text });
+      },
+      toDsl(text) {
+        return self._addStep('voice', 'to_dsl', { text });
       }
     };
   }

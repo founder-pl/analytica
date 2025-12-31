@@ -123,6 +123,14 @@ class PipelineDefinition:
     version: str = "1.0"
     domain: Optional[str] = None
     
+    def __getitem__(self, key: str) -> Any:
+        """Allow dict-like access for backwards compatibility"""
+        return self.to_dict()[key]
+    
+    def __contains__(self, key: str) -> bool:
+        """Support 'in' operator"""
+        return key in self.to_dict()
+    
     def to_dict(self) -> Dict:
         return {
             "name": self.name,
@@ -165,6 +173,8 @@ class DSLTokenizer:
         'DOT': r'\.',
         'LPAREN': r'\(',
         'RPAREN': r'\)',
+        'LBRACE': r'\{',
+        'RBRACE': r'\}',
         'LBRACKET': r'\[',
         'RBRACKET': r'\]',
         'COMMA': r',',
@@ -291,22 +301,33 @@ class DSLParser:
         params = {}
         self._expect('LPAREN')
         
-        # Handle positional first argument
+        # Handle positional arguments and named arguments
         if not self._check('RPAREN'):
-            if self._check('STRING') or self._check('NUMBER'):
-                # Positional argument
-                value = self._parse_value()
-                params['_arg0'] = value
-                
-                if self._check('COMMA'):
-                    self._advance()
-            
-            # Named arguments
+            arg_index = 0
             while not self._check('RPAREN') and not self._is_at_end():
-                name = self._expect('IDENTIFIER')[1]
-                self._expect('EQUALS')
-                value = self._parse_value()
-                params[name] = value
+                # Check if this is a named argument (IDENTIFIER followed by EQUALS)
+                if self._check('IDENTIFIER'):
+                    # Peek ahead to see if next token is EQUALS
+                    saved_pos = self.pos
+                    self._advance()
+                    if self._check('EQUALS'):
+                        # Named argument: rewind and parse normally
+                        self.pos = saved_pos
+                        name = self._expect('IDENTIFIER')[1]
+                        self._expect('EQUALS')
+                        value = self._parse_value()
+                        params[name] = value
+                    else:
+                        # Positional identifier argument: rewind and parse as value
+                        self.pos = saved_pos
+                        value = self._parse_value()
+                        params[f'_arg{arg_index}'] = value
+                        arg_index += 1
+                else:
+                    # Positional argument (string, number, array, object, etc.)
+                    value = self._parse_value()
+                    params[f'_arg{arg_index}'] = value
+                    arg_index += 1
                 
                 if self._check('COMMA'):
                     self._advance()
@@ -325,12 +346,42 @@ class DSLParser:
         elif self._check('DOLLAR'):
             self._advance()
             return f"${self._expect('IDENTIFIER')[1]}"
+        elif self._check('LBRACE'):
+            return self._parse_object()
         elif self._check('LBRACKET'):
             return self._parse_list()
         elif self._check('IDENTIFIER'):
-            return self._advance()[1]
+            ident = self._advance()[1]
+            if ident in ('null', 'None'):
+                return None
+            return ident
         else:
             raise SyntaxError(f"Unexpected token: {self._current()}")
+
+    def _parse_object(self) -> Dict[str, Any]:
+        """Parse {key: value, ...} (JSON-like object)"""
+        obj: Dict[str, Any] = {}
+        self._expect('LBRACE')
+
+        while not self._check('RBRACE'):
+            # Keys can be identifiers or strings
+            if self._check('STRING'):
+                key = self._advance()[1]
+            else:
+                key = self._expect('IDENTIFIER')[1]
+
+            self._expect('COLON')
+            obj[key] = self._parse_value()
+
+            if self._check('COMMA'):
+                self._advance()
+            elif self._check('RBRACE'):
+                break
+            else:
+                raise SyntaxError(f"Expected ',' or '}}', got {self._current()}")
+
+        self._expect('RBRACE')
+        return obj
     
     def _parse_list(self) -> List:
         """Parse [item, item, ...]"""
@@ -803,11 +854,25 @@ class _ExportBuilder(_AtomBuilder):
 # CONVENIENCE FUNCTIONS
 # ============================================================
 
-def Pipeline(dsl_code: str = None, domain: str = None) -> Union[PipelineBuilder, PipelineDefinition]:
-    """Create a pipeline from DSL code or return builder"""
-    if dsl_code:
-        parser = DSLParser()
-        return parser.parse(dsl_code)
+def Pipeline(dsl_or_domain: str = None, domain: str = None) -> Union[PipelineBuilder, PipelineDefinition]:
+    """Create a pipeline from DSL code or return builder.
+    
+    Usage:
+        Pipeline()                          -> PipelineBuilder
+        Pipeline("repox.pl")                -> PipelineBuilder with domain
+        Pipeline(domain="repox.pl")         -> PipelineBuilder with domain
+        Pipeline('data.load("x") | ...')    -> PipelineDefinition (parsed)
+    """
+    if dsl_or_domain:
+        # Heuristic: if it looks like DSL code (has function calls), parse it
+        # Otherwise treat it as a domain name
+        is_dsl = '(' in dsl_or_domain or '|' in dsl_or_domain or '@pipeline' in dsl_or_domain
+        if is_dsl:
+            parser = DSLParser()
+            return parser.parse(dsl_or_domain)
+        else:
+            # Treat as domain name
+            return PipelineBuilder(domain=dsl_or_domain)
     return PipelineBuilder(domain=domain)
 
 

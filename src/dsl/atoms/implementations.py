@@ -11,7 +11,7 @@ import io
 from datetime import datetime, date
 from decimal import Decimal
 
-from .parser import AtomRegistry, PipelineContext
+from ..core.parser import AtomRegistry, PipelineContext
 
 
 # ============================================================
@@ -139,8 +139,9 @@ def transform_sort(ctx: PipelineContext, by: str, order: str = "asc", **params) 
 
 
 @AtomRegistry.register("transform", "limit")
-def transform_limit(ctx: PipelineContext, n: int, **params) -> Any:
+def transform_limit(ctx: PipelineContext, n: int = None, **params) -> Any:
     """Limit number of results"""
+    n = n if n is not None else params.get('_arg0', 10)
     data = ctx.get_data()
     
     if isinstance(data, list):
@@ -236,16 +237,18 @@ def _extract_values(data: Any, field: str = None) -> List[float]:
 
 
 @AtomRegistry.register("metrics", "sum")
-def metrics_sum(ctx: PipelineContext, field: str, **params) -> float:
+def metrics_sum(ctx: PipelineContext, field: str = None, **params) -> float:
     """Calculate sum"""
+    field = field or params.get('_arg0')
     data = ctx.get_data()
     values = _extract_values(data, field)
     return sum(values)
 
 
 @AtomRegistry.register("metrics", "avg")
-def metrics_avg(ctx: PipelineContext, field: str, **params) -> float:
+def metrics_avg(ctx: PipelineContext, field: str = None, **params) -> float:
     """Calculate average"""
+    field = field or params.get('_arg0')
     data = ctx.get_data()
     values = _extract_values(data, field)
     return sum(values) / len(values) if values else 0

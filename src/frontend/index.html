@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Analytica UI</title>
+    <link rel="stylesheet" href="/ui/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="header">
+        <div class="brand">
+          <div class="brand-title">Analytica UI</div>
+          <div class="brand-subtitle" id="domainSubtitle"></div>
+        </div>
+
+        <div class="header-controls">
+          <label class="field">
+            <span class="label">API base URL</span>
+            <input id="apiBaseUrl" class="input" type="text" />
+          </label>
+          <button id="reload" class="button">Reload</button>
+        </div>
+      </header>
+
+      <main class="main">
+        <section class="panel">
+          <h2 class="panel-title">Pipeline Builder</h2>
+
+          <!-- Quick Templates -->
+          <div class="templates">
+            <span class="templates-label">Quick Templates:</span>
+            <button class="template-btn" data-template="sales">📊 Sales Analysis</button>
+            <button class="template-btn" data-template="budget">💰 Budget Variance</button>
+            <button class="template-btn" data-template="investment">📈 ROI Calculator</button>
+            <button class="template-btn" data-template="forecast">🔮 Forecast</button>
+            <button class="template-btn" data-template="alert">🚨 Alert Setup</button>
+          </div>
+
+          <div class="grid2">
+            <label class="field">
+              <span class="label">Pipeline name (optional)</span>
+              <input id="pipelineName" class="input" type="text" placeholder="pipeline" />
+            </label>
+
+            <label class="field">
+              <span class="label">Domain override (optional)</span>
+              <input id="domainOverride" class="input" type="text" placeholder="repox.pl" />
+            </label>
+          </div>
+
+          <label class="field">
+            <span class="label">Variables (JSON object)</span>
+            <textarea id="variablesJson" class="textarea" rows="6" spellcheck="false">{}</textarea>
+          </label>
+
+          <label class="field">
+            <span class="label">Input data (JSON, optional)</span>
+            <textarea id="inputDataJson" class="textarea" rows="6" spellcheck="false"></textarea>
+          </label>
+
+          <div class="steps-header">
+            <h3 class="panel-subtitle">Steps</h3>
+            <button id="addStep" class="button button-secondary">Add step</button>
+          </div>
+
+          <div id="steps" class="steps"></div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel-title">DSL + Run</h2>
+
+          <label class="field">
+            <span class="label">DSL preview</span>
+            <textarea id="dslPreview" class="textarea" rows="10" spellcheck="false" readonly></textarea>
+          </label>
+
+          <div class="actions">
+            <button id="btnParse" class="button button-secondary">Parse</button>
+            <button id="btnValidate" class="button button-secondary">Validate</button>
+            <button id="btnExecute" class="button">Execute</button>
+          </div>
+
+          <div class="output">
+            <div class="output-title">Output</div>
+            <pre id="output" class="output-pre"></pre>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div class="footer-left">
+          <a class="link" href="/docs" target="_blank" rel="noreferrer">API docs</a>
+          <a class="link" href="/ui/sdk/analytica.js" target="_blank" rel="noreferrer">JS SDK</a>
+        </div>
+        <div class="footer-right" id="status"></div>
+      </footer>
+    </div>
+
+    <script type="module" src="/ui/app.js"></script>
+  </body>
+</html>

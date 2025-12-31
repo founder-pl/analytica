@@ -374,10 +374,41 @@ curl -X POST http://localhost:8080/api/v1/pipeline/execute \
 
 📖 Pełna dokumentacja: [docs/DSL.md](docs/DSL.md)
 
+## 🖥️ Universal UI
+
+Każde API domenowe udostępnia wbudowany interfejs pod `/ui/`:
+
+| Domena | URL |
+|--------|-----|
+| repox.pl | http://localhost:8000/ui/ |
+| multiplan.pl | http://localhost:8010/ui/ |
+| planbudzetu.pl | http://localhost:8011/ui/ |
+| planinwestycji.pl | http://localhost:8012/ui/ |
+
+UI pozwala na:
+- Wizualne budowanie pipeline'ów DSL
+- Podgląd wygenerowanego DSL
+- Wykonywanie pipeline'ów (parse/validate/execute)
+- Przeglądanie dostępnych atomów
+
+## 📚 Dokumentacja
+
+| Dokument | Opis |
+|----------|------|
+| [docs/DSL.md](docs/DSL.md) | Pełna dokumentacja DSL, SDK Python/JS |
+| [docs/API.md](docs/API.md) | REST API reference, endpointy, przykłady |
+| [docs/MODULES.md](docs/MODULES.md) | Moduły: Budget, Investment, Forecast, Reports, Alerts, Voice |
+| [docs/COMPLIANCE.md](docs/COMPLIANCE.md) | Moduł zgodności: KSeF, CBAM, ESG, ViDA |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Plan rozwoju i refaktoryzacji architektury |
+| [examples/pipelines.dsl](examples/pipelines.dsl) | Przykłady pipeline'ów DSL |
+
 ## 🧪 Testowanie
 
 ```bash
-# Test wszystkich API
+# Uruchom wszystkie testy
+make test
+
+# Test API finansowych
 make test-financial
 
 # Pojedyncze testy
@@ -391,8 +422,93 @@ curl -s http://localhost:8012/v1/investments/calculators | jq .
 
 ## 📄 License
 
-Proprietary - Softreck Sp. z o.o.
+
 
 ---
 
 Built with ❤️ by Softreck R&D Team
+
+---
+
+## 🏛️ Compliance Module (2025-2030)
+
+ANALYTICA zawiera kompletny moduł zgodności z regulacjami prawnymi:
+
+### 🇵🇱 Polska
+| Regulacja | Termin | Status |
+|-----------|--------|--------|
+| **KSeF** - Krajowy System e-Faktur | 02.2026 | ✅ Gotowy |
+| **E-Doręczenia** - doręczenia elektroniczne | 01.2026 | ✅ Gotowy |
+
+### 🇪🇺 Unia Europejska
+| Regulacja | Termin | Status |
+|-----------|--------|--------|
+| **CSRD/ESG** - raportowanie zrównoważonego rozwoju | 2025-2027 | ✅ Gotowy |
+| **CBAM** - mechanizm węglowy | 2026 | ✅ Gotowy |
+| **ViDA** - VAT in Digital Age | 2025-2030 | ✅ Gotowy |
+| **DAC7/DAC8** - wymiana informacji platform | 2025 | ✅ Gotowy |
+
+### Szybki start
+
+```python
+from analytica.compliance import ComplianceChecker
+
+# Sprawdź wszystkie regulacje dla firmy
+checker = ComplianceChecker(
+    company_name="Moja Firma Sp. z o.o.",
+    nip="1234567890",
+    country="PL",
+    employees=150,
+    revenue_eur=10000000
+)
+
+# Raport zgodności
+results = checker.check_all()
+
+# Harmonogram wdrożeń
+timeline = checker.get_timeline()
+for item in timeline:
+    print(f"{item['date']} - {item['regulation']}: {item['action']}")
+```
+
+### Przykłady użycia
+
+#### KSeF - Faktura elektroniczna
+```python
+from analytica.compliance import create_simple_invoice, KSeFClient
+
+invoice = create_simple_invoice(
+    seller_nip="1234567890",
+    seller_name="Sprzedawca",
+    buyer_nip="0987654321",
+    buyer_name="Kupujący",
+    items=[{"name": "Usługa", "quantity": 1, "unit_price": 1000, "vat": "23"}]
+)
+
+with KSeFClient(nip="1234567890", token="xxx") as client:
+    response = client.send_invoice(invoice)
+```
+
+#### CBAM - Oblicz zobowiązanie
+```python
+from analytica.compliance import CBAMCalculator
+
+liability = CBAMCalculator.calculate_cbam_liability(
+    emissions_tco2=Decimal("100"),
+    carbon_price_paid_eur=Decimal("500")
+)
+print(f"Do zapłaty: {liability['net_liability_eur']} EUR")
+```
+
+#### ESG - Kalkulator CO2
+```python
+from analytica.compliance import CarbonCalculator
+
+scope2 = CarbonCalculator.calculate_scope2(
+    electricity_kwh=Decimal("500000"),
+    country="pl"
+)
+print(f"Emisje Scope 2: {scope2.amount_tonnes_co2e} tCO2e")
+```
+
+📖 Pełna dokumentacja: [docs/COMPLIANCE.md](docs/COMPLIANCE.md)

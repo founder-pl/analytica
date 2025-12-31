@@ -236,3 +236,123 @@
     data.query("SELECT * FROM invoices WHERE status = 'pending'")
     | transform.map(func="calculate_vat")
     | export.to_api(url="https://erp.company.pl/api/invoices")
+
+# ============================================================
+# VOICE PIPELINES (voice.pl)
+# ============================================================
+
+# Voice command to DSL
+@pipeline voice_to_pipeline:
+    voice.transcribe(audio_url="https://storage.example.com/recording.wav", language="pl")
+    | voice.parse()
+    | voice.to_dsl()
+
+# Voice-triggered report (Polish)
+@pipeline voice_report_pl:
+    # Input: "wygeneruj raport sprzedaży za ostatni miesiąc"
+    voice.parse(text="wygeneruj raport sprzedaży za ostatni miesiąc")
+    | data.load("sales")
+    | transform.filter(month="2024-12")
+    | metrics.calculate(["sum", "avg", "count"], field="amount")
+    | report.generate(format="html", template="sales_summary")
+
+# ============================================================
+# MODULE-SPECIFIC EXAMPLES
+# ============================================================
+
+# Budget Module - Complete variance analysis
+@pipeline budget_variance_complete:
+    $budget_name = "Q1 2025 Budget"
+    $scenario = "realistic"
+    
+    budget.create(name=$budget_name, scenario=$scenario)
+    | budget.variance(planned=100000, actual=95000)
+    | alert.threshold(metric="variance_percent", operator="gt", threshold=10)
+    | report.generate(format="html", template="budget_variance")
+
+# Investment Module - Full NPV/IRR analysis
+@pipeline investment_full_analysis:
+    $project_name = "New Factory"
+    $initial = 1000000
+    $rate = 0.12
+    $flows = [200000, 300000, 400000, 500000, 600000]
+    
+    investment.analyze(
+        name=$project_name,
+        initial_investment=$initial,
+        discount_rate=$rate,
+        cash_flows=$flows
+    )
+    | investment.npv(rate=$rate)
+    | investment.irr()
+    | investment.payback()
+    | report.generate(format="pdf", template="investment_analysis")
+
+# Forecast Module - Trend analysis with smoothing
+@pipeline forecast_with_smoothing:
+    data.load("historical_sales")
+    | forecast.smooth(method="exponential", alpha=0.3)
+    | forecast.trend()
+    | forecast.predict(periods=12, method="linear")
+    | report.generate(format="html", template="forecast_report")
+
+# Alerts Module - Anomaly detection pipeline
+@pipeline anomaly_detection:
+    data.load("daily_metrics")
+    | alert.anomaly(std_multiplier=2.0)
+    | alert.threshold(metric="deviation", operator="gt", threshold=3.0)
+    | alert.send(channel="email", recipient="admin@company.pl", message="Anomaly detected!")
+
+# Reports Module - Scheduled executive report
+@pipeline scheduled_executive:
+    data.load("company_metrics")
+    | metrics.calculate(["sum", "avg", "count"])
+    | report.generate(format="html", template="executive_summary", title="Weekly Executive Report")
+    | report.schedule(frequency="weekly", recipients=["ceo@company.pl", "cfo@company.pl"])
+
+# ============================================================
+# REAL-WORLD USE CASES
+# ============================================================
+
+# E-commerce daily sales dashboard
+@pipeline ecommerce_dashboard:
+    $date = "2024-12-31"
+    
+    data.load("orders")
+    | transform.filter(date=$date, status="completed")
+    | transform.group_by("category")
+    | metrics.calculate(["sum", "avg", "count"], field="total")
+    | transform.sort(by="sum_total", order="desc")
+    | transform.limit(10)
+    | report.generate(format="html", template="sales_dashboard")
+
+# SaaS MRR tracking
+@pipeline mrr_tracking:
+    data.load("subscriptions")
+    | transform.filter(status="active")
+    | metrics.sum("monthly_revenue")
+    | forecast.predict(periods=6, method="linear")
+    | alert.threshold(metric="mrr_growth", operator="lt", threshold=0.05)
+    | report.generate(format="html", template="mrr_report")
+
+# Manufacturing cost analysis
+@pipeline manufacturing_costs:
+    $facility = "factory_01"
+    
+    data.load("production_costs")
+    | transform.filter(facility=$facility)
+    | budget.categorize()
+    | budget.variance()
+    | transform.group_by("cost_center")
+    | metrics.calculate(["sum", "avg"])
+    | report.generate(format="xlsx", template="cost_analysis")
+
+# HR headcount planning
+@pipeline headcount_planning:
+    data.load("employees")
+    | transform.filter(status="active")
+    | transform.group_by("department")
+    | metrics.count()
+    | forecast.predict(periods=12)
+    | budget.variance(planned=150, actual=145)
+    | report.generate(format="pdf", template="headcount_report")

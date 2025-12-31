@@ -2,9 +2,10 @@
 ANALYTICA Framework - Base API Service
 Modular FastAPI application for multi-domain analytics platform
 """
-from fastapi import FastAPI, Request, HTTPException, Depends
+from fastapi import FastAPI, Request, HTTPException, Depends, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime, date
@@ -14,6 +15,17 @@ import sys
 
 # Add src to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import uuid
+from pathlib import Path
+
+from dsl.core.parser import (
+    AtomRegistry,
+    PipelineContext as DSLPipelineContext,
+    parse as dsl_parse,
+    execute as dsl_execute,
+)
+from dsl.atoms import implementations as _dsl_atoms
 
 # Get domain from environment
 DOMAIN = os.getenv("ANALYTICA_DOMAIN", "repox.pl")
@@ -26,6 +38,14 @@ app = FastAPI(
     version="2.0.0",
 )
 
+_src_dir = Path(__file__).resolve().parent.parent
+_frontend_dir = _src_dir / "frontend"
+_sdk_js_dir = _src_dir / "sdk" / "js"
+if _sdk_js_dir.exists():
+    app.mount("/ui/sdk", StaticFiles(directory=str(_sdk_js_dir)), name="ui-sdk")
+if _frontend_dir.exists():
+    app.mount("/ui", StaticFiles(directory=str(_frontend_dir), html=True), name="ui")
+
 # CORS
 app.add_middleware(
     CORSMiddleware,
@@ -34,7 +54,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # ============ MODELS ============
 
@@ -96,7 +115,7 @@ class BudgetCategory(BaseModel):
     name: str
     planned: Decimal
     actual: Decimal = Decimal("0")
-    
+
 
 class BudgetRequest(BaseModel):
     name: str
@@ -155,6 +174,45 @@ class ForecastResponse(BaseModel):
     model: str
     periods: int
     status: str
+
+
+# DSL Models
+class DSLExecuteRequest(BaseModel):
+    dsl: str = Field(..., description="DSL pipeline string")
+    variables: Dict[str, Any] = Field(default_factory=dict)
+    input_data: Optional[Any] = None
+    domain: Optional[str] = None
+
+
+class DSLExecuteResponse(BaseModel):
+    execution_id: str
+    status: str
+    result: Optional[Any] = None
+    logs: List[Dict] = []
+    errors: List[Dict] = []
+    execution_time_ms: Optional[float] = None
+
+
+class DSLParseRequest(BaseModel):
+    dsl: str
+
+
+class DSLParseResponse(BaseModel):
+    name: str
+    steps: List[Dict]
+    variables: Dict[str, Any]
+    dsl_normalized: str
+    json_representation: Dict
+
+
+class DSLValidateRequest(BaseModel):
+    dsl: str
+
+
+class DSLValidateResponse(BaseModel):
+    valid: bool
+    errors: List[str] = []
+    warnings: List[str] = []
 
 
 # ============ DOMAIN CONFIGURATION ============
@@ -268,6 +326,200 @@ async def get_domain_info():
         modules=get_modules(),
         **info
     )
+
+
+dsl_router = APIRouter()
+
+# In-memory storage for pipelines
+_stored_pipelines: Dict[str, Dict[str, Any]] = {}
+
+
+@dsl_router.get("/health")
+async def dsl_health():
+    return {"status": "ok", "service": "dsl-api", "domain": DOMAIN}
+
+
+@dsl_router.get("/atoms", response_model=Dict[str, List[str]])
+async def dsl_list_atoms():
+    return AtomRegistry.list_atoms()
+
+
+@dsl_router.get("/atoms/{atom_type}")
+async def dsl_list_atom_actions(atom_type: str):
+    all_atoms = AtomRegistry.list_atoms()
+    if atom_type not in all_atoms:
+        raise HTTPException(status_code=404, detail=f"Unknown atom type: {atom_type}")
+    return {"type": atom_type, "actions": all_atoms[atom_type]}
+
+
+class AtomExecuteRequest(BaseModel):
+    input_data: Optional[Any] = None
+    params: Optional[Dict[str, Any]] = None
+
+
+@dsl_router.post("/atoms/{atom_type}/{action}")
+async def dsl_execute_atom(atom_type: str, action: str, request: AtomExecuteRequest = None):
+    handler = AtomRegistry.get(atom_type, action)
+    if not handler:
+        raise HTTPException(status_code=404, detail=f"Unknown atom: {atom_type}.{action}")
+    
+    ctx = DSLPipelineContext(domain=DOMAIN)
+    if request and request.input_data is not None:
+        ctx.set_data(request.input_data)
+    
+    try:
+        result = handler(ctx, **(request.params if request and request.params else {}))
+        return {"status": "success", "result": result}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+
+@dsl_router.post("/pipeline/parse", response_model=DSLParseResponse)
+async def dsl_parse_pipeline(request: DSLParseRequest):
+    pipeline = dsl_parse(request.dsl)
+    return DSLParseResponse(
+        name=pipeline.name,
+        steps=[
+            {
+                "atom": step.atom.to_dict(),
+                "condition": step.condition,
+                "on_error": step.on_error,
+            }
+            for step in pipeline.steps
+        ],
+        variables=pipeline.variables,
+        dsl_normalized=pipeline.to_dsl(),
+        json_representation=pipeline.to_dict(),
+    )
+
+
+@dsl_router.post("/pipeline/validate", response_model=DSLValidateResponse)
+async def dsl_validate_pipeline(request: DSLValidateRequest):
+    errors: List[str] = []
+    warnings: List[str] = []
+    try:
+        pipeline = dsl_parse(request.dsl)
+    except SyntaxError as e:
+        return DSLValidateResponse(valid=False, errors=[str(e)], warnings=[])
+
+    for step in pipeline.steps:
+        atom = step.atom
+        handler = AtomRegistry.get(atom.type.value, atom.action)
+        if not handler:
+            errors.append(f"Unknown atom: {atom.type.value}.{atom.action}")
+
+    for step in pipeline.steps:
+        for _, value in step.atom.params.items():
+            if isinstance(value, str) and value.startswith('$'):
+                var_name = value[1:]
+                if var_name not in pipeline.variables:
+                    warnings.append(f"Unresolved variable: {value}")
+
+    return DSLValidateResponse(valid=len(errors) == 0, errors=errors, warnings=warnings)
+
+
+@dsl_router.post("/pipeline/execute", response_model=DSLExecuteResponse)
+async def dsl_execute_pipeline(request: DSLExecuteRequest):
+    execution_id = f"exec_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:8]}"
+    start_time = datetime.utcnow()
+    try:
+        pipeline = dsl_parse(request.dsl)
+        variables = {**pipeline.variables, **(request.variables or {})}
+        ctx = DSLPipelineContext(variables=variables, domain=request.domain or DOMAIN)
+        if request.input_data is not None:
+            ctx.set_data(request.input_data)
+        result_ctx = dsl_execute(pipeline, ctx)
+        exec_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+        return DSLExecuteResponse(
+            execution_id=execution_id,
+            status="success",
+            result=result_ctx.get_data(),
+            logs=result_ctx.logs,
+            errors=result_ctx.errors,
+            execution_time_ms=round(exec_time, 2),
+        )
+    except SyntaxError as e:
+        return DSLExecuteResponse(
+            execution_id=execution_id,
+            status="error",
+            result=None,
+            logs=[],
+            errors=[{"type": "SyntaxError", "message": str(e)}],
+        )
+    except Exception as e:
+        return DSLExecuteResponse(
+            execution_id=execution_id,
+            status="error",
+            result=None,
+            logs=[],
+            errors=[{"type": type(e).__name__, "message": str(e)}],
+        )
+
+
+# Stored pipelines CRUD
+class StoredPipelineRequest(BaseModel):
+    name: str
+    dsl: str
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+
+class StoredPipelineResponse(BaseModel):
+    id: str
+    name: str
+    dsl: str
+    description: Optional[str] = None
+    tags: List[str] = []
+    created_at: str
+
+
+@dsl_router.get("/pipelines")
+async def list_stored_pipelines():
+    return {"pipelines": list(_stored_pipelines.values()), "count": len(_stored_pipelines)}
+
+
+@dsl_router.post("/pipelines", response_model=StoredPipelineResponse)
+async def create_stored_pipeline(request: StoredPipelineRequest):
+    pipeline_id = f"pipe_{uuid.uuid4().hex[:8]}"
+    stored = {
+        "id": pipeline_id,
+        "name": request.name,
+        "dsl": request.dsl,
+        "description": request.description,
+        "tags": request.tags or [],
+        "created_at": datetime.utcnow().isoformat(),
+    }
+    _stored_pipelines[pipeline_id] = stored
+    return StoredPipelineResponse(**stored)
+
+
+@dsl_router.get("/pipelines/{pipeline_id}", response_model=StoredPipelineResponse)
+async def get_stored_pipeline(pipeline_id: str):
+    if pipeline_id not in _stored_pipelines:
+        raise HTTPException(status_code=404, detail=f"Pipeline not found: {pipeline_id}")
+    return StoredPipelineResponse(**_stored_pipelines[pipeline_id])
+
+
+@dsl_router.delete("/pipelines/{pipeline_id}")
+async def delete_stored_pipeline(pipeline_id: str):
+    if pipeline_id not in _stored_pipelines:
+        raise HTTPException(status_code=404, detail=f"Pipeline not found: {pipeline_id}")
+    del _stored_pipelines[pipeline_id]
+    return {"status": "deleted", "id": pipeline_id}
+
+
+@dsl_router.post("/pipelines/{pipeline_id}/run", response_model=DSLExecuteResponse)
+async def run_stored_pipeline(pipeline_id: str, variables: Dict[str, Any] = None, input_data: Any = None):
+    if pipeline_id not in _stored_pipelines:
+        raise HTTPException(status_code=404, detail=f"Pipeline not found: {pipeline_id}")
+    
+    stored = _stored_pipelines[pipeline_id]
+    request = DSLExecuteRequest(dsl=stored["dsl"], variables=variables or {}, input_data=input_data)
+    return await dsl_execute_pipeline(request)
+
+
+app.include_router(dsl_router, prefix="/api/v1")
+app.include_router(dsl_router, prefix="/v1", include_in_schema=False)
 
 
 # ============ REPORTS MODULE ============
