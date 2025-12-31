@@ -32,5 +32,6 @@ services:
       dind:
         condition: service_healthy
     volumes:
+      - ..:/workspace:ro
       - ../test-results:/results
     command: /workspace/scripts/run-e2e-dind-inner.sh

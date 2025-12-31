@@ -2,7 +2,7 @@
 ANALYTICA Framework - Base API Service
 Modular FastAPI application for multi-domain analytics platform
 """
-from fastapi import FastAPI, Request, HTTPException, Depends, APIRouter
+from fastapi import FastAPI, Request, HTTPException, Depends, APIRouter, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -100,6 +100,7 @@ async def favicon():
 
 class HealthResponse(BaseModel):
     status: str
+    message: Optional[str] = None
     domain: str
     port: int
     timestamp: str
@@ -425,6 +426,7 @@ async def root():
     """Health check and domain info"""
     return HealthResponse(
         status="healthy",
+        message=f"ANALYTICA API - {DOMAIN}",
         domain=DOMAIN,
         port=API_PORT,
         timestamp=datetime.utcnow().isoformat(),

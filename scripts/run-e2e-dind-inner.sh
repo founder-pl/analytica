@@ -38,12 +38,16 @@ set -e
 
 echo "[dind] copying results"
 CID=$(docker compose -f "$INNER_COMPOSE" ps -q e2e-tests || true)
-if [ -n "$CID" ]; then
-  docker cp "$CID:/app/results/." "$RESULTS_DIR/" 2>/dev/null || true
+if [ -z "$CID" ]; then
+  echo "[dind] ERROR: could not find e2e-tests container id" >&2
+  echo "missing_container_id" > "$RESULTS_DIR/inner-${RUN_ID}.error.txt" 2>/dev/null || true
+else
+  docker cp "$CID:/app/results/." "$RESULTS_DIR/" || true
 fi
 
 docker compose -f "$INNER_COMPOSE" ps > "$RESULTS_DIR/inner-${RUN_ID}.compose-ps.txt" 2>/dev/null || true
 docker compose -f "$INNER_COMPOSE" logs --no-color > "$RESULTS_DIR/inner-${RUN_ID}.compose.log" 2>/dev/null || true
+docker compose -f "$INNER_COMPOSE" logs --no-color e2e-tests > "$RESULTS_DIR/inner-${RUN_ID}.e2e-tests.log" 2>/dev/null || true
 
 docker compose -f "$INNER_COMPOSE" logs api > "$RESULTS_DIR/api.log" 2>/dev/null || true
 
