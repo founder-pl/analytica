@@ -67,22 +67,38 @@ def notify(title: str, message: str, icon: str = "dialog-information"):
 
 
 def handle_desktop_run(parsed: Dict[str, Any]) -> int:
-    """Handle desktop/run - launch Electron app."""
+    """Handle desktop/run - launch Electron app or open URL in browser."""
     params = parsed.get("params", {})
-    project_dir = params.get("dir", params.get("project", "."))
+    project_dir = params.get("dir", params.get("project", ""))
     default_url = os.environ.get("DESKTOP_DEFAULT_URL", "http://localhost:18000")
     url = params.get("url", default_url)
+    
+    # If no project dir specified, just open URL in browser
+    if not project_dir or project_dir == ".":
+        notify("Analytica", f"Opening: {url}")
+        try:
+            subprocess.Popen(
+                ["xdg-open", url],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+            return 0
+        except Exception as e:
+            notify("Analytica", f"Failed to open URL: {e}", "dialog-error")
+            return 1
     
     project_path = Path(project_dir).expanduser().resolve()
     
     if not project_path.exists():
-        notify("Analytica", f"Project directory not found: {project_path}", "dialog-error")
-        return 1
+        notify("Analytica", f"Project not found: {project_path}\nOpening URL instead: {url}", "dialog-warning")
+        subprocess.Popen(["xdg-open", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return 0
     
     package_json = project_path / "package.json"
     if not package_json.exists():
-        notify("Analytica", f"No package.json in {project_path}", "dialog-error")
-        return 1
+        notify("Analytica", f"No package.json in {project_path}\nOpening URL instead: {url}", "dialog-warning")
+        subprocess.Popen(["xdg-open", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return 0
     
     notify("Analytica", f"Starting desktop app from {project_path}")
     
@@ -90,12 +106,14 @@ def handle_desktop_run(parsed: Dict[str, Any]) -> int:
     env["ANALYTICA_URL"] = url
     
     try:
+        # Use nohup to detach process completely
         subprocess.Popen(
             ["npm", "start"],
             cwd=str(project_path),
             env=env,
             stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
+            stderr=subprocess.DEVNULL,
+            start_new_session=True  # Detach from parent process
         )
         return 0
     except Exception as e:

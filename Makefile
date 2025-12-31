@@ -213,17 +213,47 @@ db-seed: ## Seed database with sample data
 # TESTING
 # ============================================================
 
-test: ## Run tests
-	@echo "$(CYAN)Running tests...$(NC)"
-	cd docker && docker-compose exec api-repox python -m pytest -v tests/ || \
-		(echo "$(YELLOW)No tests directory or pytest not available in container. Running local tests...$(NC)" && \
-		PYTHONPATH=. python -m pytest -v tests/ 2>/dev/null || echo "$(YELLOW)No tests found.$(NC)")
+test: ## Run unit tests
+	@echo "$(CYAN)Running unit tests...$(NC)"
+	PYTHONPATH=src python -m pytest tests/unit/ -v --tb=short
 
-test-financial: ## Test financial domains
+test-all: ## Run all tests (unit + integration)
+	@echo "$(CYAN)Running all tests...$(NC)"
+	PYTHONPATH=src python -m pytest tests/ -v --tb=short
+
+test-e2e: ## Run E2E tests in Docker
+	@echo "$(CYAN)Running E2E tests in Docker...$(NC)"
+	./scripts/run-e2e-tests.sh
+
+test-e2e-build: ## Run E2E tests with rebuild
+	@echo "$(CYAN)Running E2E tests (with rebuild)...$(NC)"
+	./scripts/run-e2e-tests.sh --build
+
+test-e2e-keep: ## Run E2E tests and keep containers running
+	@echo "$(CYAN)Running E2E tests (keep containers)...$(NC)"
+	./scripts/run-e2e-tests.sh --keep
+
+test-financial: ## Test financial domains health
 	@echo "$(CYAN)Testing financial domains...$(NC)"
 	curl -s http://localhost:8010/health | jq .
 	curl -s http://localhost:8011/health | jq .
 	curl -s http://localhost:8012/health | jq .
+
+test-coverage: ## Run tests with coverage
+	@echo "$(CYAN)Running tests with coverage...$(NC)"
+	PYTHONPATH=src python -m pytest tests/unit/ -v --cov=src --cov-report=html --cov-report=term
+
+test-gui: ## Run GUI tests with Playwright
+	@echo "$(CYAN)Running GUI tests...$(NC)"
+	./scripts/run-gui-tests.sh
+
+test-gui-headed: ## Run GUI tests with visible browser
+	@echo "$(CYAN)Running GUI tests (headed)...$(NC)"
+	./scripts/run-gui-tests.sh --headed
+
+test-gui-docker: ## Run GUI tests in Docker
+	@echo "$(CYAN)Running GUI tests in Docker...$(NC)"
+	./scripts/run-gui-tests.sh --docker
 
 # ============================================================
 # CLEANUP

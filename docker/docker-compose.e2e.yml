@@ -1,0 +1,117 @@
+# ANALYTICA Framework - E2E Testing Docker Compose
+# Runs full system tests in isolated Docker environment
+#
+# Usage:
+#   docker-compose -f docker/docker-compose.e2e.yml up --build --abort-on-container-exit
+#   docker-compose -f docker/docker-compose.e2e.yml down -v
+
+services:
+  # ============================================================
+  # INFRASTRUCTURE
+  # ============================================================
+  
+  postgres:
+    image: postgres:16-alpine
+    container_name: e2e-postgres
+    environment:
+      POSTGRES_USER: analytica
+      POSTGRES_PASSWORD: analytica_test
+      POSTGRES_DB: analytica_test
+    volumes:
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - e2e-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U analytica"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: e2e-redis
+    networks:
+      - e2e-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ============================================================
+  # API SERVER
+  # ============================================================
+  
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.e2e
+    container_name: e2e-api
+    environment:
+      - ANALYTICA_DOMAIN=test.analytica.local
+      - API_PORT=8000
+      - API_HOST=0.0.0.0
+      - API_BASE_URL=http://api:8000
+      - DATABASE_URL=postgresql://analytica:analytica_test@postgres:5432/analytica_test
+      - REDIS_URL=redis://redis:6379/0
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+      - DEV_CORS_ALL=true
+      - ANALYTICA_SECRET_KEY=e2e-test-secret-key
+      - DESKTOP_DEFAULT_URL=http://api:8000
+    ports:
+      - "18080:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - e2e-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+
+  # ============================================================
+  # E2E TEST RUNNER
+  # ============================================================
+  
+  e2e-tests:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.e2e
+    container_name: e2e-tests
+    environment:
+      - API_BASE_URL=http://api:8000
+      - DATABASE_URL=postgresql://analytica:analytica_test@postgres:5432/analytica_test
+      - REDIS_URL=redis://redis:6379/0
+      - PYTHONPATH=/app/src
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - e2e-net
+    volumes:
+      - ../tests:/app/tests:ro
+      - e2e-results:/app/results
+    command: >
+      pytest tests/e2e/ -v 
+      --tb=short 
+      --junitxml=/app/results/e2e-results.xml
+      --html=/app/results/e2e-report.html
+      --self-contained-html
+      -x
+
+# ============================================================
+# VOLUMES & NETWORKS
+# ============================================================
+
+volumes:
+  e2e-results:
+
+networks:
+  e2e-net:
+    driver: bridge

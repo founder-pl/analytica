@@ -900,6 +900,120 @@
       padding: 12px 16px;
       border-top: 1px solid var(--border);
     }
+
+    /* All Deploy Logs Panel (Logs Tab) */
+    .logs-panel {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logs-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+
+    .all-deploy-logs {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .no-logs {
+      color: var(--muted);
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .deploy-log-section {
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .deploy-log-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--bg);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .deploy-log-header:hover {
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .deploy-log-header .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #059669;
+    }
+
+    .deploy-log-header .status-indicator.running {
+      background: #2563eb;
+      animation: pulse 1.5s infinite;
+    }
+
+    .deploy-log-header .status-indicator.error {
+      background: #dc2626;
+    }
+
+    .deploy-log-header .status-indicator.pending {
+      background: #d97706;
+    }
+
+    .deploy-log-header .platform-badge {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(99, 102, 241, 0.12);
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+
+    .deploy-log-header .deploy-id {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .deploy-log-header .log-count {
+      margin-left: auto;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .deploy-log-header .expand-icon {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .deploy-log-entries {
+      background: #0d1117;
+      padding: 8px 12px;
+      font-family: monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .deploy-log-entries .log-entry {
+      padding: 2px 0;
+      color: #c9d1d9;
+    }
+
+    .deploy-log-entries .log-entry.info { color: #58a6ff; }
+    .deploy-log-entries .log-entry.success { color: #3fb950; }
+    .deploy-log-entries .log-entry.warn { color: #d29922; }
+    .deploy-log-entries .log-entry.error { color: #f85149; }
     
     .preview-chart {
       height: 150px;
@@ -1356,6 +1470,7 @@ source.http(url=&quot;https://api.example.com/data&quot;)
               <button class="output-tab active" data-output="json">JSON</button>
               <button class="output-tab" data-output="preview">Preview</button>
               <button class="output-tab" data-output="export">Export</button>
+              <button class="output-tab" data-output="logs">Logs</button>
             </div>
             <span id="outputStatus" class="output-status" style="display:none">Ready</span>
           </div>
@@ -1375,6 +1490,16 @@ source.http(url=&quot;https://api.example.com/data&quot;)
               <button class="export-btn" onclick="exportTo('github')">⚙️ GitHub Actions</button>
             </div>
             <div id="exportResult" class="export-result"></div>
+          </div>
+
+          <div id="outputLogs" class="output-content" style="display:none">
+            <div class="logs-panel">
+              <div class="logs-header">
+                <span>📊 Deployment Logs</span>
+                <button class="btn btn-ghost btn-sm" onclick="clearAllDeployLogs()">🗑️ Clear All</button>
+              </div>
+              <div id="allDeployLogsContainer" class="all-deploy-logs"></div>
+            </div>
           </div>
 
           <div id="frontendLog" class="frontend-log"></div>
@@ -1637,6 +1762,11 @@ source.http(url=&quot;https://api.example.com/data&quot;)
       document.getElementById('outputJSON').style.display = tabName === 'json' ? 'block' : 'none';
       document.getElementById('outputPreview').style.display = tabName === 'preview' ? 'block' : 'none';
       document.getElementById('outputExport').style.display = tabName === 'export' ? 'block' : 'none';
+      document.getElementById('outputLogs').style.display = tabName === 'logs' ? 'block' : 'none';
+      
+      if (tabName === 'logs') {
+        renderAllDeployLogs();
+      }
       
       AppState.outputTab = tabName;
       AppState.save();
@@ -1926,6 +2056,56 @@ source.http(url=&quot;https://api.example.com/data&quot;)
       addDeployLog(deployId, 'Stop requested by user', 'warn');
       setDeployStatus(deployId, 'pending');
       showNotification('Stop wysłany', 'info');
+    }
+
+    function renderAllDeployLogs() {
+      const container = document.getElementById('allDeployLogsContainer');
+      if (!container) return;
+      
+      const deployIds = Object.keys(deploymentLogs);
+      if (deployIds.length === 0) {
+        container.innerHTML = '<div class="no-logs">Brak logów. Uruchom export lub launch aby zobaczyć logi.</div>';
+        return;
+      }
+      
+      container.innerHTML = deployIds.map(deployId => {
+        const logs = deploymentLogs[deployId] || [];
+        const status = deploymentStatus[deployId] || 'pending';
+        const platform = deployId.replace(/^deploy_/, '').replace(/_\d+$/, '');
+        
+        return `
+          <div class="deploy-log-section">
+            <div class="deploy-log-header" onclick="toggleDeployLogSection('${deployId}')">
+              <span class="status-indicator ${status}"></span>
+              <span class="platform-badge">${escapeHtml(platform)}</span>
+              <span class="deploy-id">${escapeHtml(deployId)}</span>
+              <span class="log-count">${logs.length} logs</span>
+              <span class="expand-icon">▼</span>
+            </div>
+            <div class="deploy-log-entries" id="logEntries_${deployId}">
+              ${logs.length === 0 
+                ? '<div class="log-entry info">[No logs]</div>'
+                : logs.map(log => `<div class="log-entry ${log.level}">[${log.timestamp}] ${escapeHtml(log.message)}</div>`).join('')
+              }
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleDeployLogSection(deployId) {
+      const entries = document.getElementById(`logEntries_${deployId}`);
+      if (entries) {
+        entries.style.display = entries.style.display === 'none' ? 'block' : 'none';
+      }
+    }
+
+    function clearAllDeployLogs() {
+      Object.keys(deploymentLogs).forEach(id => {
+        deploymentLogs[id] = [];
+      });
+      renderAllDeployLogs();
+      showNotification('Logi wyczyszczone', 'success');
     }
 
     function restartDeployment(deployId, platform) {

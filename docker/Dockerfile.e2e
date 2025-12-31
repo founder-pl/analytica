@@ -1,0 +1,50 @@
+# ANALYTICA Framework - E2E Testing Dockerfile
+# Builds image for running E2E tests in Docker
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for caching
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install test dependencies
+RUN pip install --no-cache-dir \
+    pytest \
+    pytest-asyncio \
+    pytest-html \
+    pytest-xdist \
+    httpx \
+    aiohttp \
+    python-dotenv \
+    psycopg2-binary \
+    redis \
+    playwright
+
+# Install Playwright browsers
+RUN playwright install chromium
+RUN playwright install-deps chromium
+
+# Copy source code
+COPY src/ /app/src/
+COPY tests/ /app/tests/
+COPY config/ /app/config/
+COPY .env.example /app/.env
+
+# Set Python path
+ENV PYTHONPATH=/app/src
+ENV PYTHONUNBUFFERED=1
+
+# Create results directory
+RUN mkdir -p /app/results
+
+# Default command runs tests
+CMD ["pytest", "tests/e2e/", "-v", "--tb=short"]

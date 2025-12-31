@@ -434,7 +434,15 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "domain": DOMAIN}
+    """Health check endpoint for monitoring and E2E tests"""
+    return {
+        "status": "healthy",
+        "domain": DOMAIN,
+        "version": "2.0.0",
+        "api_port": API_PORT,
+        "debug": DEBUG,
+        "timestamp": datetime.utcnow().isoformat()
+    }
 
 
 @app.get("/v1/domain", response_model=DomainInfo)
