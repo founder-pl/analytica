@@ -1,0 +1,66 @@
+# alerts.pl - Real-time KPI Monitoring
+domain: alerts.pl
+type: specialized
+display_name: "Alerts.pl"
+tagline: "Monitoruj KPI w czasie rzeczywistym"
+
+ports:
+  frontend: 3003
+  api: 8003
+
+modules:
+  alerts:
+    access: full
+    features:
+      - threshold_alerts
+      - anomaly_detection
+      - trend_alerts
+      - comparison_alerts
+  reports:
+    access: basic
+  webhooks:
+    access: full
+  voice:
+    access: disabled
+
+theme:
+  primary: "#EF4444"
+  accent: "#F97316"
+  secondary: "#7F1D1D"
+  mode: light
+  logo: /assets/alerts-logo.svg
+  gradient: "from-red-500 to-orange-500"
+
+features:
+  - real_time_dashboard
+  - sms_notifications
+  - escalation_policies
+  - anomaly_detection
+  - custom_webhooks
+  - status_page
+
+channels:
+  - email
+  - sms
+  - slack
+  - teams
+  - webhook
+  - push
+
+pricing:
+  plans: [free, pro, enterprise]
+  limits:
+    free:
+      alerts: 5
+      sms_per_month: 0
+    pro:
+      alerts: 50
+      sms_per_month: 100
+    enterprise:
+      alerts: unlimited
+      sms_per_month: unlimited
+
+seo:
+  title: "Alerts.pl - Alerty KPI i monitoring biznesowy"
+  description: "Otrzymuj powiadomienia gdy Twoje KPI przekroczą progi"
+  keywords: [alerty, monitoring, KPI, powiadomienia, anomalie]

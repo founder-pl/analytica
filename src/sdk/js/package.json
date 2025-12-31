@@ -1,0 +1,57 @@
+{
+  "name": "@analytica/sdk",
+  "version": "2.0.0",
+  "description": "ANALYTICA DSL - JavaScript SDK for analytics pipelines",
+  "main": "analytica.js",
+  "module": "analytica.mjs",
+  "types": "analytica.d.ts",
+  "exports": {
+    ".": {
+      "import": "./analytica.mjs",
+      "require": "./analytica.js",
+      "types": "./analytica.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "test": "jest",
+    "lint": "eslint .",
+    "docs": "typedoc --out docs analytica.js"
+  },
+  "keywords": [
+    "analytics",
+    "dsl",
+    "pipeline",
+    "data",
+    "reports",
+    "budget",
+    "investment",
+    "forecast"
+  ],
+  "author": "Softreck",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/softreck/analytica.git"
+  },
+  "homepage": "https://analytica.dev",
+  "bugs": {
+    "url": "https://github.com/softreck/analytica/issues"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "jest": "^29.0.0",
+    "rollup": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "analytica.js",
+    "analytica.mjs",
+    "analytica.d.ts",
+    "README.md"
+  ]
+}

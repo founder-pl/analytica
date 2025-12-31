@@ -1,0 +1,325 @@
+# ANALYTICA Framework - Docker Compose
+# Multi-domain analytics platform with separate ports per domain
+# 
+# Port mapping:
+# - repox.pl:        API 8000, Frontend 3000
+# - analizowanie.pl: API 8001, Frontend 3001
+# - przeanalizuj.pl: API 8002, Frontend 3002
+# - alerts.pl:       API 8003, Frontend 3003
+# - estymacja.pl:    API 8004, Frontend 3004
+# - retrospektywa.pl:API 8005, Frontend 3005
+# - persony.pl:      API 8006, Frontend 3006
+# - specyfikacja.pl: API 8007, Frontend 3007
+# - nisza.pl:        API 8008, Frontend 3008
+# - multiplan.pl:    API 8010, Frontend 3010
+# - planbudzetu.pl:  API 8011, Frontend 3011
+# - planinwestycji.pl: API 8012, Frontend 3012
+
+version: '3.8'
+
+x-api-common: &api-common
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile.api
+  volumes:
+    - ../src:/app/src:ro
+    - ../config:/app/config:ro
+  depends_on:
+    - postgres
+    - redis
+  networks:
+    - analytica-net
+  restart: unless-stopped
+
+services:
+  # ============================================================
+  # DATABASES & INFRASTRUCTURE
+  # ============================================================
+  
+  postgres:
+    image: postgres:16-alpine
+    container_name: analytica-postgres
+    environment:
+      POSTGRES_USER: analytica
+      POSTGRES_PASSWORD: analytica_secret_2024
+      POSTGRES_DB: analytica
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - analytica-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U analytica"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: analytica-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - analytica-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================
+  # HUB - repox.pl (Main Platform)
+  # ============================================================
+  
+  api-repox:
+    <<: *api-common
+    container_name: analytica-api-repox
+    environment:
+      - ANALYTICA_DOMAIN=repox.pl
+      - API_PORT=8000
+      - DATABASE_URL=postgresql://analytica:analytica_secret_2024@postgres:5432/analytica
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ============================================================
+  # ANALYTICS DOMAINS
+  # ============================================================
+  
+  api-analizowanie:
+    <<: *api-common
+    container_name: analytica-api-analizowanie
+    environment:
+      - ANALYTICA_DOMAIN=analizowanie.pl
+      - API_PORT=8001
+      - DATABASE_URL=postgresql://analytica:analytica_secret_2024@postgres:5432/analytica
+      - REDIS_URL=redis://redis:6379/1
+    ports:
+      - "8001:8001"
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8001 --reload
+
+  api-przeanalizuj:
+    <<: *api-common
+    container_name: analytica-api-przeanalizuj
+    environment:
+      - ANALYTICA_DOMAIN=przeanalizuj.pl
+      - API_PORT=8002
+      - DATABASE_URL=postgresql://analytica:analytica_secret_2024@postgres:5432/analytica
+      - REDIS_URL=redis://redis:6379/2
+    ports:
+      - "8002:8002"
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8002 --reload
+
+  # ============================================================
+  # MONITORING - alerts.pl
+  # ============================================================
+  
+  api-alerts:
+    <<: *api-common
+    container_name: analytica-api-alerts
+    environment:
+      - ANALYTICA_DOMAIN=alerts.pl
+      - API_PORT=8003
+      - DATABASE_URL=postgresql://analytica:analytica_secret_2024@postgres:5432/analytica
+      - REDIS_URL=redis://redis:6379/3
+    ports:
+      - "8003:8003"
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8003 --reload
+
+  # ============================================================
+  # FORECASTING - estymacja.pl
+  # ============================================================
+  
+  api-estymacja:
+    <<: *api-common
+    container_name: analytica-api-estymacja
+    environment:
+      - ANALYTICA_DOMAIN=estymacja.pl
+      - API_PORT=8004
+      - DATABASE_URL=postgresql://analytica:analytica_secret_2024@postgres:5432/analytica
+      - REDIS_URL=redis://redis:6379/4
+    ports:
+      - "8004:8004"
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8004 --reload
+
+  # ============================================================
+  # HISTORICAL - retrospektywa.pl
+  # ============================================================
+  
+  api-retrospektywa:
+    <<: *api-common
+    container_name: analytica-api-retrospektywa
+    environment:
+      - ANALYTICA_DOMAIN=retrospektywa.pl
+      - API_PORT=8005
+      - DATABASE_URL=postgresql://analytica:analytica_secret_2024@postgres:5432/analytica
+      - REDIS_URL=redis://redis:6379/5
+    ports:
+      - "8005:8005"
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8005 --reload
+
+  # ============================================================
+  # MARKETING - persony.pl
+  # ============================================================
+  
+  api-persony:
+    <<: *api-common
+    container_name: analytica-api-persony
+    environment:
+      - ANALYTICA_DOMAIN=persony.pl
+      - API_PORT=8006
+      - DATABASE_URL=postgresql://analytica:analytica_secret_2024@postgres:5432/analytica
+      - REDIS_URL=redis://redis:6379/6
+    ports:
+      - "8006:8006"
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8006 --reload
+
+  # ============================================================
+  # DOCUMENTATION - specyfikacja.pl
+  # ============================================================
+  
+  api-specyfikacja:
+    <<: *api-common
+    container_name: analytica-api-specyfikacja
+    environment:
+      - ANALYTICA_DOMAIN=specyfikacja.pl
+      - API_PORT=8007
+      - DATABASE_URL=postgresql://analytica:analytica_secret_2024@postgres:5432/analytica
+      - REDIS_URL=redis://redis:6379/7
+    ports:
+      - "8007:8007"
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8007 --reload
+
+  # ============================================================
+  # WHITE-LABEL - nisza.pl
+  # ============================================================
+  
+  api-nisza:
+    <<: *api-common
+    container_name: analytica-api-nisza
+    environment:
+      - ANALYTICA_DOMAIN=nisza.pl
+      - API_PORT=8008
+      - DATABASE_URL=postgresql://analytica:analytica_secret_2024@postgres:5432/analytica
+      - REDIS_URL=redis://redis:6379/8
+    ports:
+      - "8008:8008"
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8008 --reload
+
+  # ============================================================
+  # FINANCIAL DOMAINS
+  # ============================================================
+  
+  # MultiPlan - Multi-scenario Financial Planning
+  api-multiplan:
+    <<: *api-common
+    container_name: analytica-api-multiplan
+    environment:
+      - ANALYTICA_DOMAIN=multiplan.pl
+      - API_PORT=8010
+      - DATABASE_URL=postgresql://analytica:analytica_secret_2024@postgres:5432/analytica
+      - REDIS_URL=redis://redis:6379/10
+    ports:
+      - "8010:8010"
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8010 --reload
+
+  # PlanBudżetu - Budget Reports & Financial Analytics
+  api-planbudzetu:
+    <<: *api-common
+    container_name: analytica-api-planbudzetu
+    environment:
+      - ANALYTICA_DOMAIN=planbudzetu.pl
+      - API_PORT=8011
+      - DATABASE_URL=postgresql://analytica:analytica_secret_2024@postgres:5432/analytica
+      - REDIS_URL=redis://redis:6379/11
+    ports:
+      - "8011:8011"
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8011 --reload
+
+  # PlanInwestycji - Investment Planning & ROI Analysis
+  api-planinwestycji:
+    <<: *api-common
+    container_name: analytica-api-planinwestycji
+    environment:
+      - ANALYTICA_DOMAIN=planinwestycji.pl
+      - API_PORT=8012
+      - DATABASE_URL=postgresql://analytica:analytica_secret_2024@postgres:5432/analytica
+      - REDIS_URL=redis://redis:6379/12
+    ports:
+      - "8012:8012"
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8012 --reload
+
+  # ============================================================
+  # NGINX REVERSE PROXY
+  # ============================================================
+  
+  nginx:
+    image: nginx:alpine
+    container_name: analytica-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../nginx/domains:/etc/nginx/conf.d:ro
+    depends_on:
+      - api-repox
+      - api-multiplan
+      - api-planbudzetu
+      - api-planinwestycji
+    networks:
+      - analytica-net
+    restart: unless-stopped
+
+  # ============================================================
+  # MONITORING
+  # ============================================================
+  
+  grafana:
+    image: grafana/grafana:latest
+    container_name: analytica-grafana
+    ports:
+      - "3100:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - analytica-net
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: analytica-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - analytica-net
+    restart: unless-stopped
+
+# ============================================================
+# VOLUMES
+# ============================================================
+
+volumes:
+  postgres_data:
+  redis_data:
+  grafana_data:
+  prometheus_data:
+
+# ============================================================
+# NETWORKS
+# ============================================================
+
+networks:
+  analytica-net:
+    driver: bridge

@@ -1,0 +1,120 @@
+{
+  "sales_data": [
+    {"id": 1, "date": "2024-01-15", "amount": 1500.00, "category": "Product A", "region": "PL", "customer": "Firma ABC"},
+    {"id": 2, "date": "2024-01-20", "amount": 2300.00, "category": "Product B", "region": "PL", "customer": "Firma XYZ"},
+    {"id": 3, "date": "2024-02-10", "amount": 1800.00, "category": "Product A", "region": "DE", "customer": "GmbH Test"},
+    {"id": 4, "date": "2024-02-15", "amount": 3200.00, "category": "Product C", "region": "PL", "customer": "Sp. z o.o."},
+    {"id": 5, "date": "2024-03-01", "amount": 2100.00, "category": "Product B", "region": "DE", "customer": "Test AG"},
+    {"id": 6, "date": "2024-03-10", "amount": 4500.00, "category": "Product A", "region": "PL", "customer": "Firma ABC"}
+  ],
+  "budget_data": {
+    "budget_id": "budget_2024_q1",
+    "name": "Budżet Q1 2024",
+    "period_start": "2024-01-01",
+    "period_end": "2024-03-31",
+    "categories": [
+      {"name": "Wynagrodzenia", "planned": 150000, "actual": 148500, "variance": -1500},
+      {"name": "Marketing", "planned": 30000, "actual": 32500, "variance": 2500},
+      {"name": "IT", "planned": 25000, "actual": 23000, "variance": -2000},
+      {"name": "Biuro", "planned": 15000, "actual": 14200, "variance": -800},
+      {"name": "Podróże", "planned": 10000, "actual": 8500, "variance": -1500}
+    ],
+    "total_planned": 230000,
+    "total_actual": 226700
+  },
+  "investment_data": {
+    "name": "Nowa linia produkcyjna",
+    "initial_investment": 500000,
+    "discount_rate": 0.12,
+    "investment_type": "capex",
+    "expected_lifetime_years": 5,
+    "cash_flows": [
+      {"period": 1, "amount": 150000, "description": "Rok 1 - rozruch"},
+      {"period": 2, "amount": 180000, "description": "Rok 2 - wzrost"},
+      {"period": 3, "amount": 200000, "description": "Rok 3 - stabilizacja"},
+      {"period": 4, "amount": 220000, "description": "Rok 4 - optymalizacja"},
+      {"period": 5, "amount": 250000, "description": "Rok 5 - pełna wydajność"}
+    ]
+  },
+  "forecast_data": [
+    {"date": "2024-01-01", "value": 100, "category": "sales"},
+    {"date": "2024-01-02", "value": 105, "category": "sales"},
+    {"date": "2024-01-03", "value": 102, "category": "sales"},
+    {"date": "2024-01-04", "value": 110, "category": "sales"},
+    {"date": "2024-01-05", "value": 108, "category": "sales"},
+    {"date": "2024-01-06", "value": 115, "category": "sales"},
+    {"date": "2024-01-07", "value": 112, "category": "sales"},
+    {"date": "2024-01-08", "value": 120, "category": "sales"},
+    {"date": "2024-01-09", "value": 118, "category": "sales"},
+    {"date": "2024-01-10", "value": 125, "category": "sales"}
+  ],
+  "transactions": [
+    {"id": "TRX001", "date": "2024-01-15", "amount": 1500.00, "type": "income", "category": "Sprzedaż", "description": "Faktura FV/2024/001"},
+    {"id": "TRX002", "date": "2024-01-16", "amount": -500.00, "type": "expense", "category": "Marketing", "description": "Reklama Google"},
+    {"id": "TRX003", "date": "2024-01-17", "amount": -1200.00, "type": "expense", "category": "Wynagrodzenia", "description": "Pensja - styczeń"},
+    {"id": "TRX004", "date": "2024-01-18", "amount": 2300.00, "type": "income", "category": "Sprzedaż", "description": "Faktura FV/2024/002"},
+    {"id": "TRX005", "date": "2024-01-19", "amount": -300.00, "type": "expense", "category": "IT", "description": "Hosting"},
+    {"id": "TRX006", "date": "2024-01-20", "amount": -150.00, "type": "expense", "category": "Biuro", "description": "Materiały biurowe"}
+  ],
+  "invoices": [
+    {
+      "id": "INV001",
+      "number": "FV/2024/001",
+      "issue_date": "2024-01-15",
+      "sale_date": "2024-01-15",
+      "due_date": "2024-01-29",
+      "buyer_name": "Firma ABC Sp. z o.o.",
+      "buyer_nip": "1234567890",
+      "net_amount": 1219.51,
+      "vat_amount": 280.49,
+      "gross_amount": 1500.00,
+      "status": "paid",
+      "items": [
+        {"name": "Usługa consultingowa", "quantity": 1, "unit_price": 1219.51, "vat_rate": 0.23}
+      ]
+    },
+    {
+      "id": "INV002",
+      "number": "FV/2024/002",
+      "issue_date": "2024-01-18",
+      "sale_date": "2024-01-18",
+      "due_date": "2024-02-01",
+      "buyer_name": "Firma XYZ S.A.",
+      "buyer_nip": "9876543210",
+      "net_amount": 1869.92,
+      "vat_amount": 430.08,
+      "gross_amount": 2300.00,
+      "status": "unpaid",
+      "items": [
+        {"name": "Licencja oprogramowania", "quantity": 1, "unit_price": 1869.92, "vat_rate": 0.23}
+      ]
+    }
+  ],
+  "contractors": [
+    {
+      "id": "C001",
+      "name": "Firma ABC Sp. z o.o.",
+      "nip": "1234567890",
+      "address": "ul. Testowa 1",
+      "city": "Warszawa",
+      "postal_code": "00-001",
+      "email": "kontakt@firmaabc.pl",
+      "phone": "+48 22 123 45 67"
+    },
+    {
+      "id": "C002",
+      "name": "Firma XYZ S.A.",
+      "nip": "9876543210",
+      "address": "ul. Przykładowa 10",
+      "city": "Kraków",
+      "postal_code": "30-001",
+      "email": "biuro@firmaxyz.pl",
+      "phone": "+48 12 987 65 43"
+    }
+  ],
+  "products": [
+    {"id": "P001", "code": "CONS-001", "name": "Usługa consultingowa", "unit": "godz", "net_price": 200.00, "vat_rate": 0.23},
+    {"id": "P002", "code": "LIC-001", "name": "Licencja oprogramowania", "unit": "szt", "net_price": 500.00, "vat_rate": 0.23},
+    {"id": "P003", "code": "SUPP-001", "name": "Wsparcie techniczne", "unit": "mies", "net_price": 1000.00, "vat_rate": 0.23}
+  ]
+}

@@ -1,0 +1,104 @@
+# multiplan.pl - Multi-scenario Financial Planning
+domain: multiplan.pl
+type: specialized
+display_name: "MultiPlan"
+tagline: "Planuj finanse w wielu scenariuszach"
+
+# Port configuration
+ports:
+  frontend: 3010
+  api: 8010
+
+modules:
+  budget:
+    access: full
+    features:
+      - multi_scenario_planning
+      - budget_templates
+      - variance_analysis
+      - rolling_forecasts
+  forecast:
+    access: full
+    features:
+      - financial_projections
+      - cash_flow_forecast
+      - revenue_modeling
+  reports:
+    access: full
+    templates:
+      - budget_vs_actual
+      - scenario_comparison
+      - financial_summary
+      - department_breakdown
+  alerts:
+    access: basic
+    types:
+      - budget_threshold
+      - variance_alert
+  voice:
+    access: limited
+    
+theme:
+  primary: "#0891B2"      # Cyan-600
+  accent: "#06B6D4"       # Cyan-500
+  secondary: "#164E63"    # Cyan-900
+  mode: light
+  logo: /assets/multiplan-logo.svg
+  gradient: "from-cyan-500 to-blue-600"
+
+features:
+  - scenario_builder
+  - what_if_analysis
+  - budget_templates
+  - department_budgets
+  - approval_workflow
+  - version_control
+  - collaboration
+  - export_to_excel
+
+templates:
+  budget:
+    - annual_budget
+    - quarterly_budget
+    - project_budget
+    - department_budget
+  scenarios:
+    - optimistic
+    - realistic
+    - pessimistic
+    - custom
+
+integrations:
+  priority:
+    - ifirma
+    - fakturownia
+    - comarch_erp
+    - sage_symfonia
+    - google_sheets
+    - excel_online
+  banking:
+    - mbank_business
+    - ing_business
+    - santander_business
+
+pricing:
+  plans: [free, pro, enterprise]
+  default: free
+  limits:
+    free:
+      scenarios: 2
+      budgets: 3
+      users: 1
+    pro:
+      scenarios: 10
+      budgets: unlimited
+      users: 5
+    enterprise:
+      scenarios: unlimited
+      budgets: unlimited
+      users: unlimited
+
+seo:
+  title: "MultiPlan - Planowanie finansowe w wielu scenariuszach"
+  description: "Twórz budżety, analizuj scenariusze, planuj przyszłość finansową firmy"
+  keywords: [planowanie finansowe, budżetowanie, scenariusze, forecast, cash flow]

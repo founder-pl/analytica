@@ -1,0 +1,66 @@
+# ANALYTICA Framework - Prometheus Configuration
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'analytica-monitor'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files: []
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # API Services
+  - job_name: 'api-repox'
+    static_configs:
+      - targets: ['api-repox:8000']
+    metrics_path: /metrics
+
+  - job_name: 'api-multiplan'
+    static_configs:
+      - targets: ['api-multiplan:8010']
+    metrics_path: /metrics
+
+  - job_name: 'api-planbudzetu'
+    static_configs:
+      - targets: ['api-planbudzetu:8011']
+    metrics_path: /metrics
+
+  - job_name: 'api-planinwestycji'
+    static_configs:
+      - targets: ['api-planinwestycji:8012']
+    metrics_path: /metrics
+
+  - job_name: 'api-alerts'
+    static_configs:
+      - targets: ['api-alerts:8003']
+    metrics_path: /metrics
+
+  - job_name: 'api-estymacja'
+    static_configs:
+      - targets: ['api-estymacja:8004']
+    metrics_path: /metrics
+
+  # PostgreSQL
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+
+  # Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+
+  # Nginx
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx:80']

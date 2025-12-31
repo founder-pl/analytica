@@ -1,0 +1,107 @@
+# ANALYTICA Framework - Financial Domains Only
+# Lightweight setup for multiplan.pl, planbudzetu.pl, planinwestycji.pl
+#
+# Usage: docker-compose -f docker-compose.financial.yml up -d
+
+version: '3.8'
+
+x-api-common: &api-common
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile.api
+  volumes:
+    - ../src:/app/src:ro
+    - ../config:/app/config:ro
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  networks:
+    - analytica-financial
+  restart: unless-stopped
+
+services:
+  # ============================================================
+  # INFRASTRUCTURE
+  # ============================================================
+  
+  postgres:
+    image: postgres:16-alpine
+    container_name: analytica-fin-postgres
+    environment:
+      POSTGRES_USER: analytica
+      POSTGRES_PASSWORD: analytica_fin_2024
+      POSTGRES_DB: analytica_financial
+    volumes:
+      - fin_postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5433:5432"
+    networks:
+      - analytica-financial
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U analytica"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: analytica-fin-redis
+    ports:
+      - "6380:6379"
+    networks:
+      - analytica-financial
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================
+  # FINANCIAL APIS
+  # ============================================================
+
+  api-multiplan:
+    <<: *api-common
+    container_name: analytica-api-multiplan
+    environment:
+      - ANALYTICA_DOMAIN=multiplan.pl
+      - API_PORT=8010
+      - DATABASE_URL=postgresql://analytica:analytica_fin_2024@postgres:5432/analytica_financial
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "8010:8010"
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8010 --reload
+
+  api-planbudzetu:
+    <<: *api-common
+    container_name: analytica-api-planbudzetu
+    environment:
+      - ANALYTICA_DOMAIN=planbudzetu.pl
+      - API_PORT=8011
+      - DATABASE_URL=postgresql://analytica:analytica_fin_2024@postgres:5432/analytica_financial
+      - REDIS_URL=redis://redis:6379/1
+    ports:
+      - "8011:8011"
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8011 --reload
+
+  api-planinwestycji:
+    <<: *api-common
+    container_name: analytica-api-planinwestycji
+    environment:
+      - ANALYTICA_DOMAIN=planinwestycji.pl
+      - API_PORT=8012
+      - DATABASE_URL=postgresql://analytica:analytica_fin_2024@postgres:5432/analytica_financial
+      - REDIS_URL=redis://redis:6379/2
+    ports:
+      - "8012:8012"
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8012 --reload
+
+volumes:
+  fin_postgres_data:
+
+networks:
+  analytica-financial:
+    driver: bridge

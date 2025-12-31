@@ -1,0 +1,132 @@
+# ANALYTICA Framework - Main Configuration
+version: "2.0"
+name: "ANALYTICA"
+description: "Universal Analytics Framework - Multi-Domain Platform"
+
+# Global settings
+global:
+  default_language: pl
+  timezone: Europe/Warsaw
+  currency: PLN
+  
+# Core modules
+modules:
+  reports:
+    enabled: true
+    exports: [pdf, docx, xlsx, pptx, html, json, csv]
+  alerts:
+    enabled: true
+    channels: [email, sms, slack, webhook, push]
+  voice:
+    enabled: true
+    providers: [whisper, elevenlabs]
+  forecast:
+    enabled: true
+    models: [prophet, arima, lstm]
+  budget:
+    enabled: true
+    features: [planning, tracking, comparison]
+  investment:
+    enabled: true
+    features: [portfolio, roi, risk_analysis]
+  integrations:
+    enabled: true
+  billing:
+    enabled: true
+    providers: [stripe, p24]
+
+# Database configuration
+database:
+  primary: postgresql
+  analytics: clickhouse
+  cache: redis
+  timeseries: timescaledb
+
+# AI providers
+ai:
+  llm: claude
+  stt: whisper
+  tts: elevenlabs
+
+# Domain registry with ports
+domains:
+  # Hub
+  repox:
+    domain: repox.pl
+    port: 3000
+    api_port: 8000
+    type: hub
+    
+  # Analytics domains
+  analizowanie:
+    domain: analizowanie.pl
+    port: 3001
+    api_port: 8001
+    type: general
+    
+  przeanalizuj:
+    domain: przeanalizuj.pl
+    port: 3002
+    api_port: 8002
+    type: specialized
+    
+  # Monitoring
+  alerts:
+    domain: alerts.pl
+    port: 3003
+    api_port: 8003
+    type: specialized
+    
+  # Forecasting
+  estymacja:
+    domain: estymacja.pl
+    port: 3004
+    api_port: 8004
+    type: specialized
+    
+  # Historical
+  retrospektywa:
+    domain: retrospektywa.pl
+    port: 3005
+    api_port: 8005
+    type: specialized
+    
+  # Marketing
+  persony:
+    domain: persony.pl
+    port: 3006
+    api_port: 8006
+    type: specialized
+    
+  # Documentation
+  specyfikacja:
+    domain: specyfikacja.pl
+    port: 3007
+    api_port: 8007
+    type: specialized
+    
+  # White-label
+  nisza:
+    domain: nisza.pl
+    port: 3008
+    api_port: 8008
+    type: white_label
+    
+  # === NEW FINANCIAL DOMAINS ===
+  multiplan:
+    domain: multiplan.pl
+    port: 3010
+    api_port: 8010
+    type: specialized
+    
+  planbudzetu:
+    domain: planbudzetu.pl
+    port: 3011
+    api_port: 8011
+    type: specialized
+    
+  planinwestycji:
+    domain: planinwestycji.pl
+    port: 3012
+    api_port: 8012
+    type: specialized

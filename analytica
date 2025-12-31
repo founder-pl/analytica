@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+"""ANALYTICA CLI entrypoint"""
+import sys
+sys.path.insert(0, 'src')
+from dsl.cli.main import main
+main()

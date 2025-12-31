@@ -1,0 +1,147 @@
+# planinwestycji.pl - Investment Planning & Analysis
+domain: planinwestycji.pl
+type: specialized
+display_name: "PlanInwestycji"
+tagline: "Analizuj ROI, planuj inwestycje"
+
+# Port configuration
+ports:
+  frontend: 3012
+  api: 8012
+
+modules:
+  investment:
+    access: full
+    features:
+      - roi_calculator
+      - npv_analysis
+      - irr_calculation
+      - payback_period
+      - sensitivity_analysis
+      - risk_assessment
+  forecast:
+    access: full
+    features:
+      - investment_projections
+      - return_modeling
+      - scenario_analysis
+  reports:
+    access: full
+    templates:
+      - investment_proposal
+      - roi_analysis
+      - portfolio_summary
+      - risk_report
+      - comparison_matrix
+  budget:
+    access: basic
+    features:
+      - capex_planning
+      - investment_budget
+  alerts:
+    access: basic
+    types:
+      - roi_threshold
+      - risk_level_change
+  voice:
+    access: disabled
+
+theme:
+  primary: "#7C3AED"      # Violet-600
+  accent: "#8B5CF6"       # Violet-500
+  secondary: "#4C1D95"    # Violet-900
+  mode: light
+  logo: /assets/planinwestycji-logo.svg
+  gradient: "from-violet-500 to-purple-600"
+
+features:
+  - investment_dashboard
+  - roi_calculator
+  - npv_irr_tools
+  - scenario_modeling
+  - risk_matrix
+  - portfolio_tracker
+  - comparison_tools
+  - investment_timeline
+  - approval_workflow
+  - document_attachments
+
+calculators:
+  - name: roi
+    description: "Return on Investment"
+    inputs: [initial_investment, net_profit, time_period]
+  - name: npv
+    description: "Net Present Value"
+    inputs: [cash_flows, discount_rate, initial_investment]
+  - name: irr
+    description: "Internal Rate of Return"
+    inputs: [cash_flows, initial_investment]
+  - name: payback
+    description: "Payback Period"
+    inputs: [initial_investment, annual_cash_flow]
+  - name: profitability_index
+    description: "Wskaźnik rentowności"
+    inputs: [pv_cash_flows, initial_investment]
+
+investment_types:
+  - name: capex
+    label: "Inwestycje kapitałowe"
+    examples: [maszyny, nieruchomości, IT]
+  - name: rd
+    label: "Badania i rozwój"
+    examples: [prototypy, patenty, innowacje]
+  - name: marketing
+    label: "Inwestycje marketingowe"
+    examples: [kampanie, branding, ekspansja]
+  - name: hr
+    label: "Kapitał ludzki"
+    examples: [szkolenia, rekrutacja, rozwój]
+  - name: digital
+    label: "Transformacja cyfrowa"
+    examples: [software, automatyzacja, AI]
+
+risk_levels:
+  - level: low
+    color: "#10B981"
+    threshold: 0.3
+  - level: medium
+    color: "#F59E0B"
+    threshold: 0.6
+  - level: high
+    color: "#EF4444"
+    threshold: 1.0
+
+integrations:
+  priority:
+    - excel
+    - google_sheets
+  erp:
+    - comarch_erp
+    - sap
+    - sage
+  financial:
+    - bloomberg_terminal
+    - reuters
+
+pricing:
+  plans: [free, pro, enterprise]
+  default: free
+  limits:
+    free:
+      investments: 3
+      scenarios_per_investment: 2
+      reports: 5
+    pro:
+      investments: 20
+      scenarios_per_investment: 10
+      reports: unlimited
+    enterprise:
+      investments: unlimited
+      scenarios_per_investment: unlimited
+      reports: unlimited
+      api_access: true
+
+seo:
+  title: "PlanInwestycji - Analiza ROI i planowanie inwestycji"
+  description: "Kalkulatory ROI, NPV, IRR. Analizuj opłacalność inwestycji i zarządzaj portfolio"
+  keywords: [ROI, NPV, IRR, inwestycje, analiza opłacalności, CAPEX, business case]

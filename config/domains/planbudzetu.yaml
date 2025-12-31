@@ -1,0 +1,126 @@
+# planbudzetu.pl - Budget Reports & Financial Analytics
+domain: planbudzetu.pl
+type: specialized
+display_name: "PlanBudżetu"
+tagline: "Raporty finansowe pod kontrolą"
+
+# Port configuration
+ports:
+  frontend: 3011
+  api: 8011
+
+modules:
+  budget:
+    access: full
+    features:
+      - budget_tracking
+      - expense_categorization
+      - income_tracking
+      - budget_comparison
+  reports:
+    access: full
+    templates:
+      - monthly_budget_report
+      - expense_analysis
+      - income_vs_expense
+      - category_breakdown
+      - trend_analysis
+      - annual_summary
+  alerts:
+    access: full
+    types:
+      - budget_exceeded
+      - spending_spike
+      - low_balance
+      - goal_achieved
+  forecast:
+    access: basic
+    features:
+      - expense_projection
+      - savings_forecast
+  voice:
+    access: disabled
+
+theme:
+  primary: "#059669"      # Emerald-600
+  accent: "#10B981"       # Emerald-500
+  secondary: "#064E3B"    # Emerald-900
+  mode: light
+  logo: /assets/planbudzetu-logo.svg
+  gradient: "from-emerald-500 to-teal-600"
+
+features:
+  - budget_dashboard
+  - expense_tracking
+  - category_management
+  - recurring_expenses
+  - budget_goals
+  - spending_limits
+  - monthly_reports
+  - yearly_comparison
+  - export_reports
+  - email_reports
+
+report_templates:
+  - name: monthly_summary
+    description: "Miesięczne podsumowanie budżetu"
+    sections: [income, expenses, balance, categories, trends]
+  - name: expense_breakdown
+    description: "Szczegółowa analiza wydatków"
+    sections: [by_category, by_date, by_vendor, trends]
+  - name: budget_vs_actual
+    description: "Budżet vs rzeczywistość"
+    sections: [planned, actual, variance, alerts]
+  - name: annual_review
+    description: "Roczny przegląd finansowy"
+    sections: [summary, monthly_breakdown, categories, goals, recommendations]
+
+categories:
+  default:
+    - Wynagrodzenia
+    - Usługi zewnętrzne
+    - Marketing
+    - IT i oprogramowanie
+    - Biuro i administracja
+    - Podróże służbowe
+    - Szkolenia
+    - Pozostałe
+
+integrations:
+  priority:
+    - ifirma
+    - fakturownia
+    - infakt
+    - wfirma
+  banking:
+    - mbank
+    - ing
+    - pko_bp
+    - santander
+    - millennium
+  accounting:
+    - comarch_optima
+    - sage_symfonia
+    - insert_gt
+
+pricing:
+  plans: [free, pro, business]
+  default: free
+  limits:
+    free:
+      reports_per_month: 5
+      categories: 10
+      history_months: 3
+    pro:
+      reports_per_month: 50
+      categories: unlimited
+      history_months: 24
+    business:
+      reports_per_month: unlimited
+      categories: unlimited
+      history_months: unlimited
+
+seo:
+  title: "PlanBudżetu - Raporty finansowe i analiza budżetu"
+  description: "Śledź wydatki, analizuj budżet, generuj profesjonalne raporty finansowe"
+  keywords: [budżet, raporty finansowe, wydatki, analiza kosztów, finanse firmy]

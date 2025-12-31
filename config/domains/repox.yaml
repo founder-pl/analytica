@@ -1,0 +1,46 @@
+# repox.pl - Main Hub
+domain: repox.pl
+type: hub
+display_name: "REPOX"
+tagline: "Centrum analityki biznesowej"
+
+ports:
+  frontend: 3000
+  api: 8000
+
+modules:
+  reports: full
+  alerts: full
+  voice: full
+  forecast: full
+  budget: full
+  investment: full
+  integrations: full
+  billing: admin
+  sso: provider
+
+theme:
+  primary: "#6366F1"
+  accent: "#8B5CF6"
+  secondary: "#1E1B4B"
+  mode: dark
+  logo: /assets/repox-logo.svg
+  gradient: "from-indigo-500 to-purple-600"
+
+features:
+  - dashboard_builder
+  - multi_workspace
+  - team_management
+  - api_access
+  - white_label_subdomain
+  - sso_provider
+  - billing_admin
+
+pricing:
+  plans: [free, pro, enterprise]
+  default: free
+
+seo:
+  title: "REPOX - Platforma analityki biznesowej"
+  description: "Raporty, alerty, prognozy, budżety - wszystko w jednym miejscu"
+  keywords: [analityka, raporty, business intelligence, dashboard, budżet]
