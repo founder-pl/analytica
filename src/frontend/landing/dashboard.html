@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Analytica</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="components.css">
   <style>
     :root {
@@ -530,7 +531,7 @@
       runBtn.disabled = true;
       
       try {
-        const response = await fetch(`${API_BASE}/api/v1/dsl/pipeline/execute`, {
+        const response = await fetch(`${API_BASE}/api/v1/pipeline/execute`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

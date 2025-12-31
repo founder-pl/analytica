@@ -53,6 +53,10 @@ from abc import ABC, abstractmethod
 import asyncio
 from functools import reduce
 
+# Import from refactored modules
+from .registry import AtomRegistry
+from .context import PipelineContext
+
 
 class AtomType(Enum):
     """Types of atomic operations in DSL"""
@@ -72,6 +76,10 @@ class AtomType(Enum):
     SPLIT = "split"
     CACHE = "cache"
     VIEW = "view"
+    UI = "ui"
+    SOURCE = "source"
+    SINK = "sink"
+    STREAM = "stream"
 
 
 @dataclass
@@ -417,71 +425,6 @@ class DSLParser:
     
     def _is_at_end(self) -> bool:
         return self.pos >= len(self.tokens)
-
-
-class AtomRegistry:
-    """Registry of available atoms (operations)"""
-    
-    _atoms: Dict[str, Dict[str, Callable]] = {}
-    
-    @classmethod
-    def register(cls, atom_type: str, action: str):
-        """Decorator to register an atom implementation"""
-        def decorator(func: Callable):
-            if atom_type not in cls._atoms:
-                cls._atoms[atom_type] = {}
-            cls._atoms[atom_type][action] = func
-            return func
-        return decorator
-    
-    @classmethod
-    def get(cls, atom_type: str, action: str) -> Optional[Callable]:
-        return cls._atoms.get(atom_type, {}).get(action)
-    
-    @classmethod
-    def list_atoms(cls) -> Dict[str, List[str]]:
-        return {k: list(v.keys()) for k, v in cls._atoms.items()}
-
-
-class PipelineContext:
-    """Context passed through pipeline execution"""
-    
-    def __init__(self, 
-                 variables: Dict[str, Any] = None,
-                 domain: str = None,
-                 user_id: str = None,
-                 org_id: str = None):
-        self.variables = variables or {}
-        self.domain = domain
-        self.user_id = user_id
-        self.org_id = org_id
-        self.data = None
-        self.metadata = {}
-        self.errors = []
-        self.logs = []
-    
-    def resolve_variable(self, value: Any) -> Any:
-        """Resolve $variable references"""
-        if isinstance(value, str) and value.startswith('$'):
-            var_name = value[1:]
-            if var_name in self.variables:
-                return self.variables[var_name]
-            raise ValueError(f"Undefined variable: {value}")
-        return value
-    
-    def resolve_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Resolve all variables in params"""
-        return {k: self.resolve_variable(v) for k, v in params.items()}
-    
-    def log(self, message: str, level: str = "info"):
-        self.logs.append({"level": level, "message": message})
-    
-    def set_data(self, data: Any):
-        self.data = data
-        return self
-    
-    def get_data(self) -> Any:
-        return self.data
 
 
 class PipelineExecutor:
@@ -892,9 +835,14 @@ def parse(dsl_code: str) -> PipelineDefinition:
     return DSLParser().parse(dsl_code)
 
 
+# Alias for backwards compatibility
+dsl_parse = parse
+DSLPipelineContext = PipelineContext
+
+
 # Export public API
 __all__ = [
     'Pipeline', 'PipelineBuilder', 'PipelineDefinition', 'PipelineContext',
-    'PipelineExecutor', 'Atom', 'AtomType', 'AtomRegistry',
-    'execute', 'parse', 'DSLParser', 'DSLTokenizer'
+    'DSLPipelineContext', 'PipelineExecutor', 'Atom', 'AtomType', 'AtomRegistry',
+    'execute', 'parse', 'dsl_parse', 'DSLParser', 'DSLTokenizer'
 ]

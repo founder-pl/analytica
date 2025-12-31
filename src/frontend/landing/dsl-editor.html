@@ -1,0 +1,2278 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytica DSL Editor</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --accent: #8b5cf6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    
+    /* Layout */
+    .editor-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr 320px;
+      grid-template-rows: 56px 1fr;
+      height: 100vh;
+    }
+    
+    /* Header */
+    .header {
+      grid-column: 1 / -1;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 20px;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+    
+    .logo-icon { font-size: 1.5rem; }
+    
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      margin-left: auto;
+    }
+    
+    /* Buttons */
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    
+    .btn-success { background: var(--success); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-ghost { background: transparent; color: var(--muted); }
+    .btn-ghost:hover { background: var(--bg); color: var(--text); }
+    
+    /* Sidebar */
+    .sidebar {
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 16px;
+    }
+    
+    .sidebar-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      padding: 0 8px;
+    }
+    
+    .sidebar-section {
+      margin-bottom: 24px;
+    }
+    
+    /* Atom Cards */
+    .atom-category {
+      margin-bottom: 16px;
+    }
+    
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      cursor: pointer;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .category-header:hover {
+      background: var(--bg);
+    }
+    
+    .category-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    
+    .category-icon.web { background: #dbeafe; }
+    .category-icon.iot { background: #d1fae5; }
+    .category-icon.db { background: #fef3c7; }
+    .category-icon.cloud { background: #e0e7ff; }
+    .category-icon.stream { background: #fce7f3; }
+    .category-icon.transform { background: #f3e8ff; }
+    .category-icon.view { background: #ccfbf1; }
+    .category-icon.sink { background: #fee2e2; }
+    
+    .atom-list {
+      padding-left: 16px;
+      display: none;
+    }
+    
+    .atom-list.open {
+      display: block;
+    }
+    
+    .atom-item {
+      padding: 8px 12px;
+      margin: 4px 0;
+      background: var(--bg);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: grab;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    
+    .atom-item:hover {
+      border-color: var(--primary);
+      background: white;
+    }
+    
+    .atom-item:active {
+      cursor: grabbing;
+    }
+    
+    .atom-item .atom-name {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    .atom-item .atom-desc {
+      font-family: 'Inter', sans-serif;
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin-top: 2px;
+    }
+    
+    /* Main Editor */
+    .main-editor {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      overflow: hidden;
+    }
+    
+    .editor-tabs {
+      display: flex;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 16px;
+    }
+    
+    .editor-tab {
+      padding: 12px 16px;
+      font-size: 0.875rem;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+    
+    .editor-tab:hover {
+      color: var(--text);
+    }
+    
+    .editor-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      font-weight: 500;
+    }
+    
+    .editor-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      gap: 16px;
+      overflow: hidden;
+    }
+    
+    /* Code Editor */
+    .code-editor-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--code-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      min-height: 300px;
+    }
+    
+    .code-editor-header {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      background: rgba(0,0,0,0.2);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .code-editor-title {
+      font-size: 0.8rem;
+      color: var(--code-text);
+      opacity: 0.7;
+    }
+    
+    .code-editor-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+    }
+    
+    .code-editor-actions .btn {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+    
+    .code-editor {
+      flex: 1;
+      width: 100%;
+      padding: 16px;
+      background: transparent;
+      color: var(--code-text);
+      font-family: 'JetBrains Mono', 'Monaco', 'Consolas', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      border: none;
+      resize: none;
+      outline: none;
+    }
+    
+    .code-editor::placeholder {
+      color: rgba(205, 214, 244, 0.3);
+    }
+    
+    /* Output Panel */
+    .output-panel {
+      background: var(--card);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      max-height: 250px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .output-header {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    
+    .output-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .output-status {
+      margin-left: auto;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .output-status.success { background: #d1fae5; color: #059669; }
+    .output-status.error { background: #fee2e2; color: #dc2626; }
+    .output-status.pending { background: #fef3c7; color: #d97706; }
+    
+    .output-content {
+      flex: 1;
+      padding: 16px;
+      overflow: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+    }
+    
+    /* Right Panel - Examples & Components */
+    .right-panel {
+      background: var(--card);
+      border-left: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 16px;
+    }
+    
+    .panel-section {
+      margin-bottom: 24px;
+    }
+    
+    .panel-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+    
+    /* Example Cards */
+    .example-card {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    
+    .example-card:hover {
+      border-color: var(--primary);
+      background: white;
+    }
+    
+    .example-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    
+    .example-icon {
+      font-size: 1.2rem;
+    }
+    
+    .example-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .example-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    
+    .example-tags {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .example-tag {
+      padding: 3px 8px;
+      background: white;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    
+    /* Component Library */
+    .component-card {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .component-card:hover {
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .component-name {
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+    
+    .component-preview {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    /* Visual Pipeline Builder */
+    .pipeline-visual {
+      background: var(--card);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 20px;
+      min-height: 200px;
+    }
+    
+    .pipeline-nodes {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .pipeline-node {
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      min-width: 140px;
+      cursor: move;
+      transition: all 0.2s;
+    }
+    
+    .pipeline-node:hover {
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+    }
+    
+    .pipeline-node.source { border-left: 4px solid #3b82f6; }
+    .pipeline-node.transform { border-left: 4px solid #8b5cf6; }
+    .pipeline-node.view { border-left: 4px solid #10b981; }
+    .pipeline-node.sink { border-left: 4px solid #f59e0b; }
+    
+    .node-type {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    
+    .node-action {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .node-params {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    
+    .pipeline-connector {
+      color: var(--muted);
+      font-size: 1.2rem;
+    }
+    
+    .add-node-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 1.2rem;
+      transition: all 0.2s;
+    }
+    
+    .add-node-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+    
+    /* Format Selector */
+    .format-selector {
+      display: flex;
+      gap: 4px;
+      background: var(--bg);
+      padding: 4px;
+      border-radius: 8px;
+    }
+    
+    .format-btn {
+      padding: 6px 12px;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    
+    .format-btn.active {
+      background: white;
+      color: var(--primary);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    
+    .drop-zone.drag-over {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+    
+    /* Output Tabs */
+    .output-tabs {
+      display: flex;
+      gap: 4px;
+      margin-left: 16px;
+    }
+    
+    .output-tab {
+      padding: 4px 10px;
+      border: none;
+      background: transparent;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    
+    .output-tab.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    /* Export Grid */
+    .export-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 10px 0;
+    }
+    
+    .export-btn {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    
+    .export-btn:hover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+    
+    .export-result {
+      margin-top: 10px;
+      padding: 12px;
+      background: var(--code-bg);
+      color: var(--code-text);
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow: auto;
+    }
+    
+    /* Preview Container */
+    .preview-container {
+      padding: 16px;
+      background: white;
+      border-radius: 8px;
+      min-height: 150px;
+    }
+    
+    .preview-card {
+      display: inline-block;
+      padding: 16px 24px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      border-radius: 12px;
+      margin: 8px;
+      min-width: 150px;
+    }
+    
+    .preview-card.success { background: linear-gradient(135deg, #10b981, #059669); }
+    .preview-card.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .preview-card.danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    
+    .preview-card-value { font-size: 1.8rem; font-weight: 700; }
+    .preview-card-title { font-size: 0.85rem; opacity: 0.9; margin-top: 4px; }
+    .preview-card-icon { font-size: 1.5rem; float: right; }
+    
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0;
+    }
+    
+    .preview-table th, .preview-table td {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      text-align: left;
+      font-size: 0.85rem;
+    }
+    
+    .preview-table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    
+    .preview-chart {
+      height: 150px;
+      background: linear-gradient(to top, rgba(99, 102, 241, 0.1), transparent);
+      border-radius: 8px;
+      margin: 8px 0;
+      display: flex;
+      align-items: flex-end;
+      padding: 10px;
+      gap: 8px;
+    }
+    
+    .preview-chart-bar {
+      flex: 1;
+      background: var(--primary);
+      border-radius: 4px 4px 0 0;
+      min-height: 20px;
+    }
+    
+    /* Node delete button */
+    .node-delete {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: none;
+      background: var(--danger);
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    
+    .pipeline-node:hover .node-delete {
+      display: flex;
+    }
+    
+    .pipeline-node {
+      position: relative;
+    }
+    
+    .node-params {
+      cursor: pointer;
+      transition: background 0.2s;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    
+    .node-params:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .editor-layout {
+        grid-template-columns: 240px 1fr;
+      }
+      .right-panel {
+        display: none;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .editor-layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="editor-layout">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">📊</span>
+        <span>Analytica DSL Editor</span>
+      </div>
+      
+      <div class="format-selector">
+        <button class="format-btn active" data-format="native">Native</button>
+        <button class="format-btn" data-format="json">JSON</button>
+        <button class="format-btn" data-format="yaml">YAML</button>
+      </div>
+      
+      <div class="header-actions">
+        <button class="btn btn-secondary" onclick="clearEditor()">🗑️ Wyczyść</button>
+        <button class="btn btn-secondary" onclick="copyToClipboard()">📋 Kopiuj</button>
+        <button class="btn btn-secondary" onclick="downloadDSL()">💾 Pobierz</button>
+        <button class="btn btn-primary" onclick="executeDSL()">▶️ Uruchom</button>
+      </div>
+    </header>
+    
+    <!-- Sidebar - Atom Library -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">Biblioteka Atomów</div>
+        
+        <!-- Web Sources -->
+        <div class="atom-category">
+          <div class="category-header" onclick="toggleCategory(this)">
+            <div class="category-icon web">🌐</div>
+            <span>Web Sources</span>
+            <span style="margin-left:auto">▼</span>
+          </div>
+          <div class="atom-list">
+            <div class="atom-item" draggable="true" data-atom="source.http">
+              <div class="atom-name">source.http</div>
+              <div class="atom-desc">HTTP/REST API</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="source.graphql">
+              <div class="atom-name">source.graphql</div>
+              <div class="atom-desc">GraphQL query</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="source.websocket">
+              <div class="atom-name">source.websocket</div>
+              <div class="atom-desc">WebSocket stream</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="source.sse">
+              <div class="atom-name">source.sse</div>
+              <div class="atom-desc">Server-Sent Events</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- IoT Sources -->
+        <div class="atom-category">
+          <div class="category-header" onclick="toggleCategory(this)">
+            <div class="category-icon iot">📡</div>
+            <span>IoT Protocols</span>
+            <span style="margin-left:auto">▶</span>
+          </div>
+          <div class="atom-list">
+            <div class="atom-item" draggable="true" data-atom="source.mqtt">
+              <div class="atom-name">source.mqtt</div>
+              <div class="atom-desc">MQTT broker</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="source.coap">
+              <div class="atom-name">source.coap</div>
+              <div class="atom-desc">CoAP endpoint</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="source.modbus">
+              <div class="atom-name">source.modbus</div>
+              <div class="atom-desc">Modbus PLC</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="source.opcua">
+              <div class="atom-name">source.opcua</div>
+              <div class="atom-desc">OPC-UA server</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="source.serial">
+              <div class="atom-name">source.serial</div>
+              <div class="atom-desc">Serial port</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Databases -->
+        <div class="atom-category">
+          <div class="category-header" onclick="toggleCategory(this)">
+            <div class="category-icon db">🗄️</div>
+            <span>Databases</span>
+            <span style="margin-left:auto">▶</span>
+          </div>
+          <div class="atom-list">
+            <div class="atom-item" draggable="true" data-atom="source.sql">
+              <div class="atom-name">source.sql</div>
+              <div class="atom-desc">PostgreSQL, MySQL</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="source.mongodb">
+              <div class="atom-name">source.mongodb</div>
+              <div class="atom-desc">MongoDB collection</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="source.redis">
+              <div class="atom-name">source.redis</div>
+              <div class="atom-desc">Redis key/stream</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="source.elasticsearch">
+              <div class="atom-name">source.elasticsearch</div>
+              <div class="atom-desc">Elasticsearch query</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="source.influxdb">
+              <div class="atom-name">source.influxdb</div>
+              <div class="atom-desc">InfluxDB time series</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Cloud -->
+        <div class="atom-category">
+          <div class="category-header" onclick="toggleCategory(this)">
+            <div class="category-icon cloud">☁️</div>
+            <span>Cloud Storage</span>
+            <span style="margin-left:auto">▶</span>
+          </div>
+          <div class="atom-list">
+            <div class="atom-item" draggable="true" data-atom="source.s3">
+              <div class="atom-name">source.s3</div>
+              <div class="atom-desc">AWS S3</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="source.azure_blob">
+              <div class="atom-name">source.azure_blob</div>
+              <div class="atom-desc">Azure Blob Storage</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="source.gcs">
+              <div class="atom-name">source.gcs</div>
+              <div class="atom-desc">Google Cloud Storage</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Streaming -->
+        <div class="atom-category">
+          <div class="category-header" onclick="toggleCategory(this)">
+            <div class="category-icon stream">📊</div>
+            <span>Streaming</span>
+            <span style="margin-left:auto">▶</span>
+          </div>
+          <div class="atom-list">
+            <div class="atom-item" draggable="true" data-atom="source.kafka">
+              <div class="atom-name">source.kafka</div>
+              <div class="atom-desc">Apache Kafka</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="source.nats">
+              <div class="atom-name">source.nats</div>
+              <div class="atom-desc">NATS messaging</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Transforms -->
+        <div class="atom-category">
+          <div class="category-header" onclick="toggleCategory(this)">
+            <div class="category-icon transform">🔄</div>
+            <span>Transforms</span>
+            <span style="margin-left:auto">▶</span>
+          </div>
+          <div class="atom-list">
+            <div class="atom-item" draggable="true" data-atom="transform.filter">
+              <div class="atom-name">transform.filter</div>
+              <div class="atom-desc">Filter records</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="transform.map">
+              <div class="atom-name">transform.map</div>
+              <div class="atom-desc">Map/transform fields</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="transform.group">
+              <div class="atom-name">transform.group</div>
+              <div class="atom-desc">Group by field</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="transform.sort">
+              <div class="atom-name">transform.sort</div>
+              <div class="atom-desc">Sort records</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="transform.limit">
+              <div class="atom-name">transform.limit</div>
+              <div class="atom-desc">Limit results</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Views -->
+        <div class="atom-category">
+          <div class="category-header" onclick="toggleCategory(this)">
+            <div class="category-icon view">📈</div>
+            <span>Views</span>
+            <span style="margin-left:auto">▶</span>
+          </div>
+          <div class="atom-list">
+            <div class="atom-item" draggable="true" data-atom="view.chart">
+              <div class="atom-name">view.chart</div>
+              <div class="atom-desc">Chart visualization</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="view.table">
+              <div class="atom-name">view.table</div>
+              <div class="atom-desc">Data table</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="view.card">
+              <div class="atom-name">view.card</div>
+              <div class="atom-desc">KPI card</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="view.kpi">
+              <div class="atom-name">view.kpi</div>
+              <div class="atom-desc">KPI metric</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="view.dashboard">
+              <div class="atom-name">view.dashboard</div>
+              <div class="atom-desc">Dashboard layout</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Data Definition -->
+        <div class="atom-category">
+          <div class="category-header" onclick="toggleCategory(this)">
+            <div class="category-icon db">📋</div>
+            <span>Data Definition</span>
+            <span style="margin-left:auto">▶</span>
+          </div>
+          <div class="atom-list">
+            <div class="atom-item" draggable="true" data-atom="data.define">
+              <div class="atom-name">data.define</div>
+              <div class="atom-desc">Inline data</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="data.mock">
+              <div class="atom-name">data.mock</div>
+              <div class="atom-desc">Generate mock data</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="data.sample">
+              <div class="atom-name">data.sample</div>
+              <div class="atom-desc">Sample datasets</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="data.sql">
+              <div class="atom-name">data.sql</div>
+              <div class="atom-desc">SQL query</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="data.dql">
+              <div class="atom-name">data.dql</div>
+              <div class="atom-desc">DQL query</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="data.compute">
+              <div class="atom-name">data.compute</div>
+              <div class="atom-desc">Compute fields</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="data.kpi">
+              <div class="atom-name">data.kpi</div>
+              <div class="atom-desc">KPI definitions</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Sinks -->
+        <div class="atom-category">
+          <div class="category-header" onclick="toggleCategory(this)">
+            <div class="category-icon sink">📤</div>
+            <span>Sinks (Outputs)</span>
+            <span style="margin-left:auto">▶</span>
+          </div>
+          <div class="atom-list">
+            <div class="atom-item" draggable="true" data-atom="sink.http">
+              <div class="atom-name">sink.http</div>
+              <div class="atom-desc">HTTP POST</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="sink.mqtt">
+              <div class="atom-name">sink.mqtt</div>
+              <div class="atom-desc">MQTT publish</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="sink.sql">
+              <div class="atom-name">sink.sql</div>
+              <div class="atom-desc">SQL insert</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="sink.slack">
+              <div class="atom-name">sink.slack</div>
+              <div class="atom-desc">Slack message</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="sink.email">
+              <div class="atom-name">sink.email</div>
+              <div class="atom-desc">Email notification</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="sink.dashboard">
+              <div class="atom-name">sink.dashboard</div>
+              <div class="atom-desc">Real-time dashboard</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Deploy / CI/CD -->
+        <div class="atom-category">
+          <div class="category-header" onclick="toggleCategory(this)">
+            <div class="category-icon cloud">🚀</div>
+            <span>Deploy / CI/CD</span>
+            <span style="margin-left:auto">▶</span>
+          </div>
+          <div class="atom-list">
+            <div class="atom-item" draggable="true" data-atom="deploy.docker">
+              <div class="atom-name">deploy.docker</div>
+              <div class="atom-desc">Docker container</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="deploy.kubernetes">
+              <div class="atom-name">deploy.kubernetes</div>
+              <div class="atom-desc">Kubernetes deploy</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="deploy.helm">
+              <div class="atom-name">deploy.helm</div>
+              <div class="atom-desc">Helm chart</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="deploy.github_actions">
+              <div class="atom-name">deploy.github_actions</div>
+              <div class="atom-desc">GitHub Actions</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="deploy.web">
+              <div class="atom-name">deploy.web</div>
+              <div class="atom-desc">Web app</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="deploy.mobile">
+              <div class="atom-name">deploy.mobile</div>
+              <div class="atom-desc">Mobile app</div>
+            </div>
+            <div class="atom-item" draggable="true" data-atom="deploy.desktop">
+              <div class="atom-name">deploy.desktop</div>
+              <div class="atom-desc">Desktop app</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- Main Editor -->
+    <main class="main-editor">
+      <div class="editor-tabs">
+        <div class="editor-tab active" data-tab="code">📝 Kod DSL</div>
+        <div class="editor-tab" data-tab="visual">🔲 Wizualny</div>
+        <div class="editor-tab" data-tab="preview">👁️ Podgląd</div>
+      </div>
+      
+      <div class="editor-content">
+        <!-- Code Editor -->
+        <div class="code-editor-container" id="codeTab">
+          <div class="code-editor-header">
+            <span class="code-editor-title">pipeline.dsl</span>
+            <div class="code-editor-actions">
+              <button class="btn btn-ghost" onclick="formatCode()">✨ Format</button>
+              <button class="btn btn-ghost" onclick="validateDSL()">✓ Waliduj</button>
+            </div>
+          </div>
+          <textarea id="dslEditor" class="code-editor" placeholder="// Przeciągnij atomy z biblioteki lub wpisz DSL
+// Przykład:
+source.http(url=&quot;https://api.example.com/data&quot;)
+| transform.filter(status=&quot;active&quot;)
+| view.table(title=&quot;Aktywni użytkownicy&quot;)"></textarea>
+        </div>
+        
+        <!-- Visual Editor (hidden by default) -->
+        <div class="pipeline-visual" id="visualTab" style="display:none">
+          <div class="pipeline-nodes" id="pipelineNodes">
+            <div class="drop-zone" id="dropZone">
+              <div style="font-size:2rem;margin-bottom:10px">📦</div>
+              <div>Przeciągnij atomy tutaj, aby zbudować pipeline</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Output Panel with Tabs -->
+        <div class="output-panel" style="max-height:400px">
+          <div class="output-header">
+            <span class="output-title">📋 Output</span>
+            <div class="output-tabs">
+              <button class="output-tab active" data-output="json">JSON</button>
+              <button class="output-tab" data-output="preview">Preview</button>
+              <button class="output-tab" data-output="export">Export</button>
+            </div>
+            <span id="outputStatus" class="output-status" style="display:none">Ready</span>
+          </div>
+          <div id="outputJSON" class="output-content">
+            Kliknij "Uruchom" aby wykonać pipeline DSL...
+          </div>
+          <div id="outputPreview" class="output-content" style="display:none">
+            <div id="previewContainer" class="preview-container"></div>
+          </div>
+          <div id="outputExport" class="output-content" style="display:none">
+            <div class="export-grid">
+              <button class="export-btn" onclick="exportTo('docker')">🐳 Docker</button>
+              <button class="export-btn" onclick="exportTo('kubernetes')">☸️ Kubernetes</button>
+              <button class="export-btn" onclick="exportTo('web')">🌐 Web App</button>
+              <button class="export-btn" onclick="exportTo('mobile')">📱 Mobile App</button>
+              <button class="export-btn" onclick="exportTo('desktop')">🖥️ Desktop App</button>
+              <button class="export-btn" onclick="exportTo('github')">⚙️ GitHub Actions</button>
+            </div>
+            <div id="exportResult" class="export-result"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+    
+    <!-- Right Panel - Examples & Components -->
+    <aside class="right-panel">
+      <div class="panel-section">
+        <div class="panel-title">📚 Przykłady</div>
+        
+        <div class="example-card" onclick="loadExample('iot-sensor')">
+          <div class="example-card-header">
+            <span class="example-icon">🌡️</span>
+            <span class="example-title">IoT Sensor Dashboard</span>
+          </div>
+          <div class="example-desc">Odczyt z MQTT, filtrowanie i wizualizacja temperatury</div>
+          <div class="example-tags">
+            <span class="example-tag">MQTT</span>
+            <span class="example-tag">Chart</span>
+            <span class="example-tag">Real-time</span>
+          </div>
+        </div>
+        
+        <div class="example-card" onclick="loadExample('api-dashboard')">
+          <div class="example-card-header">
+            <span class="example-icon">📊</span>
+            <span class="example-title">API Dashboard</span>
+          </div>
+          <div class="example-desc">Pobieranie danych z REST API i prezentacja w tabeli</div>
+          <div class="example-tags">
+            <span class="example-tag">HTTP</span>
+            <span class="example-tag">Table</span>
+            <span class="example-tag">Filter</span>
+          </div>
+        </div>
+        
+        <div class="example-card" onclick="loadExample('finance-alert')">
+          <div class="example-card-header">
+            <span class="example-icon">💹</span>
+            <span class="example-title">Finance Alert</span>
+          </div>
+          <div class="example-desc">Monitoring cen krypto z alertami na Slack</div>
+          <div class="example-tags">
+            <span class="example-tag">Finance</span>
+            <span class="example-tag">Alert</span>
+            <span class="example-tag">Slack</span>
+          </div>
+        </div>
+        
+        <div class="example-card" onclick="loadExample('industrial-plc')">
+          <div class="example-card-header">
+            <span class="example-icon">🏭</span>
+            <span class="example-title">Industrial PLC</span>
+          </div>
+          <div class="example-desc">Modbus → InfluxDB → Grafana</div>
+          <div class="example-tags">
+            <span class="example-tag">Modbus</span>
+            <span class="example-tag">InfluxDB</span>
+            <span class="example-tag">Industrial</span>
+          </div>
+        </div>
+        
+        <div class="example-card" onclick="loadExample('etl-pipeline')">
+          <div class="example-card-header">
+            <span class="example-icon">🔄</span>
+            <span class="example-title">ETL Pipeline</span>
+          </div>
+          <div class="example-desc">S3 → Transform → PostgreSQL</div>
+          <div class="example-tags">
+            <span class="example-tag">S3</span>
+            <span class="example-tag">SQL</span>
+            <span class="example-tag">ETL</span>
+          </div>
+        </div>
+        
+        <div class="example-card" onclick="loadExample('kafka-stream')">
+          <div class="example-card-header">
+            <span class="example-icon">📨</span>
+            <span class="example-title">Kafka Stream</span>
+          </div>
+          <div class="example-desc">Real-time event processing z Kafka</div>
+          <div class="example-tags">
+            <span class="example-tag">Kafka</span>
+            <span class="example-tag">Stream</span>
+            <span class="example-tag">Real-time</span>
+          </div>
+        </div>
+        
+        <div class="example-card" onclick="loadExample('dashboard-kpi')">
+          <div class="example-card-header">
+            <span class="example-icon">📊</span>
+            <span class="example-title">KPI Dashboard</span>
+          </div>
+          <div class="example-desc">Definicja danych i KPI w DSL</div>
+          <div class="example-tags">
+            <span class="example-tag">data.define</span>
+            <span class="example-tag">view.card</span>
+          </div>
+        </div>
+        
+        <div class="example-card" onclick="loadExample('deploy-docker')">
+          <div class="example-card-header">
+            <span class="example-icon">🐳</span>
+            <span class="example-title">Deploy Docker + K8s</span>
+          </div>
+          <div class="example-desc">Deployment do Docker i Kubernetes</div>
+          <div class="example-tags">
+            <span class="example-tag">Docker</span>
+            <span class="example-tag">Kubernetes</span>
+          </div>
+        </div>
+        
+        <div class="example-card" onclick="loadExample('deploy-mobile')">
+          <div class="example-card-header">
+            <span class="example-icon">📱</span>
+            <span class="example-title">Mobile App</span>
+          </div>
+          <div class="example-desc">Deploy do React Native / Flutter</div>
+          <div class="example-tags">
+            <span class="example-tag">Mobile</span>
+            <span class="example-tag">React Native</span>
+          </div>
+        </div>
+        
+        <div class="example-card" onclick="loadExample('data-compute')">
+          <div class="example-card-header">
+            <span class="example-icon">🧮</span>
+            <span class="example-title">Computed Fields</span>
+          </div>
+          <div class="example-desc">Obliczanie pol z wyrazen</div>
+          <div class="example-tags">
+            <span class="example-tag">data.compute</span>
+            <span class="example-tag">Formulas</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel-section">
+        <div class="panel-title">🧩 Komponenty</div>
+        
+        <div class="component-card" onclick="insertComponent('auth-header')">
+          <div class="component-name">Auth Header</div>
+          <div class="component-preview">headers={"Authorization": "Bearer ..."}</div>
+        </div>
+        
+        <div class="component-card" onclick="insertComponent('pagination')">
+          <div class="component-name">Pagination</div>
+          <div class="component-preview">| transform.limit(100) | transform.offset(0)</div>
+        </div>
+        
+        <div class="component-card" onclick="insertComponent('date-filter')">
+          <div class="component-name">Date Filter</div>
+          <div class="component-preview">| transform.filter(date__gte="2024-01-01")</div>
+        </div>
+        
+        <div class="component-card" onclick="insertComponent('error-handler')">
+          <div class="component-name">Error Handler</div>
+          <div class="component-preview">| alert.on_error(notify="slack")</div>
+        </div>
+        
+        <div class="component-card" onclick="insertComponent('cache-layer')">
+          <div class="component-name">Cache Layer</div>
+          <div class="component-preview">| cache.set(key="result", ttl=3600)</div>
+        </div>
+        
+        <div class="component-card" onclick="insertComponent('retry-logic')">
+          <div class="component-name">Retry Logic</div>
+          <div class="component-preview">retry=3, timeout=30</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    
+    // ============================================================
+    // URL STATE MANAGEMENT
+    // ============================================================
+    const AppState = {
+      tab: 'code',
+      example: null,
+      outputTab: 'json',
+      
+      save() {
+        const params = new URLSearchParams();
+        if (this.tab !== 'code') params.set('tab', this.tab);
+        if (this.example) params.set('example', this.example);
+        if (this.outputTab !== 'json') params.set('output', this.outputTab);
+        
+        const hash = params.toString();
+        history.replaceState(null, '', hash ? `#${hash}` : window.location.pathname);
+        document.title = `DSL Editor${this.example ? ` - ${this.example}` : ''}`;
+      },
+      
+      load() {
+        const hash = window.location.hash.slice(1);
+        const params = new URLSearchParams(hash);
+        
+        this.tab = params.get('tab') || 'code';
+        this.example = params.get('example') || null;
+        this.outputTab = params.get('output') || 'json';
+        
+        // Apply state
+        if (this.tab) switchTab(this.tab);
+        if (this.example) loadExample(this.example, false);
+        if (this.outputTab) switchOutputTab(this.outputTab);
+      }
+    };
+    
+    window.addEventListener('hashchange', () => AppState.load());
+    
+    // ============================================================
+    // OUTPUT TABS
+    // ============================================================
+    function switchOutputTab(tabName) {
+      document.querySelectorAll('.output-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.output-tab[data-output="${tabName}"]`)?.classList.add('active');
+      
+      document.getElementById('outputJSON').style.display = tabName === 'json' ? 'block' : 'none';
+      document.getElementById('outputPreview').style.display = tabName === 'preview' ? 'block' : 'none';
+      document.getElementById('outputExport').style.display = tabName === 'export' ? 'block' : 'none';
+      
+      AppState.outputTab = tabName;
+      AppState.save();
+    }
+    
+    document.querySelectorAll('.output-tab').forEach(tab => {
+      tab.addEventListener('click', () => switchOutputTab(tab.dataset.output));
+    });
+    
+    // ============================================================
+    // PREVIEW RENDERER
+    // ============================================================
+    let lastResult = null;
+    
+    function renderPreview(result) {
+      lastResult = result;
+      const container = document.getElementById('previewContainer');
+      if (!result) {
+        container.innerHTML = '<div style="color:var(--muted)">Brak danych do podglądu</div>';
+        return;
+      }
+      
+      let html = '';
+      
+      // Handle views array
+      if (result.views && Array.isArray(result.views)) {
+        result.views.forEach(view => {
+          html += renderView(view, result);
+        });
+      }
+      // Handle single view
+      else if (result.view_type || result.type) {
+        html += renderView(result, result);
+      }
+      // Handle raw data with cards
+      else if (typeof result === 'object') {
+        // Render as KPI cards
+        Object.entries(result).forEach(([key, value]) => {
+          if (typeof value === 'number' || typeof value === 'string') {
+            html += `
+              <div class="preview-card">
+                <div class="preview-card-value">${formatValue(value)}</div>
+                <div class="preview-card-title">${key.replace(/_/g, ' ')}</div>
+              </div>
+            `;
+          }
+        });
+        
+        // Render arrays as tables
+        Object.entries(result).forEach(([key, value]) => {
+          if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
+            html += renderTable(value, key);
+          }
+        });
+      }
+      
+      container.innerHTML = html || '<div style="color:var(--muted)">Brak widoków do renderowania</div>';
+    }
+    
+    function renderView(view, data) {
+      const type = view.view_type || view.type;
+      
+      switch (type) {
+        case 'card':
+          const cardValue = view.value_field ? (data[view.value_field] || view.value_field) : (view.value || '0');
+          return `
+            <div class="preview-card ${view.style || ''}">
+              ${view.icon ? `<span class="preview-card-icon">${view.icon}</span>` : ''}
+              <div class="preview-card-value">${formatValue(cardValue)}</div>
+              <div class="preview-card-title">${view.title || ''}</div>
+            </div>
+          `;
+        
+        case 'table':
+          const tableData = data.data || data.monthly || data.readings || [];
+          return renderTable(tableData, view.title);
+        
+        case 'chart':
+          return `
+            <div style="margin:8px 0">
+              <div style="font-weight:600;margin-bottom:8px">${view.title || 'Chart'}</div>
+              <div class="preview-chart">
+                ${[40, 60, 80, 55, 90, 75].map(h => 
+                  `<div class="preview-chart-bar" style="height:${h}%"></div>`
+                ).join('')}
+              </div>
+            </div>
+          `;
+        
+        case 'kpi':
+          return `
+            <div class="preview-card success">
+              <div class="preview-card-value">${view.value || '0'}</div>
+              <div class="preview-card-title">${view.title || ''} ${view.trend || ''}</div>
+            </div>
+          `;
+        
+        default:
+          return `<div style="padding:8px;background:#f0f0f0;border-radius:4px;margin:4px">
+            ${type}: ${JSON.stringify(view).slice(0, 100)}...
+          </div>`;
+      }
+    }
+    
+    function renderTable(data, title) {
+      if (!data || !data.length) return '';
+      const cols = Object.keys(data[0]);
+      return `
+        <div style="margin:8px 0">
+          ${title ? `<div style="font-weight:600;margin-bottom:8px">${title}</div>` : ''}
+          <table class="preview-table">
+            <thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+            <tbody>${data.slice(0, 5).map(row => 
+              `<tr>${cols.map(c => `<td>${row[c] ?? ''}</td>`).join('')}</tr>`
+            ).join('')}</tbody>
+          </table>
+          ${data.length > 5 ? `<div style="font-size:0.8rem;color:var(--muted)">...i ${data.length - 5} więcej</div>` : ''}
+        </div>
+      `;
+    }
+    
+    function formatValue(val) {
+      if (typeof val === 'number') {
+        return val >= 1000 ? val.toLocaleString('pl-PL') : val;
+      }
+      return val;
+    }
+    
+    // ============================================================
+    // EXPORT FUNCTIONALITY
+    // ============================================================
+    async function exportTo(platform) {
+      const dsl = document.getElementById('dslEditor').value;
+      const result = document.getElementById('exportResult');
+      
+      const exportDSL = {
+        docker: `${dsl}\n| deploy.docker(image="analytica/app", tag="latest", port=8000)`,
+        kubernetes: `${dsl}\n| deploy.kubernetes(namespace="prod", replicas=3, image="analytica/app:latest")`,
+        web: `${dsl}\n| deploy.web(framework="react", build="npm run build", output="dist")`,
+        mobile: `${dsl}\n| deploy.mobile(framework="react-native", platforms=["ios", "android"])`,
+        desktop: `${dsl}\n| deploy.desktop(framework="electron", platforms=["win", "mac", "linux"])`,
+        github: `${dsl}\n| deploy.github_actions(workflow="deploy", triggers=["push"])`
+      };
+      
+      result.innerHTML = 'Generowanie konfiguracji...';
+      
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/pipeline/execute`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dsl: exportDSL[platform] || dsl })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success' && data.result) {
+          const config = data.result.config || data.result.deploy || data.result;
+          result.innerHTML = `// ${platform.toUpperCase()} Export\n` + JSON.stringify(config, null, 2);
+          
+          // Generate downloadable files based on platform
+          generateExportFiles(platform, config);
+        } else {
+          result.innerHTML = `Error: ${data.errors?.map(e => e.message).join(', ') || 'Unknown error'}`;
+        }
+      } catch (err) {
+        result.innerHTML = `Error: ${err.message}`;
+      }
+    }
+    
+    function generateExportFiles(platform, config) {
+      const files = {
+        docker: {
+          'Dockerfile': `FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE ${config.port || 8000}
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "${config.port || 8000}"]`,
+          'docker-compose.yml': `version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "${config.port || 8000}:${config.port || 8000}"
+    environment:
+      - DOMAIN=analytica.pl`
+        },
+        kubernetes: {
+          'k8s/deployment.yaml': `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytica
+  namespace: ${config.namespace || 'default'}
+spec:
+  replicas: ${config.replicas || 3}
+  selector:
+    matchLabels:
+      app: analytica
+  template:
+    spec:
+      containers:
+      - name: app
+        image: ${config.image || 'analytica/app:latest'}
+        ports:
+        - containerPort: 8000`
+        },
+        web: {
+          'package.json': `{
+  "name": "analytica-web",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "vite": "^5.0.0",
+    "tailwindcss": "^3.4.0"
+  }
+}`,
+          'vite.config.js': `import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: { port: 3000 },
+  build: { outDir: 'dist' }
+})`
+        },
+        mobile: {
+          'app.json': `{
+  "expo": {
+    "name": "Analytica Mobile",
+    "slug": "analytica-mobile",
+    "version": "1.0.0",
+    "platforms": ${JSON.stringify(config.platforms || ["ios", "android"])},
+    "ios": {
+      "bundleIdentifier": "pl.analytica.mobile",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "pl.analytica.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#6366f1"
+      }
+    }
+  }
+}`,
+          'package.json': `{
+  "name": "analytica-mobile",
+  "version": "1.0.0",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "build:android": "eas build --platform android",
+    "build:ios": "eas build --platform ios"
+  },
+  "dependencies": {
+    "expo": "~50.0.0",
+    "react": "18.2.0",
+    "react-native": "0.73.0",
+    "@react-navigation/native": "^6.0.0"
+  }
+}`
+        },
+        desktop: {
+          'package.json': `{
+  "name": "analytica-desktop",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "pl.analytica.desktop",
+    "productName": "Analytica",
+    "directories": { "output": "dist" },
+    "win": { "target": "nsis" },
+    "mac": { "target": "dmg" },
+    "linux": { "target": "AppImage" }
+  }
+}`,
+          'main.js': `const { app, BrowserWindow } = require('electron')
+const path = require('path')
+
+function createWindow() {
+  const win = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+  })
+  win.loadURL('${config.url || 'http://localhost:18000'}')
+}
+
+app.whenReady().then(createWindow)
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit()
+})`
+        },
+        github: {
+          '.github/workflows/deploy.yml': `name: Deploy
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: pytest
+      - name: Build Docker image
+        run: docker build -t analytica/app:latest .
+      - name: Push to registry
+        run: docker push analytica/app:latest`
+        }
+      };
+      
+      // Show download buttons if files exist
+      if (files[platform]) {
+        const downloadHtml = Object.entries(files[platform]).map(([name, content]) => 
+          `<button class="btn btn-secondary" style="margin:4px" onclick="downloadFile('${name}', \`${content.replace(/`/g, '\\`')}\`)">📥 ${name}</button>`
+        ).join('');
+        
+        document.getElementById('exportResult').innerHTML += `\n\n// Pliki do pobrania:\n${downloadHtml}`;
+      }
+    }
+    
+    function downloadFile(filename, content) {
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      showNotification(`Pobrano: ${filename}`, 'success');
+    }
+    
+    // ============================================================
+    // TAB SWITCHING
+    // ============================================================
+    function switchTab(tabName) {
+      document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.editor-tab[data-tab="${tabName}"]`)?.classList.add('active');
+      
+      document.getElementById('codeTab').style.display = tabName === 'code' ? 'flex' : 'none';
+      document.getElementById('visualTab').style.display = tabName === 'visual' ? 'block' : 'none';
+      
+      AppState.tab = tabName;
+      AppState.save();
+    }
+    
+    // Examples Library
+    const EXAMPLES = {
+      'iot-sensor': `data.mock(type="iot", rows=10)
+| transform.filter(value__gt=0)
+| view.chart(type="line", x="sensor", y="value", title="Odczyty sensorow")`,
+
+      'api-dashboard': `data.sample(dataset="ecommerce")
+| view.card(value="total_revenue", title="Przychod calkowity", icon="💰")
+| view.card(value="avg_order", title="Srednie zamowienie", icon="📦")
+| view.table(title="Miesieczne przychody", columns=["month", "revenue", "orders"])`,
+
+      'finance-alert': `data.sample(dataset="finance")
+| view.kpi(value="roi", title="ROI", trend="+15.5%")
+| view.chart(type="bar", x="month", y="income", title="Przychody miesieczne")`,
+
+      'industrial-plc': `data.mock(type="iot", rows=20)
+| transform.filter(value__gt=15)
+| view.table(title="Odczyty PLC", columns=["sensor", "value", "unit"])`,
+
+      'etl-pipeline': `data.mock(type="sales", rows=100)
+| transform.filter(revenue__gt=1000)
+| transform.sort(field="revenue", order="desc")
+| view.table(title="Top sprzedaz", columns=["month", "revenue", "orders"])`,
+
+      'kafka-stream': `data.mock(type="orders", rows=50)
+| transform.filter(status="completed")
+| view.chart(type="pie", x="status", y="total", title="Statusy zamowien")`,
+
+      'dashboard-kpi': `data.define(total_revenue=125000, avg_order=450, orders_count=278, growth_rate=12.5)
+| view.card(value="total_revenue", title="Przychod calkowity", icon="💰", style="success")
+| view.card(value="avg_order", title="Srednie zamowienie", icon="📦")
+| view.card(value="orders_count", title="Liczba zamowien", icon="🛒")
+| view.card(value="growth_rate", title="Wzrost", icon="📈", style="success")`,
+
+      'deploy-docker': `data.define(app="analytica", version="1.0.0")
+| deploy.docker(image="analytica/app", tag="latest", port=8000)
+| deploy.kubernetes(namespace="prod", replicas=3)`,
+
+      'deploy-mobile': `data.sample(dataset="ecommerce")
+| view.dashboard(layout="grid", widgets=["revenue", "orders", "chart"])
+| deploy.mobile(framework="react-native", platforms=["ios", "android"])`,
+
+      'sql-query': `data.sql(query="SELECT month, SUM(revenue) as total FROM sales GROUP BY month", connection="postgresql://localhost/db")
+| view.chart(type="bar", x="month", y="total", title="Przychody SQL")`,
+
+      'data-compute': `data.define(revenue=100000, costs=65000)
+| data.compute(profit="revenue - costs", margin="profit / revenue * 100")
+| view.card(value="profit", title="Zysk", icon="💵")
+| view.card(value="margin", title="Marza %", icon="📊")`
+    };
+    
+    // Component Snippets
+    const COMPONENTS = {
+      'auth-header': 'headers={"Authorization": "Bearer ${TOKEN}"}',
+      'pagination': '\n| transform.limit(100)\n| transform.offset(${OFFSET})',
+      'date-filter': '\n| transform.filter(created_at__gte="${START_DATE}", created_at__lte="${END_DATE}")',
+      'error-handler': '\n| alert.on_error(notify="slack", channel="#errors")',
+      'cache-layer': '\n| cache.set(key="${CACHE_KEY}", ttl=3600)',
+      'retry-logic': ', retry=3, timeout=30, backoff="exponential"'
+    };
+    
+    // Toggle category
+    function toggleCategory(header) {
+      const list = header.nextElementSibling;
+      const arrow = header.querySelector('span:last-child');
+      list.classList.toggle('open');
+      arrow.textContent = list.classList.contains('open') ? '▼' : '▶';
+    }
+    
+    // Load example
+    function loadExample(id, updateUrl = true) {
+      const editor = document.getElementById('dslEditor');
+      editor.value = EXAMPLES[id] || '';
+      
+      if (updateUrl) {
+        AppState.example = id;
+        AppState.save();
+      }
+      
+      showNotification('Przykład załadowany: ' + id, 'success');
+    }
+    
+    // Insert component
+    function insertComponent(id) {
+      const editor = document.getElementById('dslEditor');
+      const snippet = COMPONENTS[id] || '';
+      const pos = editor.selectionStart;
+      editor.value = editor.value.slice(0, pos) + snippet + editor.value.slice(pos);
+      editor.focus();
+      showNotification('Komponent dodany', 'success');
+    }
+    
+    // Tab switching - use switchTab function
+    document.querySelectorAll('.editor-tab').forEach(tab => {
+      tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+    });
+    
+    // Format selector
+    document.querySelectorAll('.format-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        // Convert format here
+      });
+    });
+    
+    // Drag & Drop
+    document.querySelectorAll('.atom-item').forEach(item => {
+      item.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', item.dataset.atom);
+        item.style.opacity = '0.5';
+      });
+      
+      item.addEventListener('dragend', () => {
+        item.style.opacity = '1';
+      });
+      
+      item.addEventListener('click', () => {
+        const editor = document.getElementById('dslEditor');
+        const atom = item.dataset.atom;
+        const template = getAtomTemplate(atom);
+        
+        if (editor.value && !editor.value.endsWith('\n')) {
+          editor.value += '\n| ';
+        }
+        editor.value += template;
+        editor.focus();
+      });
+    });
+    
+    // Atom templates
+    function getAtomTemplate(atom) {
+      const templates = {
+        // Sources
+        'source.http': 'source.http(url="https://api.example.com/data")',
+        'source.graphql': 'source.graphql(endpoint="...", query="{ ... }")',
+        'source.websocket': 'source.websocket(url="wss://...")',
+        'source.sse': 'source.sse(url="https://...")',
+        'source.mqtt': 'source.mqtt(broker="mqtt://localhost:1883", topic="sensors/#")',
+        'source.coap': 'source.coap(uri="coap://device.local/sensor")',
+        'source.modbus': 'source.modbus(host="192.168.1.100", unit=1, register=0)',
+        'source.opcua': 'source.opcua(endpoint="opc.tcp://...", nodes=[...])',
+        'source.serial': 'source.serial(port="/dev/ttyUSB0", baud=9600)',
+        'source.sql': 'source.sql(dsn="postgresql://...", query="SELECT * FROM ...")',
+        'source.mongodb': 'source.mongodb(uri="mongodb://...", collection="...")',
+        'source.redis': 'source.redis(url="redis://localhost", key="...")',
+        'source.elasticsearch': 'source.elasticsearch(url="http://localhost:9200", index="...")',
+        'source.influxdb': 'source.influxdb(url="...", bucket="...", query="...")',
+        'source.s3': 'source.s3(bucket="...", key="...")',
+        'source.azure_blob': 'source.azure_blob(container="...", blob="...")',
+        'source.gcs': 'source.gcs(bucket="...", object="...")',
+        'source.kafka': 'source.kafka(brokers="localhost:9092", topic="...")',
+        'source.nats': 'source.nats(url="nats://localhost:4222", subject="...")',
+        // Data Definition
+        'data.define': 'data.define(total_revenue=125000, avg_order=450, orders_count=278)',
+        'data.mock': 'data.mock(type="sales", rows=100)',
+        'data.sample': 'data.sample(dataset="ecommerce")',
+        'data.sql': 'data.sql(query="SELECT * FROM sales", connection="postgresql://...")',
+        'data.dql': 'data.dql(select=["revenue", "orders"], from_source="sales", where={"year": 2024})',
+        'data.compute': 'data.compute(profit="revenue - costs", margin="profit / revenue * 100")',
+        'data.kpi': 'data.kpi(revenue={"value": 125000, "target": 150000})',
+        // Transforms
+        'transform.filter': 'transform.filter(field__gt=0)',
+        'transform.map': 'transform.map(field="...", expr="...")',
+        'transform.group': 'transform.group(by=["field"], agg={"count": "count()"})',
+        'transform.sort': 'transform.sort(field="...", order="desc")',
+        'transform.limit': 'transform.limit(100)',
+        // Views
+        'view.chart': 'view.chart(type="line", x="...", y="...", title="...")',
+        'view.table': 'view.table(title="...", columns=[...])',
+        'view.card': 'view.card(value="...", title="...", icon="📊")',
+        'view.kpi': 'view.kpi(value="...", title="...", trend="...")',
+        'view.dashboard': 'view.dashboard(layout="grid", widgets=[...])',
+        // Sinks
+        'sink.http': 'sink.http(url="https://...", method="POST")',
+        'sink.mqtt': 'sink.mqtt(broker="...", topic="...")',
+        'sink.sql': 'sink.sql(dsn="...", table="...", mode="insert")',
+        'sink.slack': 'sink.slack(channel="#...", message="...")',
+        'sink.email': 'sink.email(to="...", subject="...")',
+        'sink.dashboard': 'sink.dashboard(id="...", widget="...")',
+        // Deploy / CI/CD
+        'deploy.docker': 'deploy.docker(image="app", tag="latest", port=8000)',
+        'deploy.kubernetes': 'deploy.kubernetes(namespace="prod", replicas=3)',
+        'deploy.helm': 'deploy.helm(chart="app", release="prod")',
+        'deploy.github_actions': 'deploy.github_actions(workflow="deploy", triggers=["push"])',
+        'deploy.web': 'deploy.web(framework="react", build="npm run build")',
+        'deploy.mobile': 'deploy.mobile(framework="react-native", platforms=["ios", "android"])',
+        'deploy.desktop': 'deploy.desktop(framework="electron", platforms=["win", "mac", "linux"])'
+      };
+      return templates[atom] || atom + '()';
+    }
+    
+    // Pipeline visual builder
+    function addPipelineNode(atom) {
+      const [type, action] = atom.split('.');
+      const pipelineNodes = document.getElementById('pipelineNodes');
+      const dropZone = document.getElementById('dropZone');
+      const template = getAtomTemplate(atom);
+      const params = extractParams(template);
+      
+      // Hide drop zone if first node
+      if (dropZone && pipelineNodes.children.length === 1) {
+        dropZone.style.display = 'none';
+      }
+      
+      // Add connector if not first
+      if (pipelineNodes.querySelectorAll('.pipeline-node').length > 0) {
+        const connector = document.createElement('div');
+        connector.className = 'pipeline-connector';
+        connector.textContent = '→';
+        pipelineNodes.appendChild(connector);
+      }
+      
+      const nodeId = 'node_' + Date.now();
+      const node = document.createElement('div');
+      node.className = `pipeline-node ${type}`;
+      node.id = nodeId;
+      node.dataset.atom = atom;
+      node.dataset.params = params;
+      node.innerHTML = `
+        <button class="node-delete" onclick="deleteNode('${nodeId}')" title="Usuń">×</button>
+        <div class="node-type">${type}</div>
+        <div class="node-action">${action}</div>
+        <div class="node-params" onclick="editNodeParams('${nodeId}')">${params || 'click to edit'}</div>
+      `;
+      pipelineNodes.appendChild(node);
+      
+      // Add button
+      if (!pipelineNodes.querySelector('.add-node-btn')) {
+        const addBtn = document.createElement('div');
+        addBtn.className = 'add-node-btn';
+        addBtn.textContent = '+';
+        addBtn.title = 'Dodaj atom';
+        pipelineNodes.appendChild(addBtn);
+      }
+      
+      // Update code editor
+      updateCodeFromVisual();
+    }
+    
+    function extractParams(template) {
+      const match = template.match(/\(([^)]*)\)/);
+      return match ? match[1] : '';
+    }
+    
+    function deleteNode(nodeId) {
+      const node = document.getElementById(nodeId);
+      if (!node) return;
+      
+      // Remove preceding connector if exists
+      const prev = node.previousElementSibling;
+      if (prev && prev.classList.contains('pipeline-connector')) {
+        prev.remove();
+      }
+      // Or following connector
+      const next = node.nextElementSibling;
+      if (next && next.classList.contains('pipeline-connector')) {
+        next.remove();
+      }
+      
+      node.remove();
+      
+      // Show drop zone if no nodes left
+      const pipelineNodes = document.getElementById('pipelineNodes');
+      if (pipelineNodes.querySelectorAll('.pipeline-node').length === 0) {
+        const dropZone = document.getElementById('dropZone');
+        if (dropZone) dropZone.style.display = 'flex';
+        const addBtn = pipelineNodes.querySelector('.add-node-btn');
+        if (addBtn) addBtn.remove();
+      }
+      
+      updateCodeFromVisual();
+    }
+    
+    function editNodeParams(nodeId) {
+      const node = document.getElementById(nodeId);
+      if (!node) return;
+      
+      const paramsEl = node.querySelector('.node-params');
+      const currentParams = node.dataset.params || '';
+      
+      // Create inline editor
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = currentParams;
+      input.className = 'node-params-input';
+      input.style.cssText = 'width:100%;padding:4px;font-size:0.75rem;border:1px solid var(--primary);border-radius:4px;';
+      
+      paramsEl.innerHTML = '';
+      paramsEl.appendChild(input);
+      input.focus();
+      input.select();
+      
+      const saveParams = () => {
+        node.dataset.params = input.value;
+        paramsEl.innerHTML = input.value || 'click to edit';
+        paramsEl.onclick = () => editNodeParams(nodeId);
+        updateCodeFromVisual();
+      };
+      
+      input.addEventListener('blur', saveParams);
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') saveParams();
+        if (e.key === 'Escape') {
+          paramsEl.innerHTML = currentParams || 'click to edit';
+          paramsEl.onclick = () => editNodeParams(nodeId);
+        }
+      });
+    }
+    
+    function updateCodeFromVisual() {
+      const pipelineNodes = document.getElementById('pipelineNodes');
+      const nodes = pipelineNodes.querySelectorAll('.pipeline-node');
+      const dsl = Array.from(nodes).map(node => {
+        const atom = node.dataset.atom || '';
+        const params = node.dataset.params || '';
+        return `${atom}(${params})`;
+      }).join('\n| ');
+      
+      document.getElementById('dslEditor').value = dsl;
+    }
+    
+    // Execute DSL
+    async function executeDSL() {
+      const dsl = document.getElementById('dslEditor').value;
+      const output = document.getElementById('outputJSON');
+      const status = document.getElementById('outputStatus');
+      
+      status.style.display = 'inline-block';
+      status.className = 'output-status pending';
+      status.textContent = 'Wykonywanie...';
+      output.textContent = 'Przetwarzanie pipeline...';
+      
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/pipeline/execute`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dsl })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          status.className = 'output-status success';
+          status.textContent = `OK (${result.execution_time_ms}ms)`;
+          output.textContent = JSON.stringify(result.result, null, 2);
+          
+          // Also render preview
+          renderPreview(result.result);
+        } else {
+          status.className = 'output-status error';
+          status.textContent = 'Error';
+          output.textContent = result.errors?.map(e => `${e.type}: ${e.message}`).join('\n') || 'Unknown error';
+          renderPreview(null);
+        }
+      } catch (err) {
+        status.className = 'output-status error';
+        status.textContent = 'Error';
+        output.textContent = `Connection error: ${err.message}`;
+        renderPreview(null);
+      }
+    }
+    
+    // Validate DSL
+    async function validateDSL() {
+      const dsl = document.getElementById('dslEditor').value;
+      
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/pipeline/validate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dsl })
+        });
+        
+        const result = await response.json();
+        
+        if (result.valid) {
+          showNotification('DSL jest poprawny ✓', 'success');
+        } else {
+          showNotification('Błędy walidacji: ' + result.errors?.join(', '), 'error');
+        }
+      } catch (err) {
+        showNotification('Nie można zwalidować: ' + err.message, 'error');
+      }
+    }
+    
+    // Format code
+    function formatCode() {
+      const editor = document.getElementById('dslEditor');
+      let code = editor.value;
+      
+      // Simple formatting
+      code = code.replace(/\|\s*/g, '\n| ');
+      code = code.replace(/,\s*/g, ', ');
+      code = code.replace(/\(\s*/g, '(\n  ');
+      code = code.replace(/\s*\)/g, '\n)');
+      
+      editor.value = code;
+      showNotification('Kod sformatowany', 'success');
+    }
+    
+    // Clear editor
+    function clearEditor() {
+      document.getElementById('dslEditor').value = '';
+      document.getElementById('outputJSON').textContent = 'Kliknij "Uruchom" aby wykonać pipeline DSL...';
+      document.getElementById('outputStatus').style.display = 'none';
+      document.getElementById('previewContainer').innerHTML = '';
+      document.getElementById('exportResult').innerHTML = '';
+      
+      // Reset visual editor
+      const pipelineNodes = document.getElementById('pipelineNodes');
+      pipelineNodes.innerHTML = `
+        <div class="drop-zone" id="dropZone">
+          <div style="font-size:2rem;margin-bottom:10px">📦</div>
+          <div>Przeciągnij atomy tutaj, aby zbudować pipeline</div>
+        </div>
+      `;
+      
+      // Re-attach drop zone listeners
+      initDropZone();
+      
+      // Clear URL state
+      AppState.example = null;
+      AppState.save();
+    }
+    
+    // Initialize drop zone
+    function initDropZone() {
+      const dropZone = document.getElementById('dropZone');
+      if (!dropZone) return;
+      
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+      });
+      
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+      });
+      
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        const atom = e.dataTransfer.getData('text/plain');
+        if (atom) addPipelineNode(atom);
+      });
+    }
+    
+    // Copy to clipboard
+    function copyToClipboard() {
+      const editor = document.getElementById('dslEditor');
+      navigator.clipboard.writeText(editor.value);
+      showNotification('Skopiowano do schowka', 'success');
+    }
+    
+    // Download DSL
+    function downloadDSL() {
+      const editor = document.getElementById('dslEditor');
+      const format = document.querySelector('.format-btn.active').dataset.format;
+      const ext = format === 'native' ? 'dsl' : format;
+      
+      const blob = new Blob([editor.value], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pipeline.${ext}`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      showNotification('Pobieranie...', 'success');
+    }
+    
+    // Notification
+    function showNotification(message, type = 'info') {
+      const existing = document.querySelector('.notification');
+      if (existing) existing.remove();
+      
+      const notification = document.createElement('div');
+      notification.className = 'notification';
+      notification.style.cssText = `
+        position: fixed;
+        top: 70px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+        background: ${type === 'success' ? '#d1fae5' : type === 'error' ? '#fee2e2' : '#dbeafe'};
+        color: ${type === 'success' ? '#059669' : type === 'error' ? '#dc2626' : '#2563eb'};
+      `;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => notification.remove(), 3000);
+    }
+    
+    // ============================================================
+    // INITIALIZATION
+    // ============================================================
+    
+    // Open first category by default
+    document.querySelector('.atom-list').classList.add('open');
+    document.querySelector('.category-header span:last-child').textContent = '▼';
+    
+    // Initialize drop zone
+    initDropZone();
+    
+    // Load URL state on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      AppState.load();
+    });
+    
+    // Also try to load immediately
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(() => AppState.load(), 100);
+    }
+  </script>
+</body>
+</html>

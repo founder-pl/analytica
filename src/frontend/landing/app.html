@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytica - DSL App</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="components.css">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --accent: #8b5cf6;
+      --text: #1a1a2e;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #f8fafc;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      min-height: 100vh;
+    }
+    
+    .app-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .app-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--text);
+      text-decoration: none;
+    }
+    
+    .app-nav {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    
+    .app-nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    
+    .app-nav a:hover {
+      color: var(--primary);
+    }
+    
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    
+    /* DSL Editor Section */
+    .dsl-editor {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .dsl-editor h2 {
+      font-size: 1.1rem;
+      margin: 0 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .dsl-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+    
+    .dsl-tab {
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--muted);
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    
+    .dsl-tab:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+    
+    .dsl-tab.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .dsl-input {
+      width: 100%;
+      min-height: 150px;
+      padding: 16px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', 'Monaco', monospace;
+      font-size: 13px;
+      resize: vertical;
+      background: #1a1a2e;
+      color: #e2e8f0;
+    }
+    
+    .dsl-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .dsl-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      align-items: center;
+    }
+    
+    .btn-run {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .btn-run:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    
+    .btn-run:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .status-badge.running { background: #fef3c7; color: #d97706; }
+    .status-badge.success { background: #d1fae5; color: #059669; }
+    .status-badge.error { background: #fee2e2; color: #dc2626; }
+    
+    /* UI Output */
+    #uiOutput {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      min-height: 200px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    #uiOutput:empty::before {
+      content: "Wygenerowany UI pojawi się tutaj po uruchomieniu DSL";
+      color: var(--muted);
+      font-style: italic;
+    }
+    
+    /* UI Renderer Styles */
+    .ui-stats { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
+    .stat-item { 
+      background: var(--bg); 
+      padding: 20px; 
+      border-radius: 12px; 
+      flex: 1; 
+      min-width: 150px;
+      text-align: center;
+    }
+    .stat-icon { font-size: 2rem; margin-bottom: 8px; }
+    .stat-value { font-size: 2rem; font-weight: 700; color: var(--text); }
+    .stat-label { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+    .stat-trend { font-size: 0.8rem; margin-top: 4px; }
+    .stat-trend--up { color: #10b981; }
+    .stat-trend--down { color: #ef4444; }
+    
+    .ui-grid { display: grid; gap: 16px; margin-bottom: 24px; }
+    .ui-grid--4col { grid-template-columns: repeat(4, 1fr); }
+    .ui-grid--3col { grid-template-columns: repeat(3, 1fr); }
+    .ui-grid--2col { grid-template-columns: repeat(2, 1fr); }
+    
+    .grid-item .btn { width: 100%; justify-content: center; }
+    
+    .ui-pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+    .pricing-card { 
+      background: white; 
+      border-radius: 12px; 
+      padding: 32px; 
+      border: 2px solid var(--border); 
+      text-align: center;
+      position: relative;
+    }
+    .pricing-card--highlight { 
+      border-color: var(--primary); 
+      box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15); 
+    }
+    .pricing-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary);
+      color: white;
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .pricing-name { font-size: 1.25rem; margin-bottom: 16px; }
+    .pricing-price { font-size: 2.5rem; font-weight: 700; margin-bottom: 24px; }
+    .pricing-price span { font-size: 1rem; color: var(--muted); font-weight: 400; }
+    .pricing-features { list-style: none; padding: 0; margin: 0 0 24px; text-align: left; }
+    .pricing-features li { padding: 8px 0; border-bottom: 1px solid var(--border); }
+    
+    .ui-form { max-width: 500px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 0.9rem; }
+    .form-input { 
+      width: 100%; 
+      padding: 12px; 
+      border: 2px solid var(--border); 
+      border-radius: 8px; 
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    .form-input:focus { outline: none; border-color: var(--primary); }
+    textarea.form-input { min-height: 100px; resize: vertical; }
+    
+    .form-actions { margin-top: 24px; }
+    
+    .ui-message {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+    }
+    .ui-message--success { background: #d1fae5; color: #059669; }
+    .ui-message--error { background: #fee2e2; color: #dc2626; }
+    
+    .section-title { font-size: 1.5rem; margin-bottom: 8px; }
+    .section-subtitle { color: var(--muted); margin-bottom: 24px; }
+    
+    @media (max-width: 768px) {
+      .ui-grid--4col, .ui-grid--3col { grid-template-columns: repeat(2, 1fr); }
+      .ui-stats { flex-direction: column; }
+      .app-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <a href="index.html" class="app-logo">
+        <span>📊</span>
+        Analytica
+      </a>
+      <nav class="app-nav">
+        <a href="index.html">Produkty</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="#" onclick="logout()">Wyloguj</a>
+      </nav>
+      <div class="user-badge">
+        <span>💎</span>
+        <span id="userPoints">100</span> punktów
+      </div>
+    </header>
+    
+    <div class="dsl-editor">
+      <h2>🔧 DSL UI Builder</h2>
+      
+      <div class="dsl-tabs">
+        <button class="dsl-tab active" data-page="dashboard">Dashboard</button>
+        <button class="dsl-tab" data-page="pricing">Cennik</button>
+        <button class="dsl-tab" data-page="quote">Formularz</button>
+        <button class="dsl-tab" data-page="custom">Custom</button>
+      </div>
+      
+      <textarea id="dslInput" class="dsl-input" placeholder="Wpisz DSL UI..."></textarea>
+      
+      <div class="dsl-actions">
+        <button id="runBtn" class="btn-run" onclick="renderUI()">
+          <span>▶️</span> Renderuj UI
+        </button>
+        <span id="statusBadge" class="status-badge" style="display: none;"></span>
+      </div>
+    </div>
+    
+    <div id="uiOutput"></div>
+  </div>
+
+  <script type="module">
+    const API_BASE = window.location.origin;
+    
+    // DSL Templates
+    const TEMPLATES = {
+      dashboard: `ui.page(title="Dashboard", layout="app")
+| ui.stats(items=[
+    {"icon": "📊", "value": 42, "label": "Wykonane analizy", "trend": 12},
+    {"icon": "💎", "value": 100, "label": "Dostępne punkty"},
+    {"icon": "📈", "value": "Dziś", "label": "Ostatnia analiza"}
+  ])
+| ui.grid(columns=4, items=[
+    {"type": "button", "text": "💰 Plan Budżetu", "href": "planbudzetu.html", "variant": "ghost"},
+    {"type": "button", "text": "📈 Plan Inwestycji", "href": "planinwestycji.html", "variant": "ghost"},
+    {"type": "button", "text": "🎯 MultiPlan", "href": "multiplan.html", "variant": "ghost"},
+    {"type": "button", "text": "🔮 Estymacja", "href": "estymacja.html", "variant": "ghost"}
+  ])`,
+      
+      pricing: `ui.page(title="Cennik", layout="landing")
+| ui.pricing(plans=[
+    {"id": "starter", "name": "Starter", "price": "0 zł", "period": "/mies.", "features": ["10 punktów/mies.", "Podstawowe analizy", "Email support"], "cta": {"text": "Rozpocznij", "href": "login.html"}},
+    {"id": "pro", "name": "Pro", "price": "99 zł", "period": "/mies.", "badge": "Popularne", "highlight": true, "features": ["100 punktów/mies.", "Wszystkie produkty", "API access", "Priority support"], "cta": {"text": "Wybierz Pro", "href": "login.html"}},
+    {"id": "enterprise", "name": "Enterprise", "price": "Indywidualnie", "features": ["Nielimitowane punkty", "Dedykowane API", "SLA 99.99%", "Dedykowany opiekun"], "cta": {"text": "Kontakt", "href": "quote.html"}}
+  ], highlight="pro")`,
+      
+      quote: `ui.page(title="Zapytanie Enterprise", layout="form")
+| ui.section(title="Formularz zapytania", subtitle="Wypełnij formularz, a skontaktujemy się w ciągu 24h")
+| ui.form(action="/api/v1/quotes", fields=[
+    {"name": "name", "type": "text", "label": "Imię i nazwisko", "required": true},
+    {"name": "email", "type": "email", "label": "Email służbowy", "required": true},
+    {"name": "company", "type": "text", "label": "Firma", "required": true},
+    {"name": "phone", "type": "tel", "label": "Telefon"},
+    {"name": "product", "type": "select", "label": "Produkt", "options": ["PlanBudzetu", "PlanInwestycji", "MultiPlan", "Estymacja", "Wszystkie"]},
+    {"name": "message", "type": "textarea", "label": "Dodatkowe informacje"}
+  ], submit="Wyślij zapytanie")`,
+      
+      custom: `// Stwórz własny UI z DSL
+ui.page(title="Moja strona")
+| ui.section(title="Sekcja 1")
+| ui.features(items=[
+    {"icon": "🚀", "title": "Szybkość", "description": "Błyskawiczne analizy"},
+    {"icon": "🔒", "title": "Bezpieczeństwo", "description": "Dane są chronione"},
+    {"icon": "📊", "title": "Wizualizacje", "description": "Piękne wykresy"}
+  ], columns=3)`
+    };
+    
+    // Tab switching
+    document.querySelectorAll('.dsl-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.dsl-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        const page = tab.dataset.page;
+        if (TEMPLATES[page]) {
+          document.getElementById('dslInput').value = TEMPLATES[page];
+        }
+      });
+    });
+    
+    // Load default template
+    document.getElementById('dslInput').value = TEMPLATES.dashboard;
+    
+    // Render UI function
+    window.renderUI = async function() {
+      const dsl = document.getElementById('dslInput').value;
+      const output = document.getElementById('uiOutput');
+      const statusBadge = document.getElementById('statusBadge');
+      const runBtn = document.getElementById('runBtn');
+      
+      statusBadge.style.display = 'inline-block';
+      statusBadge.className = 'status-badge running';
+      statusBadge.textContent = 'Renderowanie...';
+      runBtn.disabled = true;
+      
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/ui/render`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dsl })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success' && result.ui) {
+          statusBadge.className = 'status-badge success';
+          statusBadge.textContent = 'OK';
+          renderUIComponents(result.ui, output);
+        } else {
+          throw new Error(result.error || 'Unknown error');
+        }
+      } catch (err) {
+        statusBadge.className = 'status-badge error';
+        statusBadge.textContent = 'Błąd';
+        output.innerHTML = `<div class="ui-message ui-message--error">
+          <strong>Błąd:</strong> ${err.message}
+        </div>`;
+      }
+      
+      runBtn.disabled = false;
+    };
+    
+    // Render UI components from spec
+    function renderUIComponents(spec, container) {
+      const ui = spec.ui || [];
+      const data = spec.data || {};
+      
+      let html = '';
+      
+      for (const component of ui) {
+        html += renderComponent(component, data);
+      }
+      
+      container.innerHTML = html || '<div class="ui-message">Brak komponentów do wyrenderowania</div>';
+      bindFormEvents(container);
+    }
+    
+    // Render single component
+    function renderComponent(spec, data) {
+      switch (spec.type) {
+        case 'page':
+          return `<div class="ui-page" data-title="${spec.title}"></div>`;
+        
+        case 'nav':
+          return renderNav(spec);
+        
+        case 'hero':
+          return renderHero(spec);
+        
+        case 'section':
+          return renderSection(spec, data);
+        
+        case 'stats':
+          return renderStats(spec, data);
+        
+        case 'grid':
+          return renderGrid(spec, data);
+        
+        case 'pricing':
+          return renderPricing(spec);
+        
+        case 'features':
+          return renderFeatures(spec);
+        
+        case 'form':
+          return renderForm(spec, data);
+        
+        case 'button':
+          return renderButton(spec);
+        
+        default:
+          return `<div class="ui-unknown">[${spec.type}]</div>`;
+      }
+    }
+    
+    function renderNav(spec) {
+      const links = (spec.links || []).map(l => 
+        `<a href="${l.href || '#'}">${l.text}</a>`
+      ).join('');
+      
+      return `
+        <nav class="app-header">
+          <a href="/" class="app-logo"><span>${spec.logo || ''}</span> ${spec.brand}</a>
+          <div class="app-nav">${links}</div>
+        </nav>
+      `;
+    }
+    
+    function renderHero(spec) {
+      return `
+        <section class="hero">
+          <div class="hero-content">
+            ${spec.badge ? `<div class="hero-badge">${spec.badge}</div>` : ''}
+            <h1>${spec.title}</h1>
+            ${spec.subtitle ? `<p>${spec.subtitle}</p>` : ''}
+          </div>
+        </section>
+      `;
+    }
+    
+    function renderSection(spec, data) {
+      return `
+        <section class="section" id="${spec.id || ''}">
+          ${spec.title ? `<h2 class="section-title">${spec.title}</h2>` : ''}
+          ${spec.subtitle ? `<p class="section-subtitle">${spec.subtitle}</p>` : ''}
+        </section>
+      `;
+    }
+    
+    function renderStats(spec, data) {
+      const items = (spec.items || []).map(item => {
+        const value = typeof item.value === 'string' && item.value.startsWith('$') 
+          ? data[item.value.slice(1)] || item.value 
+          : item.value;
+        
+        return `
+          <div class="stat-item">
+            ${item.icon ? `<div class="stat-icon">${item.icon}</div>` : ''}
+            <div class="stat-value">${typeof value === 'number' ? value.toLocaleString('pl-PL') : value}</div>
+            <div class="stat-label">${item.label}</div>
+            ${item.trend ? `<div class="stat-trend stat-trend--${item.trend > 0 ? 'up' : 'down'}">
+              ${item.trend > 0 ? '↑' : '↓'} ${Math.abs(item.trend)}%
+            </div>` : ''}
+          </div>
+        `;
+      }).join('');
+      
+      return `<div class="ui-stats">${items}</div>`;
+    }
+    
+    function renderGrid(spec, data) {
+      const items = (spec.items || []).map(item => {
+        if (typeof item === 'object' && item.type) {
+          return `<div class="grid-item">${renderComponent(item, data)}</div>`;
+        }
+        return `<div class="grid-item">${item}</div>`;
+      }).join('');
+      
+      return `<div class="ui-grid ui-grid--${spec.columns}col">${items}</div>`;
+    }
+    
+    function renderPricing(spec) {
+      const plans = (spec.plans || []).map(plan => {
+        const features = (plan.features || []).map(f => `<li>✓ ${f}</li>`).join('');
+        const isHighlight = plan.id === spec.highlight || plan.highlight;
+        
+        return `
+          <div class="pricing-card ${isHighlight ? 'pricing-card--highlight' : ''}">
+            ${plan.badge ? `<div class="pricing-badge">${plan.badge}</div>` : ''}
+            <h3 class="pricing-name">${plan.name}</h3>
+            <div class="pricing-price">${plan.price}<span>${plan.period || ''}</span></div>
+            <ul class="pricing-features">${features}</ul>
+            <a href="${plan.cta?.href || '#'}" class="btn btn-${isHighlight ? 'primary' : 'secondary'}">${plan.cta?.text || 'Wybierz'}</a>
+          </div>
+        `;
+      }).join('');
+      
+      return `<div class="ui-pricing">${plans}</div>`;
+    }
+    
+    function renderFeatures(spec) {
+      const items = (spec.items || []).map(item => `
+        <div class="feature-card">
+          ${item.icon ? `<div class="feature-icon">${item.icon}</div>` : ''}
+          <h3 class="feature-title">${item.title}</h3>
+          <p class="feature-desc">${item.description || ''}</p>
+        </div>
+      `).join('');
+      
+      return `<div class="ui-features ui-features--${spec.columns || 3}col">${items}</div>`;
+    }
+    
+    function renderForm(spec, data) {
+      const fields = (spec.fields || []).map(field => {
+        const value = data[field.name] || '';
+        const required = field.required ? 'required' : '';
+        
+        let input = '';
+        switch (field.type) {
+          case 'textarea':
+            input = `<textarea name="${field.name}" class="form-input" placeholder="${field.placeholder || ''}" ${required}>${value}</textarea>`;
+            break;
+          case 'select':
+            const options = (field.options || []).map(opt => 
+              `<option value="${opt}">${opt}</option>`
+            ).join('');
+            input = `<select name="${field.name}" class="form-input" ${required}><option value="">Wybierz...</option>${options}</select>`;
+            break;
+          default:
+            input = `<input type="${field.type || 'text'}" name="${field.name}" class="form-input" placeholder="${field.placeholder || ''}" value="${value}" ${required}>`;
+        }
+        
+        return `
+          <div class="form-group">
+            <label class="form-label">${field.label}${field.required ? ' *' : ''}</label>
+            ${input}
+          </div>
+        `;
+      }).join('');
+      
+      return `
+        <form class="ui-form" action="${spec.action}" method="${spec.method || 'POST'}" id="${spec.id || 'form_' + Date.now()}">
+          ${fields}
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">${spec.submit_text || 'Wyślij'}</button>
+          </div>
+        </form>
+      `;
+    }
+    
+    function renderButton(spec) {
+      const icon = spec.icon ? `<span>${spec.icon}</span>` : '';
+      if (spec.href) {
+        return `<a href="${spec.href}" class="btn btn-${spec.variant || 'primary'}">${icon}${spec.text}</a>`;
+      }
+      return `<button class="btn btn-${spec.variant || 'primary'}">${icon}${spec.text}</button>`;
+    }
+    
+    // Bind form events
+    function bindFormEvents(container) {
+      container.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData.entries());
+          data.ticketId = 'ENT-' + Date.now().toString(36).toUpperCase();
+          
+          try {
+            const response = await fetch(form.action, {
+              method: form.method || 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            const msg = document.createElement('div');
+            msg.className = `ui-message ui-message--${response.ok ? 'success' : 'error'}`;
+            msg.textContent = response.ok 
+              ? `Wysłano! Numer zgłoszenia: ${data.ticketId}` 
+              : (result.message || 'Wystąpił błąd');
+            
+            form.insertBefore(msg, form.firstChild);
+            if (response.ok) form.reset();
+            
+            setTimeout(() => msg.remove(), 5000);
+          } catch (err) {
+            const msg = document.createElement('div');
+            msg.className = 'ui-message ui-message--error';
+            msg.textContent = 'Błąd połączenia z serwerem';
+            form.insertBefore(msg, form.firstChild);
+          }
+        });
+      });
+    }
+    
+    // Logout function
+    window.logout = function() {
+      localStorage.removeItem('analytica_token');
+      localStorage.removeItem('analytica_user');
+      window.location.href = 'login.html';
+    };
+    
+    // Load user data
+    const user = JSON.parse(localStorage.getItem('analytica_user') || '{}');
+    document.getElementById('userPoints').textContent = user.points || 100;
+  </script>
+</body>
+</html>

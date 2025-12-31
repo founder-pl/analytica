@@ -964,3 +964,303 @@ def view_list(ctx: PipelineContext, **params) -> Dict:
     }
     
     return _wrap_view_result(data, spec)
+
+
+# ============================================================
+# UI ATOMS - Generate UI component specifications for pages
+# ============================================================
+
+def _wrap_ui_result(data: Any, ui_spec: Dict) -> Dict:
+    """Wrap data and UI spec into result format"""
+    if isinstance(data, dict) and "ui" in data:
+        data["ui"].append(ui_spec)
+        return data
+    return {"data": data, "ui": [ui_spec]}
+
+
+@AtomRegistry.register("ui", "page")
+def ui_page(ctx: PipelineContext, **params) -> Dict:
+    """Generate page container specification"""
+    data = ctx.get_data()
+    
+    title = params.get("title", params.get("_arg0", "Page"))
+    layout = params.get("layout", "default")
+    theme = params.get("theme", "light")
+    
+    ctx.log(f"Creating UI page: {title}")
+    
+    spec = {
+        "type": "page",
+        "id": _generate_view_id("page"),
+        "title": title,
+        "layout": layout,
+        "theme": theme,
+        "components": [],
+    }
+    
+    return _wrap_ui_result(data, spec)
+
+
+@AtomRegistry.register("ui", "nav")
+def ui_nav(ctx: PipelineContext, **params) -> Dict:
+    """Generate navigation bar specification"""
+    data = ctx.get_data()
+    
+    brand = params.get("brand", params.get("_arg0", ""))
+    logo = params.get("logo", "")
+    links = params.get("links", [])
+    cta = params.get("cta", [])
+    sticky = params.get("sticky", True)
+    
+    ctx.log(f"Creating UI nav: {brand}")
+    
+    spec = {
+        "type": "nav",
+        "id": _generate_view_id("nav"),
+        "brand": brand,
+        "logo": logo,
+        "links": links,
+        "cta": cta,
+        "sticky": sticky,
+    }
+    
+    return _wrap_ui_result(data, spec)
+
+
+@AtomRegistry.register("ui", "hero")
+def ui_hero(ctx: PipelineContext, **params) -> Dict:
+    """Generate hero section specification"""
+    data = ctx.get_data()
+    
+    title = params.get("title", params.get("_arg0", ""))
+    subtitle = params.get("subtitle", "")
+    badge = params.get("badge", "")
+    cta_primary = params.get("cta_primary", {})
+    cta_secondary = params.get("cta_secondary", {})
+    image = params.get("image", "")
+    gradient = params.get("gradient", True)
+    
+    ctx.log(f"Creating UI hero: {title}")
+    
+    spec = {
+        "type": "hero",
+        "id": _generate_view_id("hero"),
+        "title": title,
+        "subtitle": subtitle,
+        "badge": badge,
+        "cta_primary": cta_primary,
+        "cta_secondary": cta_secondary,
+        "image": image,
+        "gradient": gradient,
+    }
+    
+    return _wrap_ui_result(data, spec)
+
+
+@AtomRegistry.register("ui", "section")
+def ui_section(ctx: PipelineContext, **params) -> Dict:
+    """Generate section specification"""
+    data = ctx.get_data()
+    
+    title = params.get("title", params.get("_arg0", ""))
+    subtitle = params.get("subtitle", "")
+    layout = params.get("layout", "default")
+    background = params.get("bg", "white")
+    padding = params.get("padding", "lg")
+    
+    ctx.log(f"Creating UI section: {title}")
+    
+    spec = {
+        "type": "section",
+        "id": _generate_view_id("section"),
+        "title": title,
+        "subtitle": subtitle,
+        "layout": layout,
+        "background": background,
+        "padding": padding,
+        "children": [],
+    }
+    
+    return _wrap_ui_result(data, spec)
+
+
+@AtomRegistry.register("ui", "grid")
+def ui_grid(ctx: PipelineContext, **params) -> Dict:
+    """Generate grid layout specification"""
+    data = ctx.get_data()
+    
+    columns = params.get("columns", params.get("_arg0", 3))
+    gap = params.get("gap", "md")
+    items = params.get("items", [])
+    
+    ctx.log(f"Creating UI grid: {columns} columns")
+    
+    spec = {
+        "type": "grid",
+        "id": _generate_view_id("grid"),
+        "columns": columns,
+        "gap": gap,
+        "items": items,
+    }
+    
+    return _wrap_ui_result(data, spec)
+
+
+@AtomRegistry.register("ui", "form")
+def ui_form(ctx: PipelineContext, **params) -> Dict:
+    """Generate form specification"""
+    data = ctx.get_data()
+    
+    action = params.get("action", params.get("_arg0", ""))
+    method = params.get("method", "POST")
+    fields = params.get("fields", [])
+    submit_text = params.get("submit", "Wyślij")
+    layout = params.get("layout", "vertical")
+    
+    ctx.log(f"Creating UI form: {action}")
+    
+    spec = {
+        "type": "form",
+        "id": _generate_view_id("form"),
+        "action": action,
+        "method": method,
+        "fields": fields,
+        "submit_text": submit_text,
+        "layout": layout,
+    }
+    
+    return _wrap_ui_result(data, spec)
+
+
+@AtomRegistry.register("ui", "input")
+def ui_input(ctx: PipelineContext, **params) -> Dict:
+    """Generate form input specification"""
+    data = ctx.get_data()
+    
+    name = params.get("name", params.get("_arg0", ""))
+    input_type = params.get("type", "text")
+    label = params.get("label", name.replace("_", " ").title())
+    placeholder = params.get("placeholder", "")
+    required = params.get("required", False)
+    options = params.get("options", [])
+    
+    spec = {
+        "type": "input",
+        "id": _generate_view_id("input"),
+        "name": name,
+        "input_type": input_type,
+        "label": label,
+        "placeholder": placeholder,
+        "required": required,
+        "options": options,
+    }
+    
+    return _wrap_ui_result(data, spec)
+
+
+@AtomRegistry.register("ui", "button")
+def ui_button(ctx: PipelineContext, **params) -> Dict:
+    """Generate button specification"""
+    data = ctx.get_data()
+    
+    text = params.get("text", params.get("_arg0", "Button"))
+    href = params.get("href", "")
+    onclick = params.get("onclick", "")
+    variant = params.get("variant", "primary")
+    icon = params.get("icon", "")
+    size = params.get("size", "md")
+    
+    spec = {
+        "type": "button",
+        "id": _generate_view_id("button"),
+        "text": text,
+        "href": href,
+        "onclick": onclick,
+        "variant": variant,
+        "icon": icon,
+        "size": size,
+    }
+    
+    return _wrap_ui_result(data, spec)
+
+
+@AtomRegistry.register("ui", "stats")
+def ui_stats(ctx: PipelineContext, **params) -> Dict:
+    """Generate stats/metrics section specification"""
+    data = ctx.get_data()
+    
+    items = params.get("items", [])
+    layout = params.get("layout", "horizontal")
+    
+    ctx.log(f"Creating UI stats: {len(items)} items")
+    
+    spec = {
+        "type": "stats",
+        "id": _generate_view_id("stats"),
+        "items": items,
+        "layout": layout,
+    }
+    
+    return _wrap_ui_result(data, spec)
+
+
+@AtomRegistry.register("ui", "pricing")
+def ui_pricing(ctx: PipelineContext, **params) -> Dict:
+    """Generate pricing table specification"""
+    data = ctx.get_data()
+    
+    plans = params.get("plans", [])
+    highlight = params.get("highlight", "")
+    
+    ctx.log(f"Creating UI pricing: {len(plans)} plans")
+    
+    spec = {
+        "type": "pricing",
+        "id": _generate_view_id("pricing"),
+        "plans": plans,
+        "highlight": highlight,
+    }
+    
+    return _wrap_ui_result(data, spec)
+
+
+@AtomRegistry.register("ui", "features")
+def ui_features(ctx: PipelineContext, **params) -> Dict:
+    """Generate features grid specification"""
+    data = ctx.get_data()
+    
+    items = params.get("items", [])
+    columns = params.get("columns", 3)
+    
+    ctx.log(f"Creating UI features: {len(items)} items")
+    
+    spec = {
+        "type": "features",
+        "id": _generate_view_id("features"),
+        "items": items,
+        "columns": columns,
+    }
+    
+    return _wrap_ui_result(data, spec)
+
+
+@AtomRegistry.register("ui", "footer")
+def ui_footer(ctx: PipelineContext, **params) -> Dict:
+    """Generate footer specification"""
+    data = ctx.get_data()
+    
+    brand = params.get("brand", "")
+    links = params.get("links", [])
+    copyright_text = params.get("copyright", "")
+    social = params.get("social", [])
+    
+    spec = {
+        "type": "footer",
+        "id": _generate_view_id("footer"),
+        "brand": brand,
+        "links": links,
+        "copyright": copyright_text,
+        "social": social,
+    }
+    
+    return _wrap_ui_result(data, spec)

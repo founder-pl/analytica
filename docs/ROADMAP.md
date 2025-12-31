@@ -1,7 +1,97 @@
 # ANALYTICA - Plan Kontynuacji i Refaktoryzacji Architektury
 
-> Status: **124/124 testów przechodzi** ✅
+> Status: **186/186 testów przechodzi** ✅
 > Data: 2024-12-31
+> DSL Schema Version: **2.0.0**
+
+---
+
+## 🌐 NOWE: Multiplatformowy DSL z Universal Data Sources
+
+### Formaty DSL (v2.0)
+| Format | Opis | Status |
+|--------|------|--------|
+| Native | `source.http() \| transform.filter()` | ✅ |
+| JSON | Portable JSON schema | ✅ |
+| YAML | Human-readable config | ✅ |
+| TOML | Config-friendly | ✅ |
+| XML | Enterprise integration | ✅ |
+
+### Data Sources (source.*)
+
+#### 🌐 Web Protocols
+| Atom | Protokół | Przykład |
+|------|----------|----------|
+| `source.http` | HTTP/REST | `source.http(url="https://api.example.com")` |
+| `source.graphql` | GraphQL | `source.graphql(endpoint="...", query="{...}")` |
+| `source.websocket` | WebSocket | `source.websocket(url="wss://...")` |
+| `source.sse` | Server-Sent Events | `source.sse(url="https://...")` |
+
+#### 📡 IoT Protocols
+| Atom | Protokół | Zastosowanie |
+|------|----------|--------------|
+| `source.mqtt` | MQTT/MQTTS | Sensory, smart home |
+| `source.coap` | CoAP | Constrained devices |
+| `source.amqp` | AMQP | RabbitMQ, message queues |
+| `source.modbus` | Modbus TCP/RTU | Industrial PLC/SCADA |
+| `source.opcua` | OPC-UA | Industrial automation |
+| `source.serial` | Serial/RS232 | Arduino, sensors |
+
+#### 🗄️ Databases
+| Atom | Baza | Przykład |
+|------|------|----------|
+| `source.sql` | PostgreSQL, MySQL, SQLite | `source.sql(dsn="postgresql://...", query="...")` |
+| `source.mongodb` | MongoDB | `source.mongodb(uri="...", collection="...")` |
+| `source.redis` | Redis | `source.redis(url="...", key="...")` |
+| `source.elasticsearch` | Elasticsearch | `source.elasticsearch(url="...", index="...")` |
+| `source.influxdb` | InfluxDB | `source.influxdb(url="...", bucket="...")` |
+
+#### ☁️ Cloud Storage
+| Atom | Provider | Przykład |
+|------|----------|----------|
+| `source.s3` | AWS S3 | `source.s3(bucket="...", key="...")` |
+| `source.azure_blob` | Azure Blob | `source.azure_blob(container="...")` |
+| `source.gcs` | Google Cloud Storage | `source.gcs(bucket="...")` |
+
+#### 📊 Streaming Platforms
+| Atom | Platforma | Przykład |
+|------|-----------|----------|
+| `source.kafka` | Apache Kafka | `source.kafka(brokers="...", topic="...")` |
+| `source.nats` | NATS | `source.nats(url="...", subject="...")` |
+
+#### 🔌 External APIs
+| Atom | Kategoria | Providers |
+|------|-----------|-----------|
+| `source.api` | Generic | OpenWeather, GitHub, Stripe, Slack, Discord |
+| `source.weather` | Pogoda | OpenWeather, WeatherAPI |
+| `source.finance` | Finanse | AlphaVantage, Binance, Polygon |
+| `source.social` | Social Media | Twitter, Reddit |
+| `source.blockchain` | Web3 | Ethereum, Bitcoin |
+
+#### 📁 Files & Special
+| Atom | Typ | Formaty |
+|------|-----|---------|
+| `source.file` | Local files | CSV, JSON, XML, Parquet, Excel |
+| `source.ftp` | FTP/SFTP | Remote files |
+| `source.scrape` | Web scraping | HTML parsing |
+| `source.email` | IMAP | Email inbox |
+| `source.calendar` | Calendar | Google, iCal |
+
+### Data Sinks (sink.*)
+
+#### 📤 Outputs
+| Kategoria | Atomy |
+|-----------|-------|
+| Web | `sink.http`, `sink.webhook`, `sink.websocket` |
+| IoT | `sink.mqtt`, `sink.modbus` |
+| Databases | `sink.sql`, `sink.mongodb`, `sink.redis`, `sink.elasticsearch`, `sink.influxdb` |
+| Cloud | `sink.s3`, `sink.azure_blob`, `sink.gcs` |
+| Streaming | `sink.kafka` |
+| Files | `sink.file` |
+| Notifications | `sink.email`, `sink.sms`, `sink.slack`, `sink.discord`, `sink.telegram`, `sink.push` |
+| Display | `sink.display`, `sink.dashboard` |
+
+---
 
 ## 📊 Obecny Stan
 
@@ -54,34 +144,33 @@ src/
 ```
 
 #### 1.2 Zadania:
-- [ ] Przenieść `src/dsl/core/parser.py` (900+ linii) do mniejszych modułów
-- [ ] Wydzielić `AtomRegistry` do osobnego pliku
-- [ ] Stworzyć `PipelineExecutor` jako osobną klasę
-- [ ] Dodać abstrakcję `AtomHandler` z walidacją parametrów
+- [x] Przenieść `src/dsl/core/parser.py` (900+ linii) do mniejszych modułów ✅
+- [x] Wydzielić `AtomRegistry` do osobnego pliku (`registry.py`) ✅
+- [x] Stworzyć `PipelineExecutor` jako osobną klasę (`executor.py`) ✅
+- [x] Wydzielić `PipelineContext` (`context.py`) ✅
+- [x] Dodać abstrakcję `AtomHandler` z walidacją parametrów ✅
 
-### FAZA 2: Usprawnienie DSL (Priorytet: WYSOKI)
+### FAZA 2: Usprawnienie DSL (Priorytet: WYSOKI) ✅ UKOŃCZONE
 
 #### 2.1 Automatyczna walidacja parametrów atomów
 ```python
-# Zamiast:
-@AtomRegistry.register("data", "load")
-def data_load(ctx, source=None, **params):
-    source = source or params.get('_arg0')
-    if not source:
-        raise ValueError("Source is required")
+# Nowa wersja z dekoratorem (ZAIMPLEMENTOWANE):
+from src.dsl.core import AtomRegistry, atom_params, Required, Optional
 
-# Nowa wersja z dekoratorem:
 @AtomRegistry.register("data", "load")
-@atom_params(source=Required(str), format=Optional(str, default="auto"))
+@atom_params(
+    source=Required(str, description="Data source path or URL"),
+    format=Optional(str, default="auto", description="Data format")
+)
 def data_load(ctx, source: str, format: str = "auto"):
     ...
 ```
 
 #### 2.2 Zadania:
-- [ ] Stworzyć system typów dla parametrów (`Required`, `Optional`, `OneOf`)
-- [ ] Automatyczne mapowanie `_arg0` -> pierwszy wymagany parametr
-- [ ] Generowanie dokumentacji atomów z dekoratorów
-- [ ] Walidacja w czasie parsowania (nie tylko wykonania)
+- [x] Stworzyć system typów dla parametrów (`Required`, `Optional`, `OneOf`) ✅
+- [x] Automatyczne mapowanie `_arg0` -> pierwszy wymagany parametr ✅
+- [x] Generowanie dokumentacji atomów z dekoratorów ✅
+- [x] Walidacja w czasie parsowania (nie tylko wykonania) ✅
 
 ### FAZA 3: Modularyzacja API (Priorytet: ŚREDNI)
 

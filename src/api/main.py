@@ -64,6 +64,16 @@ app.add_middleware(
 # Include auth router
 app.include_router(auth_router)
 
+# Favicon route
+@app.get("/favicon.ico")
+async def favicon():
+    from fastapi.responses import FileResponse
+    import os
+    favicon_path = os.path.join(os.path.dirname(__file__), "../frontend/landing/favicon.svg")
+    if os.path.exists(favicon_path):
+        return FileResponse(favicon_path, media_type="image/svg+xml")
+    return Response(status_code=204)
+
 # ============ MODELS ============
 
 class HealthResponse(BaseModel):
@@ -769,6 +779,114 @@ async def submit_quote(quote: QuoteRequest):
 async def list_quotes():
     """List all quotes (admin only)"""
     return {"quotes": _quotes_db, "count": len(_quotes_db)}
+
+
+# ============ UI PAGES (DSL-DRIVEN) ============
+
+_ui_pages = {
+    "dashboard": {
+        "dsl": """
+ui.page(title="Dashboard", layout="app")
+| ui.nav(brand="Analytica", logo="📊", links=[
+    {"text": "Produkty", "href": "index.html"},
+    {"text": "Dashboard", "href": "app.html"}
+  ], cta=[
+    {"text": "Wyloguj", "href": "#", "variant": "ghost", "onclick": "logout"}
+  ])
+| ui.section(title="Panel klienta", layout="dashboard")
+| ui.stats(items=[
+    {"icon": "📊", "value": "$analyses", "label": "Wykonane analizy", "trend": 12},
+    {"icon": "💎", "value": "$points", "label": "Dostępne punkty"},
+    {"icon": "📈", "value": "$last_analysis", "label": "Ostatnia analiza"}
+  ])
+| ui.grid(columns=4, items=[
+    {"type": "button", "text": "💰 Plan Budżetu", "href": "planbudzetu.html", "variant": "ghost"},
+    {"type": "button", "text": "📈 Plan Inwestycji", "href": "planinwestycji.html", "variant": "ghost"},
+    {"type": "button", "text": "🎯 MultiPlan", "href": "multiplan.html", "variant": "ghost"},
+    {"type": "button", "text": "🔮 Estymacja", "href": "estymacja.html", "variant": "ghost"}
+  ])
+""",
+        "data": {"analyses": 0, "points": 100, "last_analysis": "-"}
+    },
+    "pricing": {
+        "dsl": """
+ui.page(title="Cennik", layout="landing")
+| ui.pricing(plans=[
+    {"id": "starter", "name": "Starter", "price": "0 zł", "period": "/mies.", "features": ["10 punktów/mies.", "Podstawowe analizy", "Email support"], "cta": {"text": "Rozpocznij", "href": "login.html"}},
+    {"id": "pro", "name": "Pro", "price": "99 zł", "period": "/mies.", "badge": "Popularne", "highlight": true, "features": ["100 punktów/mies.", "Wszystkie produkty", "API access", "Priority support"], "cta": {"text": "Wybierz Pro", "href": "login.html"}},
+    {"id": "enterprise", "name": "Enterprise", "price": "Indywidualnie", "features": ["Nielimitowane punkty", "Dedykowane API", "SLA 99.99%", "Dedykowany opiekun"], "cta": {"text": "Kontakt", "href": "quote.html"}}
+  ], highlight="pro")
+""",
+        "data": {}
+    },
+    "quote": {
+        "dsl": """
+ui.page(title="Zapytanie Enterprise", layout="form")
+| ui.section(title="Formularz zapytania", subtitle="Wypełnij formularz, a skontaktujemy się w ciągu 24h")
+| ui.form(action="/api/v1/quotes", fields=[
+    {"name": "name", "type": "text", "label": "Imię i nazwisko", "required": true},
+    {"name": "email", "type": "email", "label": "Email służbowy", "required": true},
+    {"name": "company", "type": "text", "label": "Firma", "required": true},
+    {"name": "phone", "type": "tel", "label": "Telefon"},
+    {"name": "product", "type": "select", "label": "Produkt", "options": ["PlanBudzetu", "PlanInwestycji", "MultiPlan", "Estymacja", "Wszystkie"]},
+    {"name": "users", "type": "select", "label": "Liczba użytkowników", "options": ["1-5", "6-20", "21-50", "50+"]},
+    {"name": "message", "type": "textarea", "label": "Dodatkowe informacje"}
+  ], submit="Wyślij zapytanie")
+""",
+        "data": {}
+    }
+}
+
+@app.get("/api/v1/ui/pages")
+async def list_ui_pages():
+    """List available UI pages"""
+    return {"pages": list(_ui_pages.keys())}
+
+@app.get("/api/v1/ui/pages/{page_id}")
+async def get_ui_page(page_id: str):
+    """Get UI page specification"""
+    if page_id not in _ui_pages:
+        raise HTTPException(status_code=404, detail=f"Page not found: {page_id}")
+    
+    page = _ui_pages[page_id]
+    
+    # Execute DSL to generate UI spec
+    try:
+        pipeline = dsl_parse(page["dsl"])
+        ctx = DSLPipelineContext(variables={}, domain=DOMAIN)
+        ctx.set_data(page.get("data", {}))
+        result = dsl_execute(pipeline, ctx)
+        return {
+            "page_id": page_id,
+            "spec": result.get_data(),
+            "status": "success"
+        }
+    except Exception as e:
+        return {
+            "page_id": page_id,
+            "spec": None,
+            "status": "error",
+            "error": str(e)
+        }
+
+@app.post("/api/v1/ui/render")
+async def render_ui_from_dsl(request: DSLExecuteRequest):
+    """Render UI from DSL specification"""
+    try:
+        pipeline = dsl_parse(request.dsl)
+        ctx = DSLPipelineContext(variables=request.variables or {}, domain=request.domain or DOMAIN)
+        if request.input_data:
+            ctx.set_data(request.input_data)
+        result = dsl_execute(pipeline, ctx)
+        return {
+            "status": "success",
+            "ui": result.get_data()
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e)
+        }
 
 
 # ============ INTEGRATIONS ============
