@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # Web Dashboard Frontend
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - API_URL=http://api:8000
+      - NODE_ENV=production
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - analytica-net
+    restart: unless-stopped
+
+  # Analytica API Backend
+  api:
+    image: analytica/api:latest
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/analytica
+      - REDIS_URL=redis://redis:6379
+      - DOMAIN=dashboard.local
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - analytica-net
+    restart: unless-stopped
+
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=analytica
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - analytica-net
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redisdata:/data
+    networks:
+      - analytica-net
+    restart: unless-stopped
+
+networks:
+  analytica-net:
+    driver: bridge
+
+volumes:
+  pgdata:
+  redisdata:

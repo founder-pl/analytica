@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # Android Builder
+  android-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./dist:/dist
+    environment:
+      - ANDROID_HOME=/opt/android-sdk
+
+  # API Backend
+  api:
+    image: analytica/api:latest
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
+    ports:
+      - "18000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/analytica
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - db
+      - redis
+    networks:
+      - analytica-net
+
+  # PostgreSQL
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=analytica
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - analytica-net
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    networks:
+      - analytica-net
+
+  # Push Notification Service (mock)
+  push-service:
+    image: node:20-alpine
+    working_dir: /app
+    command: node push-server.js
+    environment:
+      - PORT=3001
+    ports:
+      - "3001:3001"
+    networks:
+      - analytica-net
+
+networks:
+  analytica-net:
+    driver: bridge
+
+volumes:
+  pgdata:

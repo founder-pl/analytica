@@ -32,6 +32,7 @@ ANALYTICA uses a modular architecture where each module provides:
 | [Reports](#reports-module) | Report generation | `report.*` |
 | [Alerts](#alerts-module) | Threshold monitoring | `alert.*` |
 | [Voice](#voice-module) | Speech-to-text, NL→DSL | `voice.*` |
+| [Deploy](#deploy-module) | Deployment & CI/CD | `deploy.*` |
 
 ---
 
@@ -539,6 +540,253 @@ command = VoiceCommandParser.parse("oblicz sumę sprzedaży")
 print(command.dsl)  # metrics.sum("sprzedaży")
 print(command.intent)  # calculate
 print(command.confidence)  # 0.85
+```
+
+---
+
+## Deploy Module
+
+**Location:** `src/dsl/atoms/deploy.py`
+
+### Features
+- Container deployment (Docker, Podman, Docker Compose)
+- Kubernetes orchestration (K8s manifests, Helm charts)
+- CI/CD pipeline generation (GitHub Actions, GitLab CI, Jenkins, CircleCI)
+- Cloud platform deployment (AWS ECS/Lambda, Vercel, Netlify)
+- Multi-platform targets (Web, Desktop, Mobile)
+- URI-based application launching
+
+### DSL Atoms
+
+#### Container Deployment
+
+##### `deploy.docker`
+Generate Docker deployment configuration.
+
+```dsl
+deploy.docker(image="analytica/app", tag="latest", port=8000)
+deploy.docker(dockerfile="Dockerfile.prod", build=true, env={"NODE_ENV": "production"})
+```
+
+**Parameters:**
+- `image` (str) - Docker image name
+- `tag` (str) - Image tag (default: "latest")
+- `port` (int) - Exposed port (default: 8000)
+- `dockerfile` (str) - Dockerfile path (default: "Dockerfile")
+- `env` (dict) - Environment variables
+- `volumes` (list) - Volume mounts
+
+**Returns:**
+```json
+{
+  "config": {
+    "type": "docker",
+    "image": "analytica/app:latest",
+    "commands": {
+      "build": "docker build -t analytica/app:latest -f Dockerfile .",
+      "run": "docker run -d -p 8000:8000 analytica/app:latest",
+      "push": "docker push analytica/app:latest"
+    }
+  },
+  "deploy": {"platform": "docker", "access_uri": "http://localhost:8000"}
+}
+```
+
+##### `deploy.compose`
+Generate Docker Compose configuration.
+
+```dsl
+deploy.compose(services=["api", "db", "redis"], file="docker-compose.prod.yml")
+```
+
+#### Kubernetes Deployment
+
+##### `deploy.kubernetes`
+Generate Kubernetes deployment configuration.
+
+```dsl
+deploy.kubernetes(namespace="prod", replicas=3, image="app:v1")
+deploy.kubernetes(manifest="k8s/", ingress_host="app.example.com")
+```
+
+**Parameters:**
+- `namespace` (str) - K8s namespace (default: "default")
+- `replicas` (int) - Number of replicas (default: 1)
+- `image` (str) - Container image
+- `manifest` (str) - Manifest directory path
+- `ingress_host` (str) - Ingress hostname
+- `resources` (dict) - Resource limits {"cpu": "100m", "memory": "128Mi"}
+
+##### `deploy.helm`
+Generate Helm chart deployment.
+
+```dsl
+deploy.helm(chart="analytica", release="prod", values="values-prod.yaml")
+```
+
+#### CI/CD Pipelines
+
+##### `deploy.github_actions`
+Generate GitHub Actions workflow.
+
+```dsl
+deploy.github_actions(workflow="deploy", triggers=["push", "pull_request"], branches=["main"])
+```
+
+**Parameters:**
+- `workflow` (str) - Workflow name
+- `triggers` (list) - Event triggers: push, pull_request, schedule
+- `branches` (list) - Target branches
+- `jobs` (list) - Job names (default: ["build", "test", "deploy"])
+
+##### `deploy.gitlab_ci`
+Generate GitLab CI configuration.
+
+```dsl
+deploy.gitlab_ci(stages=["build", "test", "deploy"])
+```
+
+##### `deploy.jenkins`
+Generate Jenkins pipeline.
+
+```dsl
+deploy.jenkins(pipeline="Jenkinsfile", agents=["docker"], stages=["Build", "Test", "Deploy"])
+```
+
+#### Cloud Platforms
+
+##### `deploy.aws`
+Deploy to AWS (ECS, Lambda, EC2).
+
+```dsl
+deploy.aws(service="ecs", cluster="prod", region="eu-central-1")
+deploy.aws(service="lambda", function="handler")
+```
+
+##### `deploy.vercel`
+Deploy to Vercel.
+
+```dsl
+deploy.vercel(project="my-app", prod=true)
+```
+
+##### `deploy.netlify`
+Deploy to Netlify.
+
+```dsl
+deploy.netlify(site="my-site", prod=true)
+```
+
+#### Application Targets
+
+##### `deploy.web`
+Configure web application deployment.
+
+```dsl
+deploy.web(framework="react", build="npm run build", output="dist")
+```
+
+**Parameters:**
+- `framework` (str) - Framework: react, vue, angular, svelte
+- `build` (str) - Build command
+- `output` (str) - Output directory
+
+##### `deploy.desktop`
+Configure desktop application deployment.
+
+```dsl
+deploy.desktop(framework="electron", platforms=["win", "mac", "linux"])
+deploy.desktop(framework="tauri", release=true, url="http://localhost:18000")
+```
+
+**Parameters:**
+- `framework` (str) - Framework: electron, tauri
+- `platforms` (list) - Target platforms: win, mac, linux
+- `release` (bool) - Build release version
+- `url` (str) - Backend URL for the app
+- `project_dir` (str) - Project directory path
+
+**Returns:**
+```json
+{
+  "config": {
+    "type": "desktop",
+    "framework": "electron",
+    "commands": {
+      "dev": "npm run electron:dev",
+      "build": "npm run electron:build",
+      "build_win": "npm run electron:build -- --win"
+    }
+  },
+  "deploy": {
+    "platform": "desktop",
+    "launch_uri": "analytica://desktop/run?dir=/path&url=http://localhost:18000"
+  }
+}
+```
+
+##### `deploy.mobile`
+Configure mobile application deployment.
+
+```dsl
+deploy.mobile(framework="react-native", platforms=["ios", "android"])
+deploy.mobile(framework="flutter", release=true)
+```
+
+#### Launch & Export
+
+##### `deploy.launch`
+Launch deployed application using URI scheme.
+
+```dsl
+deploy.launch(platform="desktop", dir="/path/to/project", url="http://localhost:18000")
+deploy.launch(uri="analytica://desktop/run?dir=/tmp")
+```
+
+##### `deploy.bundle`
+Bundle DSL pipeline with runtime for standalone deployment.
+
+```dsl
+deploy.bundle(target="standalone", include_runtime=true, minify=true)
+```
+
+##### `deploy.export_dsl`
+Export pipeline to DSL file.
+
+```dsl
+deploy.export_dsl(path="pipelines/main.dsl", format="native")
+deploy.export_dsl(path="pipelines/main.json", format="json")
+```
+
+### Example: Full Deployment Pipeline
+
+```dsl
+@pipeline deploy_app:
+    data.from_input()
+    | investment.analyze(discount_rate=0.12)
+    | view.card(value="npv", title="NPV", icon="💰")
+    | deploy.docker(image="analytica/app", tag="v1.0")
+    | deploy.kubernetes(namespace="prod", replicas=3)
+    | deploy.github_actions(workflow="deploy", triggers=["push"])
+```
+
+### Python Usage
+
+```python
+from analytica import Pipeline
+
+# Deploy to Docker + K8s
+result = (Pipeline()
+    .data.load('sales.csv')
+    .metrics.sum('amount')
+    .deploy.docker(image='analytics', tag='v1')
+    .deploy.kubernetes(namespace='prod', replicas=2)
+    .execute())
+
+# Generate CI/CD pipeline
+result = (Pipeline()
+    .deploy.github_actions(workflow='ci', triggers=['push', 'pull_request'])
+    .execute())
 ```
 
 ---

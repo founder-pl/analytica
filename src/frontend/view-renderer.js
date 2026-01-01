@@ -40,6 +40,14 @@ export class ViewRenderer {
       '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1'
     ];
   }
+
+  resolveDataForView(spec, data) {
+    if (!spec) return data;
+    const path = spec.data_path || spec.dataPath || '';
+    if (!path) return data;
+    const resolved = this.extractValue(data, path);
+    return resolved === undefined ? data : resolved;
+  }
   
   /**
    * Main render method - renders complete response with data and views
@@ -112,7 +120,8 @@ export class ViewRenderer {
     chartArea.className = 'chart-area';
     
     // Simple SVG chart rendering
-    const chartData = this.extractChartData(spec, data);
+    const scopedData = this.resolveDataForView(spec, data);
+    const chartData = this.extractChartData(spec, scopedData);
     
     if (spec.chart_type === 'bar' || spec.chart_type === 'column') {
       chartArea.appendChild(this.renderBarChart(chartData, spec));
@@ -512,7 +521,8 @@ export class ViewRenderer {
     
     // Body
     const tbody = document.createElement('tbody');
-    const rows = Array.isArray(data) ? data : [];
+    const scopedData = this.resolveDataForView(spec, data);
+    const rows = Array.isArray(scopedData) ? scopedData : [];
     
     const pageSize = spec.paginate ? spec.page_size : rows.length;
     const displayRows = rows.slice(0, pageSize);
@@ -782,7 +792,8 @@ export class ViewRenderer {
     const list = document.createElement('ul');
     list.className = 'data-list';
     
-    const items = Array.isArray(data) ? data : [];
+    const scopedData = this.resolveDataForView(spec, data);
+    const items = Array.isArray(scopedData) ? scopedData : [];
     
     items.forEach(item => {
       const li = document.createElement('li');

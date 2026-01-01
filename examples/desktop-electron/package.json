@@ -1,0 +1,60 @@
+{
+  "name": "analytica-desktop",
+  "version": "1.0.0",
+  "description": "Desktop financial analytics app built with Analytica DSL",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "npm run electron:dev",
+    "electron:dev": "cross-env NODE_ENV=development electron .",
+    "electron:build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "package": "electron-builder --dir",
+    "publish": "electron-builder --publish always"
+  },
+  "build": {
+    "appId": "io.analytica.desktop",
+    "productName": "Analytica",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "pipelines/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.finance",
+      "icon": "assets/icon.icns",
+      "target": ["dmg", "zip"]
+    },
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": ["nsis", "portable"]
+    },
+    "linux": {
+      "icon": "assets/icon.png",
+      "target": ["AppImage", "deb"],
+      "category": "Office"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "dependencies": {
+    "@analytica/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.0"
+  },
+  "keywords": ["analytica", "dsl", "desktop", "electron", "finance"],
+  "author": "Analytica Team",
+  "license": "Apache-2.0"
+}

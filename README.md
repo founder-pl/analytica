@@ -388,6 +388,8 @@ curl -X POST http://localhost:18000/api/v1/pipeline/execute \
 | `investment` | Inwestycje | `investment.roi()` |
 | `forecast` | Prognozy | `forecast.predict(30)` |
 | `export` | Eksport | `export.to_csv("out.csv")` |
+| `deploy` | Deployment & CI/CD | `deploy.docker("app")` |
+| `view` | UI Components | `view.chart(type="bar")` |
 
 📖 Pełna dokumentacja: [docs/DSL.md](docs/DSL.md)
 

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytica Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-brand">
+                <span class="logo">📊</span>
+                <h1>Analytica Dashboard</h1>
+            </div>
+            <div class="header-actions">
+                <span class="status" id="status">● Connected</span>
+                <button class="btn btn-refresh" onclick="refreshDashboard()">🔄 Refresh</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- KPI Cards -->
+            <section class="kpi-section" id="kpi-cards">
+                <!-- Rendered by DSL -->
+            </section>
+
+            <!-- Charts Grid -->
+            <section class="charts-section">
+                <div class="chart-container" id="revenue-chart">
+                    <!-- Rendered by DSL -->
+                </div>
+                <div class="chart-container" id="orders-chart">
+                    <!-- Rendered by DSL -->
+                </div>
+            </section>
+
+            <!-- Data Table -->
+            <section class="table-section" id="data-table">
+                <!-- Rendered by DSL -->
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by <a href="https://analytica.io">Analytica DSL</a></p>
+        </footer>
+    </div>
+
+    <!-- Analytica SDK -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>

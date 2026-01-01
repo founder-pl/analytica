@@ -289,8 +289,8 @@ class TestDeploymentsTable:
             logs_tab.click()
             page.wait_for_timeout(500)
             
-            # Should see logs panel
-            logs_panel = page.locator(".logs-panel, #outputLogs")
+            # Should see logs panel - use first() to handle multiple matches
+            logs_panel = page.locator(".logs-panel").first
             expect(logs_panel).to_be_visible()
         
         # No errors

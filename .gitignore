@@ -1,5 +1,6 @@
 .idea
-
+tests/e2e
+test-results/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

@@ -226,6 +226,38 @@ export.to_excel(path)              # Export to Excel
 export.to_api(url, method)         # Send to API
 ```
 
+### deploy - Deployment & CI/CD
+
+```dsl
+# Containers
+deploy.docker(image="app", tag="v1", port=8000)
+deploy.compose(services=["api", "db"], file="docker-compose.yml")
+
+# Kubernetes
+deploy.kubernetes(namespace="prod", replicas=3, image="app:v1")
+deploy.helm(chart="analytica", release="prod", values="values.yaml")
+
+# CI/CD Pipelines
+deploy.github_actions(workflow="deploy", triggers=["push"])
+deploy.gitlab_ci(stages=["build", "test", "deploy"])
+deploy.jenkins(pipeline="Jenkinsfile")
+
+# Cloud Platforms
+deploy.aws(service="ecs", cluster="prod", region="eu-central-1")
+deploy.vercel(project="my-app", prod=true)
+deploy.netlify(site="my-site", prod=true)
+
+# Application Targets
+deploy.web(framework="react", build="npm run build")
+deploy.desktop(framework="electron", platforms=["win", "mac", "linux"])
+deploy.mobile(framework="react-native", platforms=["ios", "android"])
+
+# Launch & Export
+deploy.launch(platform="desktop", dir="/path/to/project")
+deploy.bundle(target="standalone", include_runtime=true)
+deploy.export_dsl(path="pipeline.dsl", format="native")
+```
+
 ## Examples
 
 ### Budget Analysis (planbudzetu.pl)

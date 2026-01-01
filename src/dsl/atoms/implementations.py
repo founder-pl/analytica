@@ -886,6 +886,7 @@ def view_chart(ctx: PipelineContext, **params) -> Dict:
     colors = params.get("colors", [])
     show_legend = params.get("legend", True)
     show_grid = params.get("grid", True)
+    data_path = params.get("data_path", params.get("dataPath", ""))
     
     ctx.log(f"Creating chart view: {chart_type}")
     
@@ -900,6 +901,7 @@ def view_chart(ctx: PipelineContext, **params) -> Dict:
         "colors": colors if isinstance(colors, list) else [colors],
         "show_legend": show_legend,
         "show_grid": show_grid,
+        **({"data_path": data_path} if data_path else {}),
     }
     
     return _wrap_view_result(data, spec)
@@ -917,6 +919,7 @@ def view_table(ctx: PipelineContext, **params) -> Dict:
     paginate = params.get("paginate", True)
     page_size = params.get("page_size", 10)
     striped = params.get("striped", True)
+    data_path = params.get("data_path", params.get("dataPath", ""))
     
     # Convert simple column names to column specs
     columns = []
@@ -945,6 +948,7 @@ def view_table(ctx: PipelineContext, **params) -> Dict:
         "paginate": paginate,
         "page_size": page_size,
         "striped": striped,
+        **({"data_path": data_path} if data_path else {}),
     }
     
     return _wrap_view_result(data, spec)
@@ -1095,6 +1099,7 @@ def view_list(ctx: PipelineContext, **params) -> Dict:
         "primary_field": primary_field,
         "secondary_field": secondary_field,
         "icon_field": icon_field,
+        **({"data_path": params.get("data_path")} if params.get("data_path") else {}),
     }
     
     return _wrap_view_result(data, spec)

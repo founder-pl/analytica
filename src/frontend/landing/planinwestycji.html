@@ -217,11 +217,10 @@
           <span class="dsl-editor-dot green"></span>
           <span class="dsl-editor-title">investment_live_demo.dsl</span>
         </div>
-        <textarea class="dsl-code" data-dsl style="width: 100%; min-height: 260px; border: 0; outline: none; background: transparent; color: inherit; resize: vertical;">data.from_input()
-| investment.analyze(initial_investment=1000000, discount_rate=0.12, cash_flows=[200000,300000,400000,500000])
+        <textarea class="dsl-code" data-dsl style="width: 100%; min-height: 260px; border: 0; outline: none; background: transparent; color: inherit; resize: vertical;">investment.analyze(initial_investment=1000000, discount_rate=0.12, cash_flows=[200000,300000,400000,500000])
 | view.card(value="npv", title="NPV", icon="🧮", style="info")
 | view.card(value="roi", title="ROI %", icon="📈", style="success")
-| view.table(title="Szczegóły", columns=["initial_investment","discount_rate","periods","npv","roi"])\
+| view.table(title="Szczegóły", columns=["initial_investment","discount_rate","periods","npv","roi"])
 </textarea>
         <div style="display: flex; gap: 12px; align-items: center; padding: 16px 24px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
           <button class="btn btn-primary" data-run>▶️ Uruchom demo (LIVE)</button>

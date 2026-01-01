@@ -212,7 +212,7 @@
       </p>
     </div>
     
-    <div class="dsl-container" data-landing-dsl-demo data-sample="/landing/sample-data/ecommerce.json" data-input-path="monthly">
+    <div class="dsl-container" data-landing-dsl-demo data-sample="/landing/sample-data/ecommerce.json">
       <div class="dsl-editor">
         <div class="dsl-editor-header">
           <span class="dsl-editor-dot red"></span>
@@ -223,9 +223,8 @@
         <textarea class="dsl-code" data-dsl style="width: 100%; min-height: 260px; border: 0; outline: none; background: transparent; color: inherit; resize: vertical;">data.load("/landing/sample-data/ecommerce.json")
 | view.card(value="total_revenue", title="Przychód", icon="💰", style="success")
 | view.card(value="orders_count", title="Zamówienia", icon="📦", style="info")
-| transform.filter(month__ne="")
-| view.chart(type="bar", x="month", y="revenue", title="Revenue (mies.)")
-| view.table(title="Monthly", columns=["month","revenue","orders"])\
+| view.chart(type="bar", x="month", y="revenue", title="Revenue (mies.)", data_path="monthly")
+| view.table(title="Monthly", columns=["month","revenue","orders"], data_path="monthly")
 </textarea>
         <div style="display: flex; gap: 12px; align-items: center; padding: 16px 24px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
           <button class="btn btn-primary" data-run>▶️ Uruchom demo (LIVE)</button>

@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # Electron App Builder
+  builder:
+    build: .
+    volumes:
+      - ./dist:/dist
+      - ./src:/app/src:ro
+      - ./pipelines:/app/pipelines:ro
+    environment:
+      - NODE_ENV=production
+
+  # API Backend (for development)
+  api:
+    image: analytica/api:latest
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
+    ports:
+      - "18000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/analytica
+      - REDIS_URL=redis://redis:6379
+      - DESKTOP_DEFAULT_URL=http://localhost:18000
+    depends_on:
+      - db
+      - redis
+    networks:
+      - analytica-net
+
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=analytica
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - analytica-net
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    networks:
+      - analytica-net
+
+networks:
+  analytica-net:
+    driver: bridge
+
+volumes:
+  pgdata:
