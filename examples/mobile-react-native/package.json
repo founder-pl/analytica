@@ -21,7 +21,8 @@
     "react-native-screens": "^3.29.0",
     "react-native-svg": "^14.1.0",
     "react-native-chart-kit": "^6.12.0",
-    "@analytica/sdk-react-native": "^1.0.0"
+    "axios": "^1.6.0",
+    "@react-native-async-storage/async-storage": "^1.21.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
